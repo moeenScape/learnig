@@ -112,6 +112,7 @@ body::before{
 }
 .bc{font-size:11px;color:var(--muted)}
 .bc em{color:var(--violet);font-style:normal}
+.bc a:hover{color:var(--violet)!important}
 .chip{
   padding:4px 14px;border-radius:20px;
   font-size:9px;font-weight:700;letter-spacing:2px;
@@ -402,7 +403,7 @@ strong{color:var(--txt)}
   <div class="si" onclick="go(15)"><span class="sico">🔒</span>Security in CI/CD</div>
 
   <div class="sg">Real World</div>
-  <div class="si" onclick="go(16)"><span class="sico">☕</span>Spring Boot "human" Pipeline</div>
+  <div class="si" onclick="go(16)"><span class="sico">☕</span>Spring Boot "Demo App" Pipeline</div>
   <div class="si" onclick="go(17)"><span class="sico">🏆</span>Final Challenge</div>
 
   <div class="sb-foot">
@@ -415,7 +416,9 @@ strong{color:var(--txt)}
 <!-- ══════════ MAIN ══════════ -->
 <main class="main">
   <div class="topbar">
-    <div class="bc">ci-cd / <em id="bcn">introduction</em></div>
+    <div class="bc">
+      <a href="index.html" style="color: var(--muted); text-decoration: none; transition: color 0.2s;">🏠 home</a> / ci-cd / <em id="bcn">introduction</em>
+    </div>
     <div class="chip lz" id="lvchip">ZERO</div>
   </div>
 
@@ -592,7 +595,7 @@ strong{color:var(--txt)}
       </pre>
     </div>
 
-    <div class="alert ai">ℹ️ <span>For your <strong>human Spring Boot project</strong>, GitFlow is recommended: <code>main</code> → production, <code>develop</code> → staging, <code>feature/*</code> → dev testing. Simple and battle-tested for enterprise Java apps.</span></div>
+    <div class="alert ai">ℹ️ <span>For your <strong>Demo App Spring Boot project</strong>, GitFlow is recommended: <code>main</code> → production, <code>develop</code> → staging, <code>feature/*</code> → dev testing. Simple and battle-tested for enterprise Java apps.</span></div>
 
     <div class="quiz">
       <div class="qq">🧠 In GitFlow, a developer pushes to a <code>feature/add-payroll-report</code> branch. What should the CI/CD pipeline do?</div>
@@ -802,6 +805,61 @@ git push origin main
 # This instantly triggers your GitHub Actions workflow!</textarea>
     </div>
     <div class="term" id="t4b"><div class="tbar"><div class="td td1"></div><div class="td td2"></div><div class="td td3"></div><div class="tlb">pipeline execution</div></div><div class="tbody" id="o4b"></div></div>
+
+    <h3>React App CI Pipeline</h3>
+    <div class="alert ai">ℹ️ <span>React apps have a similar CI flow but use Node.js instead of Java. Build, test, and create production bundle.</span></div>
+
+    <div class="editor">
+      <div class="ebar">
+        <div class="ef"><div class="edot"></div>.github/workflows/react-ci.yml</div>
+      </div>
+      <textarea class="ca" spellcheck="false" style="min-height:380px">name: React CI Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    name: 🧪 Build & Test React App
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'                    # Cache npm dependencies
+
+      - name: 📥 Install dependencies
+        run: npm ci                       # Clean install (faster than npm install)
+
+      - name: 🔍 Lint code
+        run: npm run lint                 # ESLint checks
+
+      - name: 🧪 Run tests
+        run: npm test -- --coverage       # Jest tests with coverage
+
+      - name: 🏗️ Build production bundle
+        run: npm run build                # Creates optimized /dist folder
+        env:
+          REACT_APP_API_URL: ${{ secrets.API_URL }}
+
+      - name: 📊 Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage/lcov.info</textarea>
+    </div>
+
+    <div class="cards">
+      <div class="crd"><div class="ci">☕</div><div class="ct">Spring Boot</div><div class="cb">Gradle/Maven, JUnit tests, bootJar artifact</div></div>
+      <div class="crd"><div class="ci">⚛️</div><div class="ct">React</div><div class="cb">npm/yarn, Jest tests, production /dist bundle</div></div>
+    </div>
 
     <div class="lnav">
       <button class="nb" onclick="go(3)">← Prev</button>
@@ -1146,9 +1204,9 @@ jobs:
   Production Server (your VPS/cloud instance)
        │
        ├── docker pull ghcr.io/org/human:sha-abc1234
-       ├── docker stop human-app
-       ├── docker rm human-app
-       ├── docker run -d --name human-app ...new image...
+       ├── docker stop demo-app
+       ├── docker rm demo-app
+       ├── docker run -d --name demo-app ...new image...
        └── curl http://localhost:9191/actuator/health → ✅ UP
 
   Setup:
@@ -1243,12 +1301,12 @@ jobs:
               docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
 
               echo '🛑 Stopping old container...'
-              docker stop human-app || true
-              docker rm human-app || true
+              docker stop demo-app || true
+              docker rm demo-app || true
 
               echo '🚀 Starting new container...'
               docker run -d \
-                --name human-app \
+                --name demo-app \
                 --restart unless-stopped \
                 -p 9191:9191 \
                 -e SPRING_DATASOURCE_URL=${{ secrets.DB_URL }} \
@@ -1364,9 +1422,9 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             docker pull ghcr.io/${{ github.repository }}:${{ needs.build.outputs.image-tag }}
-            docker stop human-dev || true
-            docker rm human-dev || true
-            docker run -d --name human-dev -p 9192:9191 \
+            docker stop demo-app-dev || true
+            docker rm demo-app-dev || true
+            docker run -d --name demo-app-dev -p 9192:9191 \
               -e SPRING_PROFILES_ACTIVE=dev \
               -e SPRING_DATASOURCE_URL=${{ secrets.DEV_DB_URL }} \
               ghcr.io/${{ github.repository }}:${{ needs.build.outputs.image-tag }}
@@ -1727,7 +1785,7 @@ jobs:
         run: |
           # Save current running tag before deploying
           PREV=$(ssh user@${{ secrets.SERVER_IP }} \
-            "docker inspect human-app --format='{{.Config.Image}}' 2>/dev/null || echo 'none'")
+            "docker inspect demo-app --format='{{.Config.Image}}' 2>/dev/null || echo 'none'")
           echo "tag=$PREV" >> $GITHUB_OUTPUT
           echo "Previous image: $PREV"
 
@@ -1738,10 +1796,10 @@ jobs:
               ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} \
               "
               docker pull ghcr.io/${{ github.repository }}:${{ github.sha }}
-              docker stop human-app || true
-              docker rm human-app || true
+              docker stop demo-app || true
+              docker rm demo-app || true
               docker run -d \
-                --name human-app \
+                --name demo-app \
                 --restart unless-stopped \
                 -p 9191:9191 \
                 -e SPRING_PROFILES_ACTIVE=prod \
@@ -1774,10 +1832,10 @@ jobs:
           ssh -o StrictHostKeyChecking=no \
               ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} \
               "
-              docker stop human-app || true
-              docker rm human-app || true
+              docker stop demo-app || true
+              docker rm demo-app || true
               docker run -d \
-                --name human-app \
+                --name demo-app \
                 --restart unless-stopped \
                 -p 9191:9191 \
                 -e SPRING_PROFILES_ACTIVE=prod \
@@ -1985,8 +2043,8 @@ jobs:
   ══════════════════════════════════════════ -->
   <div class="sec" id="s16">
     <div class="ey">LESSON 17 — REAL WORLD</div>
-    <div class="ht">SPRING BOOT "HUMAN"<br>COMPLETE PIPELINE</div>
-    <div class="intro">The complete, production-ready CI/CD pipeline for your actual Spring Boot human project — combining every concept from this course.</div>
+    <div class="ht">SPRING BOOT "DEMO APP"<br>COMPLETE PIPELINE</div>
+    <div class="intro">The complete, production-ready CI/CD pipeline for your actual Spring Boot Demo App project — combining every concept from this course.</div>
 
     <div class="diag">
       <div class="dlb">YOUR COMPLETE PIPELINE FLOW</div>
@@ -2179,7 +2237,7 @@ jobs:
         id: prev
         run: |
           PREV=$(ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} \
-            "docker inspect human-app --format='{{.Config.Image}}' 2>/dev/null || echo 'none'")
+            "docker inspect demo-app --format='{{.Config.Image}}' 2>/dev/null || echo 'none'")
           echo "tag=$PREV" >> $GITHUB_OUTPUT
 
       - name: 📣 Notify Deploy Start
@@ -2197,10 +2255,10 @@ jobs:
             echo 'Pulling new image...'
             docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
             echo 'Swapping container...'
-            docker stop human-app || true
-            docker rm human-app || true
+            docker stop demo-app || true
+            docker rm demo-app || true
             docker run -d \
-              --name human-app \
+              --name demo-app \
               --restart unless-stopped \
               -p 9191:9191 \
               -e SPRING_PROFILES_ACTIVE=prod \
@@ -2229,9 +2287,9 @@ jobs:
         run: |
           echo "🔴 Rolling back to ${{ steps.prev.outputs.tag }}"
           ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "
-            docker stop human-app || true
-            docker rm human-app || true
-            docker run -d --name human-app --restart unless-stopped -p 9191:9191 \
+            docker stop demo-app || true
+            docker rm demo-app || true
+            docker run -d --name demo-app --restart unless-stopped -p 9191:9191 \
               -e SPRING_PROFILES_ACTIVE=prod \
               -e SPRING_DATASOURCE_URL=${{ secrets.PROD_DB_URL }} \
               ${{ steps.prev.outputs.tag }}
@@ -2516,10 +2574,10 @@ function runDeploy(){
     '<span class="ts">Status: Downloaded newer image for ghcr.io/org/human:abc1234</span>',
     '',
     '<span class="tc">🛑 Stopping old container...</span>',
-    '<span class="ts">human-app stopped and removed</span>',
+    '<span class="ts">demo-app stopped and removed</span>',
     '',
     '<span class="tc">🚀 Starting new container...</span>',
-    '<span class="ts">Container human-app started (port 9191)</span>',
+    '<span class="ts">Container demo-app started (port 9191)</span>',
     '',
     '<span class="tc">🏥 Health check...</span>',
     '<span class="to">Attempt 1/6 - waiting 10s...</span>',

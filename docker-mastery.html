@@ -401,7 +401,7 @@ tr:hover td{background:var(--surface2)}
 
   <div class="nav-group-label">Advanced — Production</div>
   <div class="nav-link" onclick="go(12)"><span class="nav-icon">🔒</span>Security Best Practices</div>
-  <div class="nav-link" onclick="go(13)"><span class="nav-icon">☕</span>Spring Boot "human"</div>
+  <div class="nav-link" onclick="go(13)"><span class="nav-icon">☕</span>Spring Boot "Demo App"</div>
   <div class="nav-link" onclick="go(14)"><span class="nav-icon">🏆</span>Final Challenge</div>
 
   <div class="sidebar-footer">
@@ -662,7 +662,7 @@ docker inspect myapp              # Full container details</textarea>
 
       <table>
         <tr><th>Command</th><th>What it does</th><th>Real world use</th></tr>
-        <tr><td><code>docker run -d -p</code></td><td>Run container in background with port mapping</td><td>Start your Spring Boot app</td></tr>
+        <tr><td><code>docker run -d -p</code></td><td>Run container in background with port mapping</td><td>Start your Spring Boot Demo App</td></tr>
         <tr><td><code>docker logs -f</code></td><td>Stream container output</td><td>Debug issues in production</td></tr>
         <tr><td><code>docker exec -it</code></td><td>Enter container shell</td><td>Inspect files, run DB queries</td></tr>
         <tr><td><code>docker stats</code></td><td>CPU/memory usage</td><td>Monitor performance</td></tr>
@@ -836,7 +836,7 @@ docker-compose*.yml</textarea>
     <div class="section" id="s6">
       <div class="lesson-eyebrow">LESSON 07 — ADVANCED DOCKERFILE</div>
       <div class="lesson-title">Multi-stage Builds</div>
-      <div class="lesson-intro">Multi-stage builds let you use multiple FROM statements. Build in one stage, copy only the output to the final tiny image. This is the standard for production Spring Boot apps.</div>
+      <div class="lesson-intro">Multi-stage builds let you use multiple FROM statements. Build in one stage, copy only the output to the final tiny image. This is the standard for production Spring Boot Demo Apps.</div>
 
       <div class="diagram">
         <div class="diagram-label">MULTI-STAGE BUILD CONCEPT</div>
@@ -855,7 +855,7 @@ docker-compose*.yml</textarea>
 
       <div class="editor">
         <div class="editor-bar">
-          <div class="editor-file"><div class="file-pill"></div>Dockerfile — Spring Boot multi-stage (your human project)</div>
+          <div class="editor-file"><div class="file-pill"></div>Dockerfile — Spring Boot multi-stage (your Demo App project)</div>
           <div class="editor-btns"><button class="ebtn ebtn-run" onclick="runMultistage()">▶ Simulate</button></div>
         </div>
         <textarea class="code-area" spellcheck="false" style="min-height:420px"># ── Stage 1: Build ──────────────────────────────────────
@@ -913,6 +913,62 @@ ENTRYPOINT ["java", \
       <div class="terminal" id="t-ms">
         <div class="term-bar"><div class="tdot td1"></div><div class="tdot td2"></div><div class="tdot td3"></div><div class="term-label">build simulation</div></div>
         <div class="term-body" id="o-ms"></div>
+      </div>
+
+      <h3>React App Multi-stage Build</h3>
+      <div class="alert alert-info">ℹ️ <span>React apps also benefit from multi-stage builds. Build with Node.js, then serve the static files with nginx — final image is only ~25MB!</span></div>
+
+      <div class="editor">
+        <div class="editor-bar">
+          <div class="editor-file"><div class="file-pill"></div>Dockerfile — React multi-stage (frontend app)</div>
+          <div class="editor-btns"><button class="ebtn ebtn-run" onclick="runReactMultistage()">▶ Simulate</button></div>
+        </div>
+        <textarea class="code-area" spellcheck="false" style="min-height:380px"># ── Stage 1: Build React App ────────────────────────────
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Copy package files first (layer caching)
+COPY package.json package-lock.json ./
+
+# Install dependencies
+RUN npm ci --only=production
+
+# Copy source code
+COPY public public
+COPY src src
+COPY tsconfig.json vite.config.ts index.html ./
+
+# Build for production (creates /app/dist)
+RUN npm run build
+
+# ── Stage 2: Serve with Nginx ────────────────────────────
+FROM nginx:1.25-alpine AS runtime
+
+# Copy custom nginx config
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Copy built React app from builder stage
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Expose port 80
+EXPOSE 80
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s \
+  CMD wget -qO- http://localhost/health || exit 1
+
+# Nginx runs as daemon by default
+CMD ["nginx", "-g", "daemon off;"]</textarea>
+      </div>
+      <div class="terminal" id="t-react-ms">
+        <div class="term-bar"><div class="tdot td1"></div><div class="tdot td2"></div><div class="tdot td3"></div><div class="term-label">build simulation</div></div>
+        <div class="term-body" id="o-react-ms"></div>
+      </div>
+
+      <div class="cards">
+        <div class="card"><div class="card-icon">☕</div><div class="card-title">Spring Boot</div><div class="card-body">Build: ~800MB → Runtime: ~180MB. Uses JRE, runs JAR file.</div></div>
+        <div class="card"><div class="card-icon">⚛️</div><div class="card-title">React</div><div class="card-body">Build: ~1.2GB → Runtime: ~25MB. Static files served by nginx.</div></div>
       </div>
 
       <div class="quiz">
@@ -1062,7 +1118,7 @@ docker network disconnect human-network myapp</textarea>
     <div class="section" id="s9">
       <div class="lesson-eyebrow">LESSON 10 — COMPOSE FILES</div>
       <div class="lesson-title">Writing docker-compose.yml</div>
-      <div class="lesson-intro">Learn every section of the compose file with a real, production-ready example for your human Spring Boot project.</div>
+      <div class="lesson-intro">Learn every section of the compose file with a real, production-ready example for your Demo App Spring Boot project.</div>
 
       <div class="editor">
         <div class="editor-bar">
@@ -1127,10 +1183,10 @@ services:
     environment:
       - COLLECTOR_OTLP_ENABLED=true
     networks:
-      - human-net
+      - demo-app-net
 
-  # ── Spring Boot App "human" ────────────────────────────────────
-  human:
+  # ── Spring Boot App "Demo App" ────────────────────────────────────
+  demo-app:
     build:
       context: .                             # Build from current directory
       dockerfile: Dockerfile                 # Use this Dockerfile
@@ -1171,6 +1227,27 @@ services:
       timeout: 10s
       retries: 3
       start_period: 90s
+
+  # ── React Frontend App ────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: react-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"                            # Nginx serves on port 80
+    environment:
+      - REACT_APP_API_URL=http://localhost:9191/api
+    depends_on:
+      - demo-app                             # Wait for backend to start
+    networks:
+      - human-net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
 
 # ── NETWORKS ──────────────────────────────────────────────────────
 networks:
@@ -1905,6 +1982,27 @@ function runMultistage(){
     '',
     '<span class="ti">Builder stage: ~820MB  →  Final image: <span class="ts">183MB</span> ✅</span>',
     '<span class="ts">✅ Multi-stage build complete! 78% smaller than single-stage.</span>',
+  ]);
+}
+
+function runReactMultistage(){
+  show('t-react-ms');
+  type('o-react-ms',[
+    '<span class="tp">$</span> <span class="tc">docker build -t myapp/frontend:latest .</span>',
+    '<span class="ti">[+] Building 45.2s (12/12) FINISHED</span>',
+    '<span class="to"> => [builder 1/6] FROM node:20-alpine                       2.1s</span>',
+    '<span class="ts"> => CACHED [builder 2/6] WORKDIR /app                       0.0s</span>',
+    '<span class="ts"> => CACHED [builder 3/6] COPY package*.json ./              0.0s ← cached!</span>',
+    '<span class="ts"> => CACHED [builder 4/6] RUN npm ci --only=production       0.0s ← cached!</span>',
+    '<span class="to"> => [builder 5/6] COPY public src tsconfig.json ...         0.8s</span>',
+    '<span class="to"> => [builder 6/6] RUN npm run build                        38.4s</span>',
+    '<span class="to"> => [runtime 1/3] FROM nginx:1.25-alpine                    0.0s</span>',
+    '<span class="to"> => [runtime 2/3] COPY nginx.conf /etc/nginx/conf.d/...     0.1s</span>',
+    '<span class="to"> => [runtime 3/3] COPY --from=builder /app/dist /usr/...    0.2s</span>',
+    '<span class="ts"> => => naming to docker.io/myapp/frontend:latest            0.0s</span>',
+    '',
+    '<span class="ti">Builder stage: ~1.2GB  →  Final image: <span class="ts">25MB</span> ✅</span>',
+    '<span class="ts">✅ Multi-stage build complete! 98% smaller than single-stage.</span>',
   ]);
 }
 

@@ -420,7 +420,7 @@ strong{color:var(--txt)}
   <div class="nav-item" onclick="go(14)"><span class="ni">🔐</span>Security Hardening</div>
   <div class="nav-item" onclick="go(15)"><span class="ni">⚡</span>Performance Tuning</div>
   <div class="nav-item" onclick="go(16)"><span class="ni">🌍</span>Upstream & Health Checks</div>
-  <div class="nav-item" onclick="go(17)"><span class="ni">☕</span>Spring Boot Production</div>
+  <div class="nav-item" onclick="go(17)"><span class="ni">☕</span>Spring Boot Demo App Production</div>
   <div class="nav-item" onclick="go(18)"><span class="ni">🏆</span>Final Challenge</div>
 
   <div class="nav-bot">
@@ -596,9 +596,9 @@ nginx -T | head -20                  # Print entire effective config</textarea>
   ├── <span style="color:#4d9eff">nginx.conf</span>              ← Main config. Includes everything else.
   ├── <span style="color:#4d9eff">sites-available/</span>        ← ALL site configs (active or not)
   │   ├── default             ← Default Nginx welcome page
-  │   └── <span style="color:#00ff88">human</span>              ← Your Spring Boot app config
+  │   └── <span style="color:#00ff88">demo-app</span>              ← Your Spring Boot app config
   ├── <span style="color:#4d9eff">sites-enabled/</span>          ← Only ACTIVE configs (symlinks to sites-available)
-  │   └── human ──────────────► ../sites-available/human
+  │   └── demo-app ──────────────► ../sites-available/demo-app
   ├── <span style="color:#4d9eff">conf.d/</span>                 ← Additional config snippets (auto-included)
   ├── <span style="color:#4d9eff">snippets/</span>               ← Reusable config fragments
   │   ├── fastcgi-php.conf
@@ -673,10 +673,10 @@ http {
         <div class="ebtns"><button class="ebtn run" onclick="runEnableSite()">▶ RUN</button></div>
       </div>
       <textarea class="carea" spellcheck="false" style="min-height:160px"># Create your config in sites-available
-sudo nano /etc/nginx/sites-available/human
+sudo nano /etc/nginx/sites-available/demo-app
 
 # Enable it by creating a symlink in sites-enabled
-sudo ln -s /etc/nginx/sites-available/human /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/demo-app /etc/nginx/sites-enabled/
 
 # ALWAYS test config before reloading!
 sudo nginx -t
@@ -738,13 +738,13 @@ sudo tail -f /var/log/nginx/error.log     # Watch errors in real time
 sudo cat /var/log/nginx/error.log | grep "crit"   # Filter critical errors
 
 ## ── SITE MANAGEMENT ──────────────────────────────────────────────
-sudo ln -s /etc/nginx/sites-available/human /etc/nginx/sites-enabled/  # Enable
-sudo rm /etc/nginx/sites-enabled/human     # Disable (don't delete sites-available!)
+sudo ln -s /etc/nginx/sites-available/demo-app /etc/nginx/sites-enabled/  # Enable
+sudo rm /etc/nginx/sites-enabled/demo-app     # Disable (don't delete sites-available!)
 
 ## ── DEBUGGING ────────────────────────────────────────────────────
 curl -I http://localhost                   # Check response headers
 curl -v http://localhost/api/test          # Verbose request/response
-curl -H "Host: human.com" http://localhost # Test virtual host</textarea>
+curl -H "Host: demo-app.com" http://localhost # Test virtual host</textarea>
     </div>
     <div class="term" id="t3"><div class="tbar"><div class="td td1"></div><div class="td td2"></div><div class="td td3"></div><div class="tlabel">simulation</div></div><div class="tbody" id="o3"></div></div>
 
@@ -869,7 +869,7 @@ curl -H "Host: human.com" http://localhost # Test virtual host</textarea>
       <div class="dlabel">REVERSE PROXY FLOW</div>
       <pre style="color:#5a7a94;line-height:2.3;font-size:12px">
   Client Browser
-      │  GET https://human.com/api/employees
+      │  GET https://demo-app.com/api/employees
       ▼
   <span style="color:#00ff88">Nginx :443</span>  ← Handles SSL, rate limiting, headers
       │  proxy_pass → http://localhost:9191/api/employees
@@ -886,7 +886,7 @@ curl -H "Host: human.com" http://localhost # Test virtual host</textarea>
     <h3>✏️ Practice — Write a Reverse Proxy Config</h3>
     <div class="editor">
       <div class="ebar">
-        <div class="efile"><div class="edot"></div>/etc/nginx/sites-available/human</div>
+        <div class="efile"><div class="edot"></div>/etc/nginx/sites-available/demo-app</div>
         <div class="ebtns">
           <button class="ebtn rst" onclick="resetCode('c5','')">Clear</button>
           <button class="ebtn sol" onclick="showSol('c5',sol5)">Solution</button>
@@ -950,6 +950,80 @@ curl -H "Host: human.com" http://localhost # Test virtual host</textarea>
       <div class="qfb" id="qf5"></div>
     </div>
 
+    <h3>Real World: React Frontend + Spring Boot Backend</h3>
+    <div class="alert a-info">ℹ️ <span>Modern apps have a React frontend (static files) and Spring Boot API backend. Nginx serves both from one domain — no CORS issues!</span></div>
+
+    <div class="diag">
+      <div class="dlabel">FULL STACK ARCHITECTURE</div>
+      <pre style="color:#5a7a94;line-height:2.3;font-size:12px">
+  Browser → <span style="color:#00ff88">https://myapp.com</span>
+      │
+      ▼
+  <span style="color:#00ff88">Nginx :443</span>
+      ├── <span style="color:#4d9eff">/</span>           → Serve React static files (HTML, JS, CSS)
+      ├── <span style="color:#4d9eff">/api/*</span>      → Proxy to Spring Boot :9191
+      └── <span style="color:#4d9eff">/actuator/*</span> → Proxy to Spring Boot :9191 (health checks)
+      </pre>
+    </div>
+
+    <div class="editor">
+      <div class="ebar">
+        <div class="efile"><div class="edot"></div>/etc/nginx/sites-available/fullstack-app</div>
+      </div>
+      <textarea class="carea" spellcheck="false" style="min-height:340px">server {
+    listen 80;
+    server_name myapp.com;
+
+    # ── React Frontend (static files) ────────────────────────────
+    location / {
+        root /var/www/react-build;         # Built React app (npm run build)
+        try_files $uri $uri/ /index.html;  # SPA routing — always serve index.html
+        expires 1h;                        # Cache static assets
+        add_header Cache-Control "public, immutable";
+    }
+
+    # ── API Routes — proxy to Spring Boot ────────────────────────
+    location /api/ {
+        proxy_pass http://localhost:9191;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # ── Health Check Endpoint ─────────────────────────────────────
+    location /actuator/health {
+        proxy_pass http://localhost:9191;
+        access_log off;                    # Don't log health checks
+    }
+
+    # ── Block other actuator endpoints from public ────────────────
+    location /actuator/ {
+        allow 10.0.0.0/8;                  # Only internal network
+        deny all;
+        proxy_pass http://localhost:9191;
+    }
+
+    # ── Swagger UI ────────────────────────────────────────────────
+    location /swagger-ui/ {
+        proxy_pass http://localhost:9191;
+    }
+
+    # ── DEFAULT — catch everything else ───────────────────────────
+    location / {
+        proxy_pass http://localhost:9191;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}</textarea>
+    </div>
+
+    <div class="cards">
+      <div class="card"><div class="c-icon">⚛️</div><div class="c-title">React (Port 80)</div><div class="c-body">Static files served by Nginx. Fast, cached, no backend needed for UI.</div></div>
+      <div class="card"><div class="c-icon">☕</div><div class="c-title">Spring Boot (Port 9191)</div><div class="c-body">API endpoints proxied through Nginx. Only accessible via /api/* routes.</div></div>
+      <div class="card"><div class="c-icon">🔒</div><div class="c-title">Same Origin</div><div class="c-body">Both served from same domain — no CORS configuration needed!</div></div>
+    </div>
+
     <div class="lnav">
       <button class="nb" onclick="go(4)">← Prev</button>
       <button class="nb go" onclick="go(6)">Location Blocks →</button>
@@ -986,7 +1060,7 @@ curl -H "Host: human.com" http://localhost # Test virtual host</textarea>
 
     <div class="editor">
       <div class="ebar">
-        <div class="efile"><div class="edot"></div>/etc/nginx/sites-available/human — all location types</div>
+        <div class="efile"><div class="edot"></div>/etc/nginx/sites-available/demo-app — all location types</div>
         <div class="ebtns"><button class="ebtn run" onclick="runLocations()">▶ Test Matching</button></div>
       </div>
       <textarea class="carea" spellcheck="false" style="min-height:500px">server {
@@ -1145,11 +1219,11 @@ curl -H "Host: human.com" http://localhost # Test virtual host</textarea>
 
     <div class="editor">
       <div class="ebar">
-        <div class="efile"><div class="edot"></div>/etc/nginx/sites-available/human — load balanced</div>
+        <div class="efile"><div class="edot"></div>/etc/nginx/sites-available/demo-app — load balanced</div>
         <div class="ebtns"><button class="ebtn run" onclick="runLB()">▶ Simulate Traffic</button></div>
       </div>
       <textarea class="carea" spellcheck="false" style="min-height:360px"># upstream block must be in http {} context (nginx.conf or conf.d/)
-upstream human_cluster {
+upstream demo_app_cluster {
     least_conn;                             # Algorithm choice
 
     # server <address> [parameters]
@@ -1167,7 +1241,7 @@ server {
 
     # Point to upstream group instead of single server
     location /api/ {
-        proxy_pass http://human_cluster;    # Uses the upstream group
+        proxy_pass http://demo_app_cluster;    # Uses the upstream group
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
 
@@ -1178,7 +1252,7 @@ server {
 }
 
 # ip_hash example (for session stickiness):
-# upstream human_sticky {
+# upstream demo_app_sticky {
 #     ip_hash;
 #     server 10.0.0.1:9191;
 #     server 10.0.0.2:9191;
@@ -1425,9 +1499,9 @@ server {
         <div class="efile"><div class="edot"></div>nginx.conf + sites-available/human — caching</div>
       </div>
       <textarea class="carea" spellcheck="false" style="min-height:440px"># ── In http {} context (nginx.conf) ──────────────────────────────
-proxy_cache_path /var/cache/nginx/human
+proxy_cache_path /var/cache/nginx/demo-app
     levels=1:2                             # 2-level directory structure
-    keys_zone=human_cache:10m              # 10MB in-memory key store (~80,000 keys)
+    keys_zone=demo_app_cache:10m              # 10MB in-memory key store (~80,000 keys)
     max_size=1g                            # Max 1GB disk cache
     inactive=60m                           # Remove if not accessed for 60min
     use_temp_path=off;                     # Write directly to cache dir (faster)
@@ -1439,7 +1513,7 @@ server {
 
     # ── Cache reports and lookup data ────────────────────────────
     location /api/reports/ {
-        proxy_cache human_cache;
+        proxy_cache demo_app_cache;
         proxy_cache_key "$host$request_uri";         # What makes cache unique
         proxy_cache_valid 200 10m;                   # Cache 200 OK for 10 minutes
         proxy_cache_valid 404 1m;                    # Cache 404 for 1 minute
@@ -1466,15 +1540,15 @@ server {
         proxy_cache_bypass $request_method;
         proxy_no_cache $request_method;
 
-        proxy_cache human_cache;
+        proxy_cache demo_app_cache;
         proxy_cache_valid 200 5m;
         proxy_pass http://localhost:9191;
     }
 }
 
 # ── Create cache directory ───────────────────────────────────────
-# sudo mkdir -p /var/cache/nginx/human
-# sudo chown www-data:www-data /var/cache/nginx/human</textarea>
+# sudo mkdir -p /var/cache/nginx/demo-app
+# sudo chown www-data:www-data /var/cache/nginx/demo-app</textarea>
     </div>
 
     <div class="quiz">
@@ -1571,8 +1645,8 @@ log_format detailed
 
 # In server {} block
 server {
-    access_log /var/log/nginx/human-access.log detailed;
-    error_log  /var/log/nginx/human-error.log warn;
+    access_log /var/log/nginx/demo-app-access.log detailed;
+    error_log  /var/log/nginx/demo-app-error.log warn;
 }</textarea>
     </div>
     <div class="term" id="t13"><div class="tbar"><div class="td td1"></div><div class="td td2"></div><div class="td td3"></div><div class="tlabel">sample logs + analysis</div></div><div class="tbody" id="o13"></div></div>
@@ -1583,34 +1657,34 @@ server {
         <div class="efile"><div class="edot"></div>log analysis toolkit</div>
       </div>
       <textarea class="carea" spellcheck="false" style="min-height:300px"># ── REAL-TIME MONITORING ─────────────────────────────────────────
-tail -f /var/log/nginx/human-access.log             # Watch all requests
-tail -f /var/log/nginx/human-error.log              # Watch errors
+tail -f /var/log/nginx/demo-app-access.log             # Watch all requests
+tail -f /var/log/nginx/demo-app-error.log              # Watch errors
 
 # ── FIND SLOW REQUESTS (>1 second) ───────────────────────────────
-awk '$NF > 1 {print}' /var/log/nginx/human-access.log
+awk '$NF > 1 {print}' /var/log/nginx/demo-app-access.log
 
 # ── FIND ALL 5XX ERRORS ──────────────────────────────────────────
-grep ' 5[0-9][0-9] ' /var/log/nginx/human-access.log | tail -20
+grep ' 5[0-9][0-9] ' /var/log/nginx/demo-app-access.log | tail -20
 
 # ── TOP 10 SLOWEST ENDPOINTS ──────────────────────────────────────
-awk '{print $NF, $7}' /var/log/nginx/human-access.log | sort -rn | head -10
+awk '{print $NF, $7}' /var/log/nginx/demo-app-access.log | sort -rn | head -10
 
 # ── REQUESTS PER MINUTE ───────────────────────────────────────────
-awk '{print $4}' /var/log/nginx/human-access.log \
+awk '{print $4}' /var/log/nginx/demo-app-access.log \
   | cut -d: -f1,2 | sort | uniq -c
 
 # ── TOP 10 CLIENT IPs (find who's hammering your API) ─────────────
-awk '{print $1}' /var/log/nginx/human-access.log | sort | uniq -c | sort -rn | head -10
+awk '{print $1}' /var/log/nginx/demo-app-access.log | sort | uniq -c | sort -rn | head -10
 
 # ── STATUS CODE BREAKDOWN ─────────────────────────────────────────
-awk '{print $9}' /var/log/nginx/human-access.log | sort | uniq -c | sort -rn
+awk '{print $9}' /var/log/nginx/demo-app-access.log | sort | uniq -c | sort -rn
 
 # ── TOP REQUESTED URLS ────────────────────────────────────────────
-awk '{print $7}' /var/log/nginx/human-access.log | sort | uniq -c | sort -rn | head -20
+awk '{print $7}' /var/log/nginx/demo-app-access.log | sort | uniq -c | sort -rn | head -20
 
 # ── AVERAGE RESPONSE TIME BY ENDPOINT ────────────────────────────
 awk '{sum[$7]+=$NF; count[$7]++} END {for(u in sum) print sum[u]/count[u], u}' \
-  /var/log/nginx/human-access.log | sort -rn | head -10</textarea>
+  /var/log/nginx/demo-app-access.log | sort -rn | head -10</textarea>
     </div>
 
     <div class="lnav">
@@ -1749,7 +1823,7 @@ http {
     keepalive_requests 1000;                # Max requests per keep-alive connection
 
     # Upstream keep-alive
-    upstream human_app {
+    upstream demo_app {
         server localhost:9191;
         keepalive 32;                       # Maintain 32 persistent connections to backend
     }
@@ -1825,7 +1899,7 @@ fs.file-max = 200000</textarea>
         <div class="ebtns"><button class="ebtn run" onclick="runUpstream()">▶ Simulate Failover</button></div>
       </div>
       <textarea class="carea" spellcheck="false" style="min-height:440px"># ── ADVANCED UPSTREAM CONFIGURATION ─────────────────────────────
-upstream human_cluster {
+upstream demo_app_cluster {
     # Algorithm
     least_conn;
 
@@ -1854,7 +1928,7 @@ server {
     server_name yourdomain.com;
 
     location /api/ {
-        proxy_pass http://human_cluster;
+        proxy_pass http://demo_app_cluster;
 
         # Required for upstream keepalive
         proxy_http_version 1.1;
@@ -1891,8 +1965,8 @@ server {
   ════════════════════════════════════════════════ -->
   <div class="sec" id="s17">
     <div class="eyebrow">LESSON 18 — REAL WORLD</div>
-    <div class="headline">SPRING BOOT<br>"HUMAN" PROJECT</div>
-    <div class="intro">Complete production-ready Nginx configuration for your actual Spring Boot human project — combining every technique from this course into one hardened, performant, production config.</div>
+    <div class="headline">SPRING BOOT<br>"DEMO APP" PROJECT</div>
+    <div class="intro">Complete production-ready Nginx configuration for your actual Spring Boot Demo App project — combining every technique from this course into one hardened, performant, production config.</div>
 
     <h3>📁 Server File Structure</h3>
     <div class="diag">
@@ -1901,17 +1975,17 @@ server {
   <span style="color:#00ff88">/etc/nginx/</span>
   ├── nginx.conf                     ← Global: workers, gzip, rate zones, cache path
   ├── sites-available/
-  │   └── <span style="color:#4d9eff">human</span>                  ← Your complete config
+  │   └── <span style="color:#4d9eff">demo-app</span>                  ← Your complete config
   └── sites-enabled/
-      └── human → ../sites-available/human
+      └── demo-app → ../sites-available/demo-app
 
-  <span style="color:#00ff88">/var/cache/nginx/human/</span>            ← Response cache
+  <span style="color:#00ff88">/var/cache/nginx/demo-app/</span>            ← Response cache
   <span style="color:#00ff88">/var/log/nginx/</span>
-  ├── human-access.log               ← All requests with timing
-  └── human-error.log                ← Errors only
+  ├── demo-app-access.log               ← All requests with timing
+  └── demo-app-error.log                ← Errors only
 
-  <span style="color:#00ff88">/opt/human/</span>
-  ├── human.jar                      ← Spring Boot app
+  <span style="color:#00ff88">/opt/demo-app/</span>
+  ├── demo-app.jar                      ← Spring Boot app
   └── opentelemetry-javaagent.jar    ← OTel agent
       </pre>
     </div>
@@ -1959,7 +2033,7 @@ http {
     limit_req_zone $binary_remote_addr zone=human_file:10m  rate=2r/s;
 
     # Cache zone
-    proxy_cache_path /var/cache/nginx/human levels=1:2 keys_zone=human_cache:10m max_size=500m inactive=30m use_temp_path=off;
+    proxy_cache_path /var/cache/nginx/demo-app levels=1:2 keys_zone=demo_app_cache:10m max_size=500m inactive=30m use_temp_path=off;
 
     # Custom log format with timing
     log_format timing '$remote_addr - [$time_local] "$request" $status $body_bytes_sent rt=$request_time urt=$upstream_response_time cs=$upstream_cache_status';
@@ -2006,8 +2080,8 @@ server {
     location ~ /\. { deny all; access_log off; log_not_found off; }
 
     # ── Logging ────────────────────────────────────────────────
-    access_log /var/log/nginx/human-access.log timing;
-    error_log  /var/log/nginx/human-error.log warn;
+    access_log /var/log/nginx/demo-app-access.log timing;
+    error_log  /var/log/nginx/demo-app-error.log warn;
 
     # Max upload size for Excel/PDF imports
     client_max_body_size 100m;
@@ -2030,7 +2104,7 @@ server {
         proxy_read_timeout    120s;        # Long for batch jobs
 
         # Cache GET requests to reporting endpoints
-        proxy_cache human_cache;
+        proxy_cache demo_app_cache;
         proxy_cache_methods GET;
         proxy_cache_key "$host$uri$is_args$args";
         proxy_cache_valid 200 5m;
@@ -2156,7 +2230,7 @@ const N=19;
 const bcNames=['introduction','install-architecture','config-structure','commands',
   'static-file-server','reverse-proxy','location-blocks','variables',
   'load-balancing','ssl-https','rate-limiting','caching','gzip',
-  'logging','security','performance','upstream','spring-boot-human','final-challenge'];
+  'logging','security','performance','upstream','spring-boot-demo-app','final-challenge'];
 
 const lvls=['lv-zero','lv-zero','lv-zero','lv-zero',
   'lv-mid','lv-mid','lv-mid','lv-mid',
@@ -2278,7 +2352,7 @@ function runInstall(){
 function runEnableSite(){
   showTerm('t2b');
   type('o2b',[
-    '<span class="tp">$</span> <span class="tc">sudo ln -s /etc/nginx/sites-available/human /etc/nginx/sites-enabled/</span>',
+    '<span class="tp">$</span> <span class="tc">sudo ln -s /etc/nginx/sites-available/demo-app /etc/nginx/sites-enabled/</span>',
     '<span class="tp">$</span> <span class="tc">sudo nginx -t</span>',
     '<span class="ts">nginx: the configuration file /etc/nginx/nginx.conf syntax is ok</span>',
     '<span class="ts">nginx: configuration file /etc/nginx/nginx.conf test is successful</span>',
@@ -2443,7 +2517,7 @@ function runGzip(){
 function runLogs(){
   showTerm('t13');
   type('o13',[
-    '<span class="tp">$</span> <span class="tc">tail -f /var/log/nginx/human-access.log</span>','',
+    '<span class="tp">$</span> <span class="tc">tail -f /var/log/nginx/demo-app-access.log</span>','',
     '<span class="to">103.12.45.67 - [05/Mar/2026:10:23:45] "GET /api/employees HTTP/2.0" 200 4521 rt=0.045 urt=0.043 cs=MISS</span>',
     '<span class="ts">103.12.45.67 - [05/Mar/2026:10:23:46] "GET /api/employees HTTP/2.0" 200 4521 rt=0.001 urt=- cs=HIT</span>',
     '<span class="to">103.12.45.67 - [05/Mar/2026:10:23:47] "POST /api/auth/login HTTP/2.0" 200 312 rt=0.123 urt=0.121 cs=-</span>',

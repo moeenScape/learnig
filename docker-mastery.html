@@ -1,0 +1,2024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Docker Zero → Expert</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;0,9..144,900;1,9..144,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #06090f;
+  --surface: #0d1117;
+  --surface2: #161b22;
+  --surface3: #1c2333;
+  --border: #21262d;
+  --blue: #2f81f7;
+  --cyan: #39d353;
+  --orange: #f78166;
+  --yellow: #e3b341;
+  --purple: #bc8cff;
+  --pink: #ff7b72;
+  --text: #cdd9e5;
+  --muted: #768390;
+  --code: #aff5b4;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'IBM Plex Mono',monospace;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* Animated background */
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 10%, rgba(47,129,247,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 90%, rgba(57,211,83,0.04) 0%, transparent 50%);
+  pointer-events:none;z-index:0;
+}
+
+.wrap{display:flex;min-height:100vh;position:relative;z-index:1}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:260px;
+  background:var(--surface);
+  border-right:1px solid var(--border);
+  position:fixed;top:0;left:0;bottom:0;
+  overflow-y:auto;z-index:100;
+  display:flex;flex-direction:column;
+}
+.sidebar-brand{
+  padding:20px 18px;
+  border-bottom:1px solid var(--border);
+}
+.brand-whale{font-size:28px;line-height:1}
+.brand-title{
+  font-family:'Fraunces',serif;
+  font-size:18px;font-weight:900;
+  color:#fff;letter-spacing:-0.5px;
+  margin-top:6px;
+}
+.brand-sub{font-size:10px;color:var(--muted);letter-spacing:3px;margin-top:2px}
+
+.nav-group-label{
+  padding:14px 18px 6px;
+  font-size:9px;color:var(--muted);
+  letter-spacing:3px;text-transform:uppercase;
+}
+.nav-link{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 14px;margin:1px 8px;
+  border-radius:6px;cursor:pointer;
+  font-size:11px;font-weight:500;
+  color:var(--muted);
+  border:1px solid transparent;
+  transition:all .15s;
+}
+.nav-link:hover{background:var(--surface2);color:var(--text)}
+.nav-link.active{
+  background:rgba(47,129,247,0.12);
+  color:var(--blue);
+  border-color:rgba(47,129,247,0.25);
+}
+.nav-icon{font-size:15px;width:22px;text-align:center;flex-shrink:0}
+.nav-badge{
+  margin-left:auto;font-size:9px;
+  padding:2px 6px;border-radius:3px;
+  background:rgba(57,211,83,0.12);
+  color:var(--cyan);
+}
+
+.sidebar-footer{
+  margin-top:auto;
+  padding:16px 18px;
+  border-top:1px solid var(--border);
+}
+.xp-label{font-size:9px;color:var(--muted);letter-spacing:2px;margin-bottom:6px}
+.xp-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.xp-fill{
+  height:100%;
+  background:linear-gradient(90deg,var(--blue),var(--cyan));
+  border-radius:2px;
+  transition:width .6s cubic-bezier(.4,0,.2,1);
+  width:0%;
+}
+.xp-text{font-size:10px;color:var(--blue);margin-top:5px}
+
+/* ── MAIN ── */
+.main{margin-left:260px;flex:1;display:flex;flex-direction:column}
+
+.topbar{
+  background:rgba(13,17,23,0.8);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+  padding:12px 32px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:50;
+}
+.breadcrumb{font-size:11px;color:var(--muted)}
+.breadcrumb em{color:var(--blue);font-style:normal}
+.breadcrumb a:hover{color:var(--blue)!important}
+.level-chip{
+  padding:4px 12px;border-radius:20px;
+  font-size:10px;font-weight:600;letter-spacing:1.5px;
+}
+.lv-zero{background:rgba(57,211,83,.12);color:var(--cyan)}
+.lv-mid{background:rgba(227,179,65,.12);color:var(--yellow)}
+.lv-expert{background:rgba(188,140,255,.12);color:var(--purple)}
+
+.content{padding:36px 40px;max-width:960px}
+
+/* ── SECTION ── */
+.section{display:none}
+.section.active{display:block;animation:fadeUp .35s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+.lesson-eyebrow{
+  font-size:9px;color:var(--blue);
+  letter-spacing:3px;text-transform:uppercase;
+  margin-bottom:10px;
+}
+.lesson-title{
+  font-family:'Fraunces',serif;
+  font-size:40px;font-weight:900;
+  color:#fff;line-height:1.05;
+  letter-spacing:-1px;margin-bottom:14px;
+}
+.lesson-intro{
+  font-size:13px;color:var(--muted);
+  line-height:1.8;max-width:640px;margin-bottom:32px;
+}
+
+/* ── CODE EDITOR ── */
+.editor{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:10px;
+  overflow:hidden;margin:20px 0;
+}
+.editor-bar{
+  background:var(--surface2);
+  padding:10px 16px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--border);
+}
+.editor-file{
+  font-size:11px;color:var(--muted);
+  display:flex;align-items:center;gap:8px;
+}
+.file-pill{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--blue);flex-shrink:0;
+}
+.editor-btns{display:flex;gap:8px}
+.ebtn{
+  padding:5px 14px;border-radius:5px;border:none;
+  cursor:pointer;font-family:'IBM Plex Mono',monospace;
+  font-size:10px;font-weight:600;letter-spacing:.5px;
+  transition:all .15s;
+}
+.ebtn-run{background:var(--cyan);color:#000}
+.ebtn-run:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.ebtn-reset{background:var(--surface3);color:var(--muted);border:1px solid var(--border)}
+.ebtn-reset:hover{color:var(--text)}
+.ebtn-show{background:rgba(188,140,255,.15);color:var(--purple);border:1px solid rgba(188,140,255,.25)}
+
+.code-area{
+  width:100%;min-height:200px;
+  background:transparent;border:none;outline:none;
+  color:var(--code);
+  font-family:'IBM Plex Mono',monospace;
+  font-size:12.5px;line-height:1.9;
+  padding:18px 20px;
+  resize:vertical;tab-size:2;
+  caret-color:var(--blue);
+}
+.code-area::placeholder{color:var(--muted);opacity:.5}
+
+/* ── TERMINAL ── */
+.terminal{
+  background:#020408;
+  border:1px solid var(--border);
+  border-radius:10px;overflow:hidden;
+  margin:16px 0;display:none;
+}
+.term-bar{
+  background:var(--surface2);padding:8px 14px;
+  display:flex;align-items:center;gap:6px;
+  border-bottom:1px solid var(--border);
+}
+.tdot{width:10px;height:10px;border-radius:50%}
+.td1{background:#ff5f57}.td2{background:#febc2e}.td3{background:#28c840}
+.term-label{font-size:10px;color:var(--muted);margin-left:8px}
+.term-body{
+  padding:16px 18px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:12px;line-height:2;
+  min-height:80px;max-height:320px;overflow-y:auto;
+}
+.tp{color:var(--cyan)}.tc{color:var(--text)}.to{color:#8b949e}
+.ts{color:#39d353}.te{color:var(--orange)}.tw{color:var(--yellow)}
+.ti{color:var(--blue)}.tpu{color:var(--purple)}
+
+/* ── DIAGRAM ── */
+.diagram{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:22px;margin:20px 0;
+  overflow-x:auto;
+}
+.diagram-label{
+  font-size:9px;color:var(--muted);
+  letter-spacing:2px;text-transform:uppercase;
+  margin-bottom:14px;
+}
+
+/* ── CARDS ── */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin:20px 0}
+.card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:9px;padding:18px;
+  transition:border-color .2s;cursor:default;
+}
+.card:hover{border-color:var(--blue)}
+.card-icon{font-size:22px;margin-bottom:10px}
+.card-title{font-size:12px;font-weight:700;color:#fff;margin-bottom:5px}
+.card-body{font-size:11px;color:var(--muted);line-height:1.6}
+
+/* ── QUIZ ── */
+.quiz{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:22px;margin:24px 0;
+}
+.quiz-q{font-size:14px;font-weight:600;color:#fff;margin-bottom:18px;line-height:1.5}
+.quiz-opts{display:flex;flex-direction:column;gap:9px}
+.qopt{
+  padding:12px 16px;border-radius:7px;
+  border:1px solid var(--border);cursor:pointer;
+  font-size:12px;color:var(--text);
+  background:var(--surface2);
+  transition:all .15s;
+}
+.qopt:hover{border-color:var(--blue);color:var(--blue)}
+.qopt.correct{border-color:var(--cyan)!important;background:rgba(57,211,83,.08);color:var(--cyan)!important;pointer-events:none}
+.qopt.wrong{border-color:var(--orange)!important;background:rgba(247,129,102,.08);color:var(--orange)!important;pointer-events:none}
+.qfb{
+  margin-top:14px;padding:12px 15px;border-radius:7px;
+  font-size:11px;display:none;line-height:1.6;
+}
+.qfb.show{display:block}
+.qfb.ok{background:rgba(57,211,83,.08);border:1px solid rgba(57,211,83,.25);color:var(--cyan)}
+.qfb.no{background:rgba(247,129,102,.08);border:1px solid rgba(247,129,102,.25);color:var(--orange)}
+
+/* ── ALERTS ── */
+.alert{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:13px 16px;border-radius:8px;
+  font-size:12px;line-height:1.7;margin:16px 0;
+}
+.alert-tip{background:rgba(57,211,83,.07);border:1px solid rgba(57,211,83,.2);color:#7ee787}
+.alert-warn{background:rgba(227,179,65,.07);border:1px solid rgba(227,179,65,.2);color:var(--yellow)}
+.alert-info{background:rgba(47,129,247,.07);border:1px solid rgba(47,129,247,.2);color:#79c0ff}
+.alert-danger{background:rgba(247,129,102,.07);border:1px solid rgba(247,129,102,.2);color:var(--orange)}
+
+/* ── STEP LIST ── */
+.steps{margin:20px 0}
+.step{
+  display:flex;gap:16px;padding:16px 0;
+  border-bottom:1px solid var(--border);
+}
+.step:last-child{border-bottom:none}
+.step-num{
+  width:28px;height:28px;border-radius:50%;
+  background:rgba(47,129,247,.15);
+  border:1px solid rgba(47,129,247,.3);
+  color:var(--blue);font-size:11px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.step-body{flex:1}
+.step-title{font-size:13px;font-weight:700;color:#fff;margin-bottom:5px}
+.step-desc{font-size:12px;color:var(--muted);line-height:1.7}
+
+/* ── NAV ── */
+.lesson-nav{
+  display:flex;justify-content:space-between;
+  align-items:center;
+  margin-top:48px;padding-top:24px;
+  border-top:1px solid var(--border);
+}
+.navbtn{
+  padding:10px 22px;border-radius:7px;
+  border:1px solid var(--border);
+  background:var(--surface);
+  color:var(--text);cursor:pointer;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:12px;font-weight:600;
+  display:flex;align-items:center;gap:8px;
+  transition:all .15s;
+}
+.navbtn:hover{border-color:var(--blue);color:var(--blue)}
+.navbtn:disabled{opacity:.3;cursor:default}
+.navbtn.go{background:var(--blue);color:#fff;border-color:var(--blue)}
+.navbtn.go:hover{background:#388bfd}
+
+/* code inline */
+code{
+  background:rgba(47,129,247,.1);
+  color:#79c0ff;padding:1px 6px;
+  border-radius:4px;font-size:11px;
+}
+
+h3{font-size:15px;font-weight:700;color:#fff;margin:24px 0 10px}
+p{font-size:13px;color:var(--muted);line-height:1.8;margin-bottom:10px}
+strong{color:var(--text)}
+
+/* completion */
+.victory{
+  text-align:center;
+  background:linear-gradient(135deg,rgba(47,129,247,.1),rgba(57,211,83,.1));
+  border:1px solid rgba(47,129,247,.3);
+  border-radius:16px;padding:48px 32px;margin:32px 0;
+}
+.victory-icon{font-size:56px;margin-bottom:16px}
+.victory-title{
+  font-family:'Fraunces',serif;
+  font-size:36px;font-weight:900;
+  color:#fff;margin-bottom:8px;
+}
+.victory-sub{font-size:13px;color:var(--muted)}
+
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--surface)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* table */
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:12px}
+th{background:var(--surface2);color:var(--blue);padding:10px 14px;text-align:left;font-weight:600;border:1px solid var(--border)}
+td{padding:10px 14px;border:1px solid var(--border);color:var(--text);vertical-align:top}
+tr:hover td{background:var(--surface2)}
+
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;background:rgba(47,129,247,.1);color:var(--blue);border:1px solid rgba(47,129,247,.2);margin:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-whale">🐳</div>
+    <div class="brand-title">Docker Mastery</div>
+    <div class="brand-sub">Zero → Expert</div>
+  </div>
+
+  <div class="nav-group-label">Zero — Foundations</div>
+  <div class="nav-link active" onclick="go(0)"><span class="nav-icon">🧠</span>What is Docker?</div>
+  <div class="nav-link" onclick="go(1)"><span class="nav-icon">⚙️</span>Install Docker</div>
+  <div class="nav-link" onclick="go(2)"><span class="nav-icon">📦</span>Images vs Containers</div>
+  <div class="nav-link" onclick="go(3)"><span class="nav-icon">🖥️</span>Essential Commands</div>
+
+  <div class="nav-group-label">Beginner — Dockerfile</div>
+  <div class="nav-link" onclick="go(4)"><span class="nav-icon">📄</span>Dockerfile Basics</div>
+  <div class="nav-link" onclick="go(5)"><span class="nav-icon">🏗️</span>Build & Run Images</div>
+  <div class="nav-link" onclick="go(6)"><span class="nav-icon">⚡</span>Multi-stage Builds</div>
+  <div class="nav-link" onclick="go(7)"><span class="nav-icon">🔗</span>Networking</div>
+
+  <div class="nav-group-label">Intermediate — Compose</div>
+  <div class="nav-link" onclick="go(8)"><span class="nav-icon">🎼</span>Docker Compose Intro</div>
+  <div class="nav-link" onclick="go(9)"><span class="nav-icon">📝</span>Write Compose Files</div>
+  <div class="nav-link" onclick="go(10)"><span class="nav-icon">💾</span>Volumes & Data</div>
+  <div class="nav-link" onclick="go(11)"><span class="nav-icon">🌐</span>Compose Networking</div>
+
+  <div class="nav-group-label">Advanced — Production</div>
+  <div class="nav-link" onclick="go(12)"><span class="nav-icon">🔒</span>Security Best Practices</div>
+  <div class="nav-link" onclick="go(13)"><span class="nav-icon">☕</span>Spring Boot "human"</div>
+  <div class="nav-link" onclick="go(14)"><span class="nav-icon">🏆</span>Final Challenge</div>
+
+  <div class="sidebar-footer">
+    <div class="xp-label">XP PROGRESS</div>
+    <div class="xp-bar"><div class="xp-fill" id="xpFill"></div></div>
+    <div class="xp-text" id="xpText">0 / 15 lessons</div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div class="breadcrumb">
+      <a href="index.html" style="color: var(--muted); text-decoration: none; transition: color 0.2s;">🏠 home</a> / docker / <em id="bcName">introduction</em>
+    </div>
+    <div id="lvChip" class="level-chip lv-zero">ZERO</div>
+  </div>
+
+  <div class="content">
+
+    <!-- ══════════════════════════════════════════════════════
+         S0 — What is Docker
+    ══════════════════════════════════════════════════════ -->
+    <div class="section active" id="s0">
+      <div class="lesson-eyebrow">LESSON 01 — INTRODUCTION</div>
+      <div class="lesson-title">What is Docker?</div>
+      <div class="lesson-intro">Docker packages your application and ALL its dependencies into a portable unit called a <strong>container</strong>. It runs identically on any machine — your laptop, a test server, or a production cloud server.</div>
+
+      <div class="cards">
+        <div class="card"><div class="card-icon">😤</div><div class="card-title">The Problem</div><div class="card-body">"Works on my machine!" — app works locally but breaks on server due to different Java versions, OS, or configs.</div></div>
+        <div class="card"><div class="card-icon">📦</div><div class="card-title">Docker Solution</div><div class="card-body">Bundle app + JDK + OS libs + config into one container. Runs identically everywhere.</div></div>
+        <div class="card"><div class="card-icon">🚀</div><div class="card-title">vs Virtual Machine</div><div class="card-body">VM = full OS (GBs, minutes to start). Container = shares host OS kernel (MBs, milliseconds to start).</div></div>
+        <div class="card"><div class="card-icon">🔁</div><div class="card-title">Reproducible</div><div class="card-body">Same image always produces same result. No more "it worked last week" mysteries.</div></div>
+      </div>
+
+      <div class="diagram">
+        <div class="diagram-label">DOCKER vs VIRTUAL MACHINE</div>
+        <pre style="color:#8b949e;line-height:2.2;font-size:12px">
+  <span style="color:#e3b341">Virtual Machine</span>                    <span style="color:#2f81f7">Docker Container</span>
+
+  ┌──────────────────────┐           ┌──────────────────────┐
+  │   App A  │   App B   │           │   App A  │   App B   │
+  ├──────────┼───────────┤           ├──────────┼───────────┤
+  │  Guest   │  Guest    │           │ Container│ Container │
+  │   OS     │   OS      │           │  (libs)  │  (libs)   │
+  ├──────────┴───────────┤           ├──────────┴───────────┤
+  │      Hypervisor      │           │     Docker Engine     │
+  ├──────────────────────┤           ├──────────────────────┤
+  │      Host OS         │           │      Host OS          │
+  ├──────────────────────┤           ├──────────────────────┤
+  │      Hardware        │           │      Hardware         │
+  └──────────────────────┘           └──────────────────────┘
+  Size: ~10GB  Start: ~60s           Size: ~200MB  Start: &lt;1s
+        </pre>
+      </div>
+
+      <div class="alert alert-info">ℹ️ <span>Docker uses Linux <strong>namespaces</strong> and <strong>cgroups</strong> to isolate containers. Each container gets its own filesystem, network, and process space — but shares the host OS kernel.</span></div>
+
+      <div class="quiz">
+        <div class="quiz-q">🧠 What is the main advantage of Docker containers over Virtual Machines?</div>
+        <div class="quiz-opts">
+          <div class="qopt" onclick="Q(this,false,0)">A) Containers have their own full operating system</div>
+          <div class="qopt" onclick="Q(this,true,0)">B) Containers are lighter, faster to start, and share the host OS kernel</div>
+          <div class="qopt" onclick="Q(this,false,0)">C) Containers use more memory than VMs</div>
+          <div class="qopt" onclick="Q(this,false,0)">D) Containers require Hypervisor software</div>
+        </div>
+        <div class="qfb" id="qf0"></div>
+      </div>
+
+      <div class="lesson-nav">
+        <button class="navbtn" disabled>← Prev</button>
+        <button class="navbtn go" onclick="go(1)">Install Docker →</button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         S1 — Install
+    ══════════════════════════════════════════════════════ -->
+    <div class="section" id="s1">
+      <div class="lesson-eyebrow">LESSON 02 — SETUP</div>
+      <div class="lesson-title">Install Docker</div>
+      <div class="lesson-intro">Install Docker Engine on Ubuntu/Debian Linux — the most common production environment.</div>
+
+      <div class="editor">
+        <div class="editor-bar">
+          <div class="editor-file"><div class="file-pill"></div>terminal — ubuntu install</div>
+          <div class="editor-btns"><button class="ebtn ebtn-run" onclick="runInstall()">▶ RUN</button></div>
+        </div>
+        <textarea class="code-area" id="install-code" spellcheck="false"># Remove old versions
+sudo apt-get remove docker docker-engine docker.io containerd runc
+
+# Install prerequisites
+sudo apt-get update
+sudo apt-get install -y ca-certificates curl gnupg
+
+# Add Docker's official GPG key
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+# Add Docker repository
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list
+
+# Install Docker Engine
+sudo apt-get update
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+
+# Run without sudo (add your user to docker group)
+sudo usermod -aG docker $USER
+
+# Verify installation
+docker --version
+docker run hello-world</textarea>
+      </div>
+      <div class="terminal" id="t-install">
+        <div class="term-bar"><div class="tdot td1"></div><div class="tdot td2"></div><div class="tdot td3"></div><div class="term-label">output</div></div>
+        <div class="term-body" id="o-install"></div>
+      </div>
+
+      <h3>Docker Architecture</h3>
+      <div class="diagram">
+        <div class="diagram-label">HOW DOCKER WORKS INTERNALLY</div>
+        <pre style="color:#8b949e;line-height:2.2;font-size:12px">
+  You type: <span style="color:#39d353">docker run nginx</span>
+
+  ┌─────────────────────────────────────────────────────┐
+  │                  Docker CLI                         │  ← your terminal
+  └───────────────────────┬─────────────────────────────┘
+                          │ REST API
+  ┌───────────────────────▼─────────────────────────────┐
+  │                 Docker Daemon (dockerd)              │  ← background service
+  │  • Manages images, containers, networks, volumes     │
+  └────────────┬───────────────────────┬────────────────┘
+               │                       │
+  ┌────────────▼──────┐   ┌────────────▼──────────────┐
+  │   Docker Hub      │   │     containerd            │
+  │   (Image Registry)│   │   (Container Runtime)     │
+  └───────────────────┘   └───────────────────────────┘
+        </pre>
+      </div>
+
+      <div class="lesson-nav">
+        <button class="navbtn" onclick="go(0)">← Prev</button>
+        <button class="navbtn go" onclick="go(2)">Images vs Containers →</button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         S2 — Images vs Containers
+    ══════════════════════════════════════════════════════ -->
+    <div class="section" id="s2">
+      <div class="lesson-eyebrow">LESSON 03 — CONCEPTS</div>
+      <div class="lesson-title">Images vs Containers</div>
+      <div class="lesson-intro">This is the most important concept in Docker. Understanding the difference between an <strong>image</strong> and a <strong>container</strong> is fundamental.</div>
+
+      <div class="diagram">
+        <div class="diagram-label">IMAGE vs CONTAINER ANALOGY</div>
+        <pre style="color:#8b949e;line-height:2.4;font-size:12px">
+  <span style="color:#e3b341">Image</span>  =  A blueprint / recipe / class definition
+  <span style="color:#2f81f7">Container</span>  =  A running instance created from that blueprint
+
+  Real world analogy:
+  ┌─────────────────────────────────────────────────────┐
+  │  Image = Cookie Cutter 🍪                           │
+  │  Container = The actual cookie made from it         │
+  │                                                     │
+  │  One image → can create MANY containers             │
+  │  nginx:latest → container1, container2, container3  │
+  └─────────────────────────────────────────────────────┘
+
+  <span style="color:#39d353">Image Layers</span> (read-only):
+  ┌─────────────────────┐
+  │  Your App JAR       │  ← Layer 4 (your changes)
+  ├─────────────────────┤
+  │  application.yml    │  ← Layer 3
+  ├─────────────────────┤
+  │  JDK 21             │  ← Layer 2
+  ├─────────────────────┤
+  │  Ubuntu base        │  ← Layer 1 (FROM ubuntu)
+  └─────────────────────┘
+  + Writable container layer on top when running
+        </pre>
+      </div>
+
+      <div class="cards">
+        <div class="card"><div class="card-icon">📸</div><div class="card-title">Image</div><div class="card-body">Read-only template. Stored in registry (Docker Hub). Built from Dockerfile. Can be shared and versioned.</div></div>
+        <div class="card"><div class="card-icon">🏃</div><div class="card-title">Container</div><div class="card-body">Running instance of an image. Has writable layer. Isolated process. Can be started, stopped, deleted.</div></div>
+        <div class="card"><div class="card-icon">🏪</div><div class="card-title">Registry</div><div class="card-body">Storage for images. Docker Hub is public. You can run private registries. Like GitHub but for Docker images.</div></div>
+        <div class="card"><div class="card-icon">🏷️</div><div class="card-title">Tag</div><div class="card-body">Version label for an image. nginx:latest, nginx:1.25, java:21-slim. "latest" is default if not specified.</div></div>
+      </div>
+
+      <div class="quiz">
+        <div class="quiz-q">🧠 If you delete a container, what happens to the image it was created from?</div>
+        <div class="quiz-opts">
+          <div class="qopt" onclick="Q(this,false,2)">A) The image is also deleted</div>
+          <div class="qopt" onclick="Q(this,true,2)">B) The image remains unchanged — containers and images are independent</div>
+          <div class="qopt" onclick="Q(this,false,2)">C) The image is paused</div>
+          <div class="qopt" onclick="Q(this,false,2)">D) Docker gives an error</div>
+        </div>
+        <div class="qfb" id="qf2"></div>
+      </div>
+
+      <div class="lesson-nav">
+        <button class="navbtn" onclick="go(1)">← Prev</button>
+        <button class="navbtn go" onclick="go(3)">Essential Commands →</button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         S3 — Essential Commands
+    ══════════════════════════════════════════════════════ -->
+    <div class="section" id="s3">
+      <div class="lesson-eyebrow">LESSON 04 — COMMANDS</div>
+      <div class="lesson-title">Essential Commands</div>
+      <div class="lesson-intro">Master these commands and you can manage 90% of Docker tasks. Practice each one by clicking RUN.</div>
+
+      <div class="editor">
+        <div class="editor-bar">
+          <div class="editor-file"><div class="file-pill"></div>docker commands practice</div>
+          <div class="editor-btns"><button class="ebtn ebtn-run" onclick="runCmds()">▶ SIMULATE</button></div>
+        </div>
+        <textarea class="code-area" spellcheck="false" style="min-height:380px">## ── IMAGES ───────────────────────────────────
+docker pull nginx:latest          # Download image from Docker Hub
+docker images                     # List all local images
+docker image inspect nginx        # See detailed image info
+docker rmi nginx                  # Remove an image
+docker image prune                # Remove unused images
+
+## ── CONTAINERS ────────────────────────────────
+docker run nginx                  # Create + start container
+docker run -d nginx               # Run in background (detached)
+docker run -d -p 8080:80 nginx    # Map port: host:container
+docker run -d --name myapp nginx  # Give container a name
+docker run -it ubuntu bash        # Interactive terminal
+
+docker ps                         # List running containers
+docker ps -a                      # List ALL containers (incl. stopped)
+docker stop myapp                 # Stop container gracefully
+docker start myapp                # Start stopped container
+docker restart myapp              # Restart container
+docker rm myapp                   # Remove stopped container
+docker rm -f myapp                # Force remove running container
+
+## ── LOGS & EXEC ───────────────────────────────
+docker logs myapp                 # View container logs
+docker logs -f myapp              # Follow logs in real time
+docker exec -it myapp bash        # Enter running container
+docker exec myapp env             # Run command in container
+
+## ── SYSTEM ────────────────────────────────────
+docker stats                      # Live resource usage
+docker system prune               # Remove ALL unused resources
+docker inspect myapp              # Full container details</textarea>
+      </div>
+      <div class="terminal" id="t-cmds">
+        <div class="term-bar"><div class="tdot td1"></div><div class="tdot td2"></div><div class="tdot td3"></div><div class="term-label">simulation</div></div>
+        <div class="term-body" id="o-cmds"></div>
+      </div>
+
+      <table>
+        <tr><th>Command</th><th>What it does</th><th>Real world use</th></tr>
+        <tr><td><code>docker run -d -p</code></td><td>Run container in background with port mapping</td><td>Start your Spring Boot app</td></tr>
+        <tr><td><code>docker logs -f</code></td><td>Stream container output</td><td>Debug issues in production</td></tr>
+        <tr><td><code>docker exec -it</code></td><td>Enter container shell</td><td>Inspect files, run DB queries</td></tr>
+        <tr><td><code>docker stats</code></td><td>CPU/memory usage</td><td>Monitor performance</td></tr>
+        <tr><td><code>docker system prune</code></td><td>Clean up disk space</td><td>Free space on server</td></tr>
+      </table>
+
+      <div class="quiz">
+        <div class="quiz-q">🧠 What does <code>docker run -d -p 9191:9191 human</code> do?</div>
+        <div class="quiz-opts">
+          <div class="qopt" onclick="Q(this,false,3)">A) Runs human container in foreground on port 9191</div>
+          <div class="qopt" onclick="Q(this,true,3)">B) Runs human container in background, maps host port 9191 to container port 9191</div>
+          <div class="qopt" onclick="Q(this,false,3)">C) Builds the human image</div>
+          <div class="qopt" onclick="Q(this,false,3)">D) Stops the human container</div>
+        </div>
+        <div class="qfb" id="qf3"></div>
+      </div>
+
+      <div class="lesson-nav">
+        <button class="navbtn" onclick="go(2)">← Prev</button>
+        <button class="navbtn go" onclick="go(4)">Dockerfile Basics →</button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         S4 — Dockerfile Basics
+    ══════════════════════════════════════════════════════ -->
+    <div class="section" id="s4">
+      <div class="lesson-eyebrow">LESSON 05 — DOCKERFILE</div>
+      <div class="lesson-title">Dockerfile Basics</div>
+      <div class="lesson-intro">A Dockerfile is a text file with instructions to build a Docker image. Each instruction creates a new layer in the image.</div>
+
+      <div class="diagram">
+        <div class="diagram-label">DOCKERFILE INSTRUCTIONS REFERENCE</div>
+        <pre style="color:#8b949e;line-height:2.3;font-size:12px">
+  <span style="color:#bc8cff">FROM</span>        Base image to start from           FROM eclipse-temurin:21-jdk-alpine
+  <span style="color:#bc8cff">WORKDIR</span>     Set working directory              WORKDIR /app
+  <span style="color:#bc8cff">COPY</span>        Copy files from host to image      COPY target/app.jar app.jar
+  <span style="color:#bc8cff">ADD</span>         Like COPY but can unzip/download   ADD app.tar.gz /app
+  <span style="color:#bc8cff">RUN</span>         Execute command during build       RUN apt-get install -y curl
+  <span style="color:#bc8cff">ENV</span>         Set environment variable           ENV JAVA_OPTS="-Xmx512m"
+  <span style="color:#bc8cff">ARG</span>         Build-time argument                ARG VERSION=1.0
+  <span style="color:#bc8cff">EXPOSE</span>      Document port (does NOT publish)   EXPOSE 9191
+  <span style="color:#bc8cff">VOLUME</span>      Create mount point for data        VOLUME /var/log
+  <span style="color:#bc8cff">CMD</span>         Default command when container runs CMD ["java","-jar","app.jar"]
+  <span style="color:#bc8cff">ENTRYPOINT</span>  Main command (CMD appends to it)   ENTRYPOINT ["java"]
+  <span style="color:#bc8cff">HEALTHCHECK</span> Check if container is healthy      HEALTHCHECK CMD curl -f http://localhost/health
+  <span style="color:#bc8cff">USER</span>        Switch to non-root user            USER appuser
+  <span style="color:#bc8cff">LABEL</span>       Add metadata                       LABEL version="1.0"
+        </pre>
+      </div>
+
+      <h3>✏️ Write Your First Dockerfile</h3>
+      <div class="editor">
+        <div class="editor-bar">
+          <div class="editor-file"><div class="file-pill"></div>Dockerfile — simple Node.js app</div>
+          <div class="editor-btns">
+            <button class="ebtn ebtn-reset" onclick="resetCode('df-basic','')">Clear</button>
+            <button class="ebtn ebtn-show" onclick="showSolution('df-basic', solBasic)">Show Solution</button>
+            <button class="ebtn ebtn-run" onclick="validateDF()">▶ Validate</button>
+          </div>
+        </div>
+        <textarea class="code-area" id="df-basic" spellcheck="false" placeholder="# Write a Dockerfile that:
+# 1. Starts FROM node:18-alpine
+# 2. Sets WORKDIR to /app
+# 3. COPYs package.json first (for layer caching)
+# 4. RUNs npm install
+# 5. COPYs the rest of your source code
+# 6. EXPOSEs port 3000
+# 7. CMDs node server.js"></textarea>
+      </div>
+      <div class="terminal" id="t-df">
+        <div class="term-bar"><div class="tdot td1"></div><div class="tdot td2"></div><div class="tdot td3"></div><div class="term-label">validation</div></div>
+        <div class="term-body" id="o-df"></div>
+      </div>
+
+      <div class="alert alert-tip">💡 <span><strong>Layer Caching Tip:</strong> Copy <code>package.json</code> (or <code>pom.xml</code>) BEFORE copying source code. Docker caches layers — if dependencies haven't changed, it skips re-running <code>npm install</code> or <code>mvn install</code>, saving build time.</span></div>
+
+      <div class="quiz">
+        <div class="quiz-q">🧠 What is the difference between CMD and ENTRYPOINT?</div>
+        <div class="quiz-opts">
+          <div class="qopt" onclick="Q(this,false,4)">A) They are identical</div>
+          <div class="qopt" onclick="Q(this,true,4)">B) ENTRYPOINT is the main command; CMD provides default arguments that can be overridden at runtime</div>
+          <div class="qopt" onclick="Q(this,false,4)">C) CMD runs during build; ENTRYPOINT runs at start</div>
+          <div class="qopt" onclick="Q(this,false,4)">D) ENTRYPOINT can only be used once per Dockerfile</div>
+        </div>
+        <div class="qfb" id="qf4"></div>
+      </div>
+
+      <div class="lesson-nav">
+        <button class="navbtn" onclick="go(3)">← Prev</button>
+        <button class="navbtn go" onclick="go(5)">Build & Run →</button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         S5 — Build & Run
+    ══════════════════════════════════════════════════════ -->
+    <div class="section" id="s5">
+      <div class="lesson-eyebrow">LESSON 06 — BUILD</div>
+      <div class="lesson-title">Build & Run Images</div>
+      <div class="lesson-intro">Turn your Dockerfile into a runnable image and understand the build process layer by layer.</div>
+
+      <div class="editor">
+        <div class="editor-bar">
+          <div class="editor-file"><div class="file-pill"></div>build commands</div>
+          <div class="editor-btns"><button class="ebtn ebtn-run" onclick="runBuild()">▶ Simulate Build</button></div>
+        </div>
+        <textarea class="code-area" spellcheck="false" style="min-height:280px"># Build image from Dockerfile in current directory
+docker build -t myapp:1.0 .
+
+# Build with different Dockerfile location
+docker build -t myapp:1.0 -f docker/Dockerfile.prod .
+
+# Build with build arguments
+docker build --build-arg ENV=production -t myapp:prod .
+
+# Build and push to Docker Hub
+docker build -t yourusername/myapp:1.0 .
+docker push yourusername/myapp:1.0
+
+# Pull specific version
+docker pull yourusername/myapp:1.0
+
+# Tag an existing image
+docker tag myapp:1.0 myapp:latest
+
+# Run the built image
+docker run -d \
+  --name myapp \
+  -p 9191:9191 \
+  -e SPRING_PROFILES_ACTIVE=prod \
+  myapp:1.0</textarea>
+      </div>
+      <div class="terminal" id="t-build">
+        <div class="term-bar"><div class="tdot td1"></div><div class="tdot td2"></div><div class="tdot td3"></div><div class="term-label">build output</div></div>
+        <div class="term-body" id="o-build"></div>
+      </div>
+
+      <div class="alert alert-warn">⚠️ <span>Always use a <strong>.dockerignore</strong> file to exclude unnecessary files from the build context. Large build contexts slow down builds significantly.</span></div>
+
+      <div class="editor">
+        <div class="editor-bar">
+          <div class="editor-file"><div class="file-pill"></div>.dockerignore</div>
+        </div>
+        <textarea class="code-area" spellcheck="false" style="min-height:160px"># .dockerignore — exclude from Docker build context
+.git
+.gitignore
+README.md
+*.md
+node_modules/
+target/
+build/
+.gradle/
+.idea/
+*.iml
+logs/
+*.log
+.env
+docker-compose*.yml</textarea>
+      </div>
+
+      <div class="lesson-nav">
+        <button class="navbtn" onclick="go(4)">← Prev</button>
+        <button class="navbtn go" onclick="go(6)">Multi-stage Builds →</button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         S6 — Multi-stage Builds
+    ══════════════════════════════════════════════════════ -->
+    <div class="section" id="s6">
+      <div class="lesson-eyebrow">LESSON 07 — ADVANCED DOCKERFILE</div>
+      <div class="lesson-title">Multi-stage Builds</div>
+      <div class="lesson-intro">Multi-stage builds let you use multiple FROM statements. Build in one stage, copy only the output to the final tiny image. This is the standard for production Spring Boot apps.</div>
+
+      <div class="diagram">
+        <div class="diagram-label">MULTI-STAGE BUILD CONCEPT</div>
+        <pre style="color:#8b949e;line-height:2.2;font-size:12px">
+  <span style="color:#e3b341">Stage 1: builder</span>                    <span style="color:#2f81f7">Stage 2: final</span>
+  ┌─────────────────────┐              ┌─────────────────────┐
+  │  FROM gradle:8-jdk21│              │ FROM eclipse-temurin│
+  │  COPY source code   │              │       :21-jre-alpine│
+  │  RUN gradle bootJar │──── JAR ────►│ COPY --from=builder │
+  │  (includes gradle,  │              │ CMD java -jar       │
+  │   source, tests...) │              │                     │
+  │  Size: ~800MB       │              │  Size: ~180MB  ✅   │
+  └─────────────────────┘              └─────────────────────┘
+        </pre>
+      </div>
+
+      <div class="editor">
+        <div class="editor-bar">
+          <div class="editor-file"><div class="file-pill"></div>Dockerfile — Spring Boot multi-stage (your human project)</div>
+          <div class="editor-btns"><button class="ebtn ebtn-run" onclick="runMultistage()">▶ Simulate</button></div>
+        </div>
+        <textarea class="code-area" spellcheck="false" style="min-height:420px"># ── Stage 1: Build ──────────────────────────────────────
+FROM gradle:8.10-jdk21-alpine AS builder
+
+WORKDIR /workspace
+
+# Copy gradle files FIRST (layer caching — only re-downloads if changed)
+COPY build.gradle settings.gradle ./
+COPY gradle gradle
+
+# Download dependencies (cached layer if build.gradle unchanged)
+RUN gradle dependencies --no-daemon || true
+
+# Copy source code
+COPY src src
+
+# Build the JAR (skip tests for faster build)
+RUN gradle bootJar --no-daemon -x test
+
+# ── Stage 2: Runtime ─────────────────────────────────────
+FROM eclipse-temurin:21-jre-alpine AS runtime
+
+# Security: create non-root user
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+WORKDIR /app
+
+# Copy ONLY the built JAR from builder stage
+COPY --from=builder /workspace/build/libs/*.jar app.jar
+
+# Copy OTel agent for monitoring
+COPY opentelemetry-javaagent.jar otel-agent.jar
+
+# Own files as appuser
+RUN chown -R appuser:appgroup /app
+
+# Switch to non-root user (security!)
+USER appuser
+
+# Document the port
+EXPOSE 9191
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+  CMD wget -qO- http://localhost:9191/actuator/health || exit 1
+
+# Start with OTel agent
+ENTRYPOINT ["java", \
+  "-javaagent:/app/otel-agent.jar", \
+  "-Dotel.service.name=human", \
+  "-Djava.security.egd=file:/dev/./urandom", \
+  "-jar", "/app/app.jar"]</textarea>
+      </div>
+      <div class="terminal" id="t-ms">
+        <div class="term-bar"><div class="tdot td1"></div><div class="tdot td2"></div><div class="tdot td3"></div><div class="term-label">build simulation</div></div>
+        <div class="term-body" id="o-ms"></div>
+      </div>
+
+      <div class="quiz">
+        <div class="quiz-q">🧠 Why do we COPY build.gradle before COPY src in the Dockerfile?</div>
+        <div class="quiz-opts">
+          <div class="qopt" onclick="Q(this,false,6)">A) It's just convention, order doesn't matter</div>
+          <div class="qopt" onclick="Q(this,true,6)">B) Docker caches each layer — if build.gradle doesn't change, dependencies aren't re-downloaded, making builds faster</div>
+          <div class="qopt" onclick="Q(this,false,6)">C) build.gradle must be read before source code can compile</div>
+          <div class="qopt" onclick="Q(this,false,6)">D) To reduce image size</div>
+        </div>
+        <div class="qfb" id="qf6"></div>
+      </div>
+
+      <div class="lesson-nav">
+        <button class="navbtn" onclick="go(5)">← Prev</button>
+        <button class="navbtn go" onclick="go(7)">Networking →</button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         S7 — Networking
+    ══════════════════════════════════════════════════════ -->
+    <div class="section" id="s7">
+      <div class="lesson-eyebrow">LESSON 08 — NETWORKING</div>
+      <div class="lesson-title">Docker Networking</div>
+      <div class="lesson-intro">Containers are isolated. Docker networking lets containers talk to each other securely, and controls what's exposed to the outside world.</div>
+
+      <div class="diagram">
+        <div class="diagram-label">DOCKER NETWORK TYPES</div>
+        <pre style="color:#8b949e;line-height:2.2;font-size:12px">
+  <span style="color:#e3b341">bridge</span> (default)     Containers on same network can talk by name
+  <span style="color:#2f81f7">host</span>                Container shares host's network directly
+  <span style="color:#39d353">none</span>                No network access (complete isolation)
+  <span style="color:#bc8cff">overlay</span>             Multi-host networking (Docker Swarm)
+
+  ┌────────────────────────── Custom Bridge Network ────┐
+  │                                                     │
+  │  ┌──────────────┐     ┌──────────────────────────┐  │
+  │  │   human app  │────►│   oracle-db              │  │
+  │  │  :9191       │     │   :1521                  │  │
+  │  └──────────────┘     └──────────────────────────┘  │
+  │         │                                           │
+  │  ┌──────▼───────┐     ┌──────────────────────────┐  │
+  │  │   redis      │     │  otel-collector           │  │
+  │  │  :6379       │     │  :4317                   │  │
+  │  └──────────────┘     └──────────────────────────┘  │
+  │                                                     │
+  │  Containers talk by NAME not IP (DNS auto-resolved) │
+  └─────────────────────────────────────────────────────┘
+  Only ports with -p are exposed to host machine
+        </pre>
+      </div>
+
+      <div class="editor">
+        <div class="editor-bar">
+          <div class="editor-file"><div class="file-pill"></div>network commands</div>
+          <div class="editor-btns"><button class="ebtn ebtn-run" onclick="runNetwork()">▶ Simulate</button></div>
+        </div>
+        <textarea class="code-area" spellcheck="false" style="min-height:280px"># Create a custom network
+docker network create human-network
+
+# Run containers on same network (they can talk by name!)
+docker run -d \
+  --name oracle-db \
+  --network human-network \
+  -e ORACLE_PASSWORD=secret \
+  gvenzl/oracle-xe:21-slim
+
+docker run -d \
+  --name human-app \
+  --network human-network \
+  -p 9191:9191 \
+  -e SPRING_DATASOURCE_URL=jdbc:oracle:thin:@//oracle-db:1521/pimshuman \
+  human:latest
+
+# human-app can reach oracle-db using hostname "oracle-db"!
+
+# Network commands
+docker network ls                          # List networks
+docker network inspect human-network       # See connected containers
+docker network connect human-network myapp # Add container to network
+docker network disconnect human-network myapp</textarea>
+      </div>
+      <div class="terminal" id="t-net">
+        <div class="term-bar"><div class="tdot td1"></div><div class="tdot td2"></div><div class="tdot td3"></div><div class="term-label">output</div></div>
+        <div class="term-body" id="o-net"></div>
+      </div>
+
+      <div class="lesson-nav">
+        <button class="navbtn" onclick="go(6)">← Prev</button>
+        <button class="navbtn go" onclick="go(8)">Docker Compose →</button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         S8 — Compose Intro
+    ══════════════════════════════════════════════════════ -->
+    <div class="section" id="s8">
+      <div class="lesson-eyebrow">LESSON 09 — DOCKER COMPOSE</div>
+      <div class="lesson-title">Docker Compose Intro</div>
+      <div class="lesson-intro">Docker Compose lets you define and run <strong>multi-container applications</strong> using a single YAML file. Instead of running 5 docker run commands, you run one: <code>docker compose up</code>.</div>
+
+      <div class="diagram">
+        <div class="diagram-label">WITHOUT vs WITH DOCKER COMPOSE</div>
+        <pre style="color:#8b949e;line-height:2;font-size:12px">
+  <span style="color:#f78166">Without Compose — 5 commands to remember:</span>
+  docker network create human-net
+  docker run -d --name oracle --network human-net -e PASS=... oracle/database:19.3.0-ee
+  docker run -d --name redis --network human-net redis:7-alpine
+  docker run -d --name jaeger --network human-net -p 16686:16686 jaegertracing/all-in-one
+  docker run -d --name human --network human-net -p 9191:9191 -e DB_URL=... human:latest
+
+  <span style="color:#39d353">With Compose — just one command:</span>
+  docker compose up -d   ✅  (everything defined in docker-compose.yml)
+        </pre>
+      </div>
+
+      <div class="cards">
+        <div class="card"><div class="card-icon">📋</div><div class="card-title">One File</div><div class="card-body">All services, networks, volumes defined in one docker-compose.yml. Version controlled with your code.</div></div>
+        <div class="card"><div class="card-icon">🔗</div><div class="card-title">Auto Networking</div><div class="card-body">Compose creates a network automatically. Services talk to each other by service name.</div></div>
+        <div class="card"><div class="card-icon">📊</div><div class="card-title">Dependency Order</div><div class="card-body">Use depends_on to start services in the right order (DB before app).</div></div>
+        <div class="card"><div class="card-icon">♻️</div><div class="card-title">Easy Lifecycle</div><div class="card-body">up, down, restart, logs, ps — manage entire stack with simple commands.</div></div>
+      </div>
+
+      <table>
+        <tr><th>Command</th><th>Description</th></tr>
+        <tr><td><code>docker compose up -d</code></td><td>Start all services in background</td></tr>
+        <tr><td><code>docker compose down</code></td><td>Stop and remove containers</td></tr>
+        <tr><td><code>docker compose down -v</code></td><td>Also remove volumes (delete data!)</td></tr>
+        <tr><td><code>docker compose logs -f</code></td><td>Follow all service logs</td></tr>
+        <tr><td><code>docker compose logs -f human</code></td><td>Follow specific service logs</td></tr>
+        <tr><td><code>docker compose ps</code></td><td>List all services and status</td></tr>
+        <tr><td><code>docker compose build</code></td><td>Rebuild images</td></tr>
+        <tr><td><code>docker compose restart human</code></td><td>Restart one service</td></tr>
+        <tr><td><code>docker compose exec human bash</code></td><td>Enter a running service</td></tr>
+      </table>
+
+      <div class="lesson-nav">
+        <button class="navbtn" onclick="go(7)">← Prev</button>
+        <button class="navbtn go" onclick="go(9)">Write Compose Files →</button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         S9 — Write Compose Files
+    ══════════════════════════════════════════════════════ -->
+    <div class="section" id="s9">
+      <div class="lesson-eyebrow">LESSON 10 — COMPOSE FILES</div>
+      <div class="lesson-title">Writing docker-compose.yml</div>
+      <div class="lesson-intro">Learn every section of the compose file with a real, production-ready example for your human Spring Boot project.</div>
+
+      <div class="editor">
+        <div class="editor-bar">
+          <div class="editor-file"><div class="file-pill"></div>docker-compose.yml — complete annotated example</div>
+          <div class="editor-btns"><button class="ebtn ebtn-run" onclick="runCompose()">▶ Validate</button></div>
+        </div>
+        <textarea class="code-area" id="compose-code" spellcheck="false" style="min-height:700px">version: '3.8'
+
+# ── SERVICES ─────────────────────────────────────────────────────
+services:
+
+  # ── Oracle Database ────────────────────────────────────────────
+  oracle-db:
+    image: gvenzl/oracle-xe:21-slim          # Use pre-built Oracle XE image
+    container_name: oracle-db
+    restart: unless-stopped                  # Auto-restart unless manually stopped
+    environment:
+      ORACLE_PASSWORD: pimshuman             # SYS/SYSTEM password
+      APP_USER: pims_human                   # Auto-creates this user
+      APP_USER_PASSWORD: pimshuman
+      ORACLE_DATABASE: pimshuman
+    ports:
+      - "1521:1521"                          # host:container
+      - "5500:5500"                          # Oracle EM Express (optional)
+    volumes:
+      - oracle-data:/opt/oracle/oradata      # Persist database files
+    networks:
+      - human-net
+    healthcheck:
+      test: ["CMD", "healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s                     # Oracle takes time to start
+
+  # ── Redis Cache ────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - human-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # ── Jaeger (Tracing UI) ────────────────────────────────────────
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger
+    restart: unless-stopped
+    ports:
+      - "16686:16686"                        # Jaeger UI
+      - "4317:4317"                          # OTel gRPC receiver
+      - "4318:4318"                          # OTel HTTP receiver
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    networks:
+      - human-net
+
+  # ── Spring Boot App "human" ────────────────────────────────────
+  human:
+    build:
+      context: .                             # Build from current directory
+      dockerfile: Dockerfile                 # Use this Dockerfile
+    container_name: human
+    restart: unless-stopped
+    ports:
+      - "9191:9191"
+    environment:
+      # Spring datasource (use SERVICE NAME not localhost!)
+      SPRING_DATASOURCE_URL: jdbc:oracle:thin:@//oracle-db:1521/pimshuman
+      SPRING_DATASOURCE_USERNAME: pims_human
+      SPRING_DATASOURCE_PASSWORD: pimshuman
+      # Redis
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+      # OTel
+      OTEL_SERVICE_NAME: human
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4317
+      OTEL_LOGS_EXPORTER: none
+      OTEL_METRICS_EXPORTER: none
+      # Profile
+      SPRING_PROFILES_ACTIVE: docker
+    volumes:
+      - ./logs:/app/logs                     # Mount log directory
+      - ./opentelemetry-javaagent.jar:/app/otel-agent.jar
+    depends_on:
+      oracle-db:
+        condition: service_healthy           # Wait for DB to be healthy!
+      redis:
+        condition: service_healthy
+      jaeger:
+        condition: service_started
+    networks:
+      - human-net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:9191/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+
+# ── NETWORKS ──────────────────────────────────────────────────────
+networks:
+  human-net:
+    driver: bridge                           # Default network driver
+
+# ── VOLUMES ───────────────────────────────────────────────────────
+volumes:
+  oracle-data:                               # Persistent Oracle data
+    driver: local
+  redis-data:                                # Persistent Redis data
+    driver: local</textarea>
+      </div>
+      <div class="terminal" id="t-compose">
+        <div class="term-bar"><div class="tdot td1"></div><div class="tdot td2"></div><div class="tdot td3"></div><div class="term-label">validation output</div></div>
+        <div class="term-body" id="o-compose"></div>
+      </div>
+
+      <div class="quiz">
+        <div class="quiz-q">🧠 In the compose file, human app uses <code>SPRING_DATASOURCE_URL: jdbc:oracle:thin:@//oracle-db:1521/...</code> — why <strong>oracle-db</strong> and not <strong>localhost</strong>?</div>
+        <div class="quiz-opts">
+          <div class="qopt" onclick="Q(this,false,9)">A) localhost would also work fine inside Docker</div>
+          <div class="qopt" onclick="Q(this,true,9)">B) Docker Compose creates a network where containers reach each other by service name. "localhost" refers to the container itself, not other containers.</div>
+          <div class="qopt" onclick="Q(this,false,9)">C) oracle-db is a special Docker reserved hostname</div>
+          <div class="qopt" onclick="Q(this,false,9)">D) The port number changes when using localhost</div>
+        </div>
+        <div class="qfb" id="qf9"></div>
+      </div>
+
+      <div class="lesson-nav">
+        <button class="navbtn" onclick="go(8)">← Prev</button>
+        <button class="navbtn go" onclick="go(10)">Volumes & Data →</button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         S10 — Volumes
+    ══════════════════════════════════════════════════════ -->
+    <div class="section" id="s10">
+      <div class="lesson-eyebrow">LESSON 11 — DATA PERSISTENCE</div>
+      <div class="lesson-title">Volumes & Data</div>
+      <div class="lesson-intro">Containers are ephemeral — when you remove a container, its data is gone. <strong>Volumes</strong> persist data outside the container lifecycle.</div>
+
+      <div class="diagram">
+        <div class="diagram-label">3 WAYS TO PERSIST DATA</div>
+        <pre style="color:#8b949e;line-height:2.2;font-size:12px">
+  <span style="color:#2f81f7">1. Named Volumes</span>  (Recommended for databases)
+     docker run -v oracle-data:/opt/oracle/oradata oracle-db
+     Data stored in Docker-managed location. Survives container deletion.
+
+  <span style="color:#39d353">2. Bind Mounts</span>   (Recommended for config & logs)
+     docker run -v /host/path:/container/path myapp
+     Maps a host directory into container. You control location.
+     Use for: logs, config files, development code hot-reload
+
+  <span style="color:#e3b341">3. tmpfs Mounts</span>  (Sensitive data in memory only)
+     docker run --tmpfs /run:rw,size=64m myapp
+     Stored in host RAM only. Never written to disk.
+     Use for: secrets, session data
+
+  ┌──────────────────────────────────────────────────────┐
+  │               Host Machine                           │
+  │  /var/lib/docker/volumes/oracle-data/  ◄──── Volume │
+  │  /home/user/human/logs/               ◄──── Bind    │
+  └──────────────────────────────────────────────────────┘
+        </pre>
+      </div>
+
+      <div class="editor">
+        <div class="editor-bar">
+          <div class="editor-file"><div class="file-pill"></div>volume examples</div>
+        </div>
+        <textarea class="code-area" spellcheck="false" style="min-height:320px"># ── Named Volume ─────────────────────────────────────────
+# Create named volume
+docker volume create oracle-data
+
+# Use named volume (data survives container deletion)
+docker run -d \
+  --name oracle-db \
+  -v oracle-data:/opt/oracle/oradata \
+  oracle/database:19.3.0-ee
+
+# ── Bind Mount ────────────────────────────────────────────
+# Mount current directory's logs folder into container
+docker run -d \
+  --name human \
+  -v $(pwd)/logs:/app/logs \          # ./logs on host → /app/logs in container
+  -v $(pwd)/application.yml:/app/application.yml:ro \  # :ro = read-only!
+  human:latest
+
+# ── Volume Commands ──────────────────────────────────────
+docker volume ls                      # List all volumes
+docker volume inspect oracle-data     # See volume details & location
+docker volume rm oracle-data          # Delete volume (DATA GONE!)
+docker volume prune                   # Remove all unused volumes
+
+# Backup a volume
+docker run --rm \
+  -v oracle-data:/source:ro \
+  -v $(pwd):/backup \
+  ubuntu tar czf /backup/oracle-backup.tar.gz /source</textarea>
+      </div>
+
+      <div class="alert alert-danger">🚨 <span><strong>Never</strong> run <code>docker compose down -v</code> in production. The <code>-v</code> flag deletes all volumes, meaning your database data is permanently lost!</span></div>
+
+      <div class="lesson-nav">
+        <button class="navbtn" onclick="go(9)">← Prev</button>
+        <button class="navbtn go" onclick="go(11)">Compose Networking →</button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         S11 — Compose Networking
+    ══════════════════════════════════════════════════════ -->
+    <div class="section" id="s11">
+      <div class="lesson-eyebrow">LESSON 12 — COMPOSE NETWORKING</div>
+      <div class="lesson-title">Compose Networking Deep Dive</div>
+      <div class="lesson-intro">Understand how services find and talk to each other, and how to expose only what needs to be public.</div>
+
+      <div class="diagram">
+        <div class="diagram-label">YOUR HUMAN PROJECT NETWORK MAP</div>
+        <pre style="color:#8b949e;line-height:2.2;font-size:12px">
+  Internet / Host Machine
+       │
+       │  Port 9191 exposed  ←─── Only this is public
+       │  Port 16686 exposed ←─── Jaeger UI
+       ▼
+  ┌──────────────────────────────── human-net ─────────────────────────┐
+  │                                                                    │
+  │  ┌──────────────┐    jdbc://oracle-db:1521    ┌────────────────┐  │
+  │  │   human      │ ──────────────────────────► │   oracle-db    │  │
+  │  │  :9191 ✅pub │                             │  :1521 🔒priv  │  │
+  │  │              │ ──── redis:6379 ──────────► │   redis        │  │
+  │  │              │                             │  :6379 🔒priv  │  │
+  │  │              │ ── http://jaeger:4317 ─────► │   jaeger       │  │
+  │  └──────────────┘                             │  :4317 🔒priv  │  │
+  │                                               │  :16686 ✅pub  │  │
+  │                                               └────────────────┘  │
+  └────────────────────────────────────────────────────────────────────┘
+  🔒 = Not accessible from outside. Only human app can reach them.
+        </pre>
+      </div>
+
+      <div class="editor">
+        <div class="editor-bar">
+          <div class="editor-file"><div class="file-pill"></div>docker-compose.yml — networking section</div>
+        </div>
+        <textarea class="code-area" spellcheck="false" style="min-height:340px">services:
+  oracle-db:
+    image: gvenzl/oracle-xe:21-slim
+    # NO ports: section = NOT accessible from host!
+    # Only other containers on human-net can reach it
+    networks:
+      - human-net
+
+  redis:
+    image: redis:7-alpine
+    # NO ports: section = private to network
+    networks:
+      - human-net
+
+  human:
+    build: .
+    ports:
+      - "9191:9191"    # Public: host:9191 → container:9191
+    networks:
+      - human-net
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "16686:16686"  # Jaeger UI public
+      # 4317 NOT exposed — only human container sends to it internally
+    networks:
+      - human-net
+
+networks:
+  human-net:
+    driver: bridge
+
+# Inside human container, you can reach:
+# oracle-db  → jdbc:oracle:thin:@//oracle-db:1521/pimshuman
+# redis      → host=redis port=6379
+# jaeger     → http://jaeger:4317</textarea>
+      </div>
+
+      <div class="alert alert-tip">💡 <span>Don't expose database ports (1521, 5432, 3306) in production compose files. Only expose what the outside world actually needs to access. This is a <strong>security best practice</strong>.</span></div>
+
+      <div class="lesson-nav">
+        <button class="navbtn" onclick="go(10)">← Prev</button>
+        <button class="navbtn go" onclick="go(12)">Security →</button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         S12 — Security
+    ══════════════════════════════════════════════════════ -->
+    <div class="section" id="s12">
+      <div class="lesson-eyebrow">LESSON 13 — PRODUCTION SECURITY</div>
+      <div class="lesson-title">Security Best Practices</div>
+      <div class="lesson-intro">Docker containers are not automatically secure. Follow these practices to harden your production setup.</div>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <div class="step-title">Never run as root</div>
+            <div class="step-desc">Add a non-root user in your Dockerfile. Running as root means a container exploit could compromise the host.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <div class="step-title">Use specific image tags, never :latest in production</div>
+            <div class="step-desc">Use <code>eclipse-temurin:21.0.4-jre-alpine</code> not <code>:latest</code>. Latest can break without warning.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <div class="step-title">Use .env files for secrets, not hardcoded values</div>
+            <div class="step-desc">Keep passwords in .env files. Add .env to .gitignore. Never commit passwords to git.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <div class="step-title">Don't expose unnecessary ports</div>
+            <div class="step-desc">Oracle DB on 1521 should never be public. Only expose what clients actually need to reach.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <div class="step-title">Use read-only mounts where possible</div>
+            <div class="step-desc">Mount config files with <code>:ro</code> flag so containers can't modify them.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="editor">
+        <div class="editor-bar">
+          <div class="editor-file"><div class="file-pill"></div>.env + docker-compose.yml secure pattern</div>
+        </div>
+        <textarea class="code-area" spellcheck="false" style="min-height:320px"># .env file (NEVER commit to git!)
+ORACLE_PASSWORD=SuperSecret123!
+ORACLE_USERNAME=pims_human
+SPRING_MAIL_PASSWORD=smtp-secret
+JWT_SECRET=myVeryLongSecretKeyForJWT
+
+# docker-compose.yml — reference .env variables with ${}
+services:
+  oracle-db:
+    image: gvenzl/oracle-xe:21-slim
+    environment:
+      ORACLE_PASSWORD: ${ORACLE_PASSWORD}       # From .env
+      APP_USER: ${ORACLE_USERNAME}
+      APP_USER_PASSWORD: ${ORACLE_PASSWORD}
+
+  human:
+    build: .
+    environment:
+      SPRING_DATASOURCE_PASSWORD: ${ORACLE_PASSWORD}
+      SPRING_MAIL_PASSWORD: ${SPRING_MAIL_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+
+# .gitignore — MUST include:
+# .env
+# .env.production
+# *.env</textarea>
+      </div>
+
+      <div class="lesson-nav">
+        <button class="navbtn" onclick="go(11)">← Prev</button>
+        <button class="navbtn go" onclick="go(13)">Spring Boot "human" →</button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         S13 — Spring Boot human
+    ══════════════════════════════════════════════════════ -->
+    <div class="section" id="s13">
+      <div class="lesson-eyebrow">LESSON 14 — REAL WORLD</div>
+      <div class="lesson-title">Your "human" Project — Full Setup</div>
+      <div class="lesson-intro">Complete, production-ready Docker setup for your actual Spring Boot human project with Oracle DB, Redis, and OpenTelemetry.</div>
+
+      <h3>📁 Project File Structure</h3>
+      <div class="diagram">
+        <pre style="color:#8b949e;line-height:2;font-size:12px">
+  <span style="color:#2f81f7">human/</span>
+  ├── <span style="color:#39d353">Dockerfile</span>                    ← Multi-stage build
+  ├── <span style="color:#39d353">docker-compose.yml</span>            ← Full stack
+  ├── <span style="color:#39d353">docker-compose.local.yml</span>      ← Local dev override
+  ├── <span style="color:#39d353">.env</span>                          ← Secrets (gitignored!)
+  ├── <span style="color:#39d353">.dockerignore</span>                 ← Exclude from build
+  ├── <span style="color:#39d353">opentelemetry-javaagent.jar</span>   ← OTel agent
+  ├── src/
+  └── build.gradle
+        </pre>
+      </div>
+
+      <div class="editor">
+        <div class="editor-bar">
+          <div class="editor-file"><div class="file-pill"></div>Dockerfile — production ready</div>
+          <div class="editor-btns"><button class="ebtn ebtn-run" onclick="runHuman()">▶ Simulate Deploy</button></div>
+        </div>
+        <textarea class="code-area" spellcheck="false" style="min-height:420px"># ── Stage 1: Build ──────────────────────────────────────────────
+FROM gradle:8.10-jdk21-alpine AS builder
+WORKDIR /workspace
+COPY build.gradle settings.gradle ./
+COPY gradle gradle
+RUN gradle dependencies --no-daemon || true
+COPY src src
+RUN gradle bootJar --no-daemon -x test
+
+# ── Stage 2: Runtime ─────────────────────────────────────────────
+FROM eclipse-temurin:21.0.4-jre-alpine AS runtime
+
+# Non-root user for security
+RUN addgroup -S pims && adduser -S human -G pims
+
+WORKDIR /app
+
+# Copy JAR from builder
+COPY --from=builder /workspace/build/libs/*.jar app.jar
+
+# Copy OTel agent
+COPY opentelemetry-javaagent.jar otel-agent.jar
+
+# Set ownership
+RUN chown -R human:pims /app
+USER human
+
+EXPOSE 9191
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
+  CMD wget -qO- http://localhost:9191/actuator/health | grep -q '"status":"UP"'
+
+ENTRYPOINT ["java", \
+  "-javaagent:/app/otel-agent.jar", \
+  "-Dotel.service.name=human", \
+  "-Dotel.logs.exporter=none", \
+  "-Dotel.metrics.exporter=none", \
+  "-Djava.security.egd=file:/dev/./urandom", \
+  "-jar", "/app/app.jar"]</textarea>
+      </div>
+
+      <div class="terminal" id="t-human">
+        <div class="term-bar"><div class="tdot td1"></div><div class="tdot td2"></div><div class="tdot td3"></div><div class="term-label">deploy simulation</div></div>
+        <div class="term-body" id="o-human"></div>
+      </div>
+
+      <div class="editor">
+        <div class="editor-bar">
+          <div class="editor-file"><div class="file-pill"></div>docker-compose.yml — production</div>
+        </div>
+        <textarea class="code-area" spellcheck="false" style="min-height:560px">version: '3.8'
+
+services:
+
+  oracle-db:
+    image: oracle/database:19.3.0-ee
+    container_name: oracle-db
+    restart: unless-stopped
+    environment:
+      ORACLE_PWD: ${ORACLE_PASSWORD}
+    ports:
+      - "1521:1521"
+    volumes:
+      - oracle-data:/opt/oracle/oradata
+    networks:
+      - human-net
+    healthcheck:
+      test: ["CMD-SHELL", "echo 'SELECT 1 FROM DUAL;' | sqlplus -S sys/${ORACLE_PASSWORD}@localhost/ORCLCDB as sysdba"]
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 300s
+
+  redis:
+    image: redis:7-alpine
+    container_name: ielts_redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    networks:
+      - human-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger
+    restart: unless-stopped
+    ports:
+      - "16686:16686"
+      - "4317:4317"
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    networks:
+      - human-net
+
+  human:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: pims/human:latest
+    container_name: human
+    restart: unless-stopped
+    ports:
+      - "9191:9191"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:oracle:thin:@//oracle-db:1521/pimshuman
+      SPRING_DATASOURCE_USERNAME: pims_human
+      SPRING_DATASOURCE_PASSWORD: ${ORACLE_PASSWORD}
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4317
+      SPRING_PROFILES_ACTIVE: prod
+    volumes:
+      - ./logs:/app/logs
+    depends_on:
+      oracle-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - human-net
+
+networks:
+  human-net:
+    driver: bridge
+
+volumes:
+  oracle-data:
+  redis-data:</textarea>
+      </div>
+
+      <h3>🚀 Deploy Commands</h3>
+      <div class="editor">
+        <div class="editor-bar">
+          <div class="editor-file"><div class="file-pill"></div>deploy.sh</div>
+        </div>
+        <textarea class="code-area" spellcheck="false" style="min-height:200px">#!/bin/bash
+# deploy.sh — run on production server
+
+echo "🔨 Building JAR..."
+./gradlew bootJar -x test
+
+echo "🐳 Building Docker image..."
+docker compose build human
+
+echo "🚀 Starting stack..."
+docker compose up -d
+
+echo "📋 Watching logs..."
+docker compose logs -f human
+
+# Useful commands after deploy:
+# docker compose ps                    # Check all service status
+# docker compose logs -f human         # Watch app logs
+# docker compose restart human         # Restart just the app
+# docker compose exec human sh         # Enter container</textarea>
+      </div>
+
+      <div class="lesson-nav">
+        <button class="navbtn" onclick="go(12)">← Prev</button>
+        <button class="navbtn go" onclick="go(14)">Final Challenge →</button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         S14 — Final Challenge
+    ══════════════════════════════════════════════════════ -->
+    <div class="section" id="s14">
+      <div class="lesson-eyebrow">LESSON 15 — EXPERT CHALLENGE</div>
+      <div class="lesson-title">Final Challenge</div>
+      <div class="lesson-intro">Write a complete multi-stage Dockerfile AND docker-compose.yml from memory. All 7 requirements must pass.</div>
+
+      <div class="cards" style="grid-template-columns:1fr">
+        <div class="card" style="border-color:rgba(47,129,247,.3)">
+          <div class="card-title">📋 Requirements</div>
+          <div class="card-body" style="line-height:2.2">
+            1. Dockerfile uses multi-stage build (builder + runtime)<br>
+            2. Runtime uses non-root USER<br>
+            3. HEALTHCHECK is defined<br>
+            4. docker-compose.yml has at least 2 services<br>
+            5. Services communicate by service name (not localhost)<br>
+            6. Secrets use ${} environment variable references<br>
+            7. At least one named volume is defined
+          </div>
+        </div>
+      </div>
+
+      <div class="editor">
+        <div class="editor-bar">
+          <div class="editor-file"><div class="file-pill"></div>your Dockerfile + docker-compose.yml</div>
+          <div class="editor-btns">
+            <button class="ebtn ebtn-reset" onclick="resetCode('challenge','')">Clear</button>
+            <button class="ebtn ebtn-run" onclick="validateChallenge()">▶ Check All Requirements</button>
+          </div>
+        </div>
+        <textarea class="code-area" id="challenge" spellcheck="false" style="min-height:500px" placeholder="# Write your Dockerfile here...
+# Then a separator comment line
+# Then your docker-compose.yml below
+# Cover all 7 requirements!"></textarea>
+      </div>
+      <div class="terminal" id="t-challenge">
+        <div class="term-bar"><div class="tdot td1"></div><div class="tdot td2"></div><div class="tdot td3"></div><div class="term-label">challenge results</div></div>
+        <div class="term-body" id="o-challenge"></div>
+      </div>
+      <div id="victory-banner" style="display:none">
+        <div class="victory">
+          <div class="victory-icon">🐳🏆</div>
+          <div class="victory-title">Docker Expert!</div>
+          <div class="victory-sub">You've mastered Docker from zero to expert.<br>You can now containerize any application and run it anywhere in the world.</div>
+        </div>
+      </div>
+
+      <div class="lesson-nav">
+        <button class="navbtn" onclick="go(13)">← Prev</button>
+        <button class="navbtn" style="opacity:.3;cursor:default">Course Complete 🎉</button>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</main>
+</div><!-- /wrap -->
+
+<script>
+let cur = 0;
+let done = new Set([0]);
+
+const bcNames = [
+  'introduction','install','images-vs-containers','commands',
+  'dockerfile-basics','build-run','multi-stage','networking',
+  'compose-intro','compose-files','volumes','compose-networking',
+  'security','spring-boot-human','final-challenge'
+];
+const lvls = [
+  'lv-zero','lv-zero','lv-zero','lv-zero',
+  'lv-mid','lv-mid','lv-mid','lv-mid',
+  'lv-mid','lv-mid','lv-mid','lv-mid',
+  'lv-expert','lv-expert','lv-expert'
+];
+const lvNames = ['ZERO','ZERO','ZERO','ZERO','BEGINNER','BEGINNER','BEGINNER','BEGINNER','INTER','INTER','INTER','INTER','EXPERT','EXPERT','EXPERT'];
+
+const solBasic = `FROM node:18-alpine
+
+WORKDIR /app
+
+# Copy package.json first for layer caching
+COPY package.json package-lock.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy rest of source
+COPY . .
+
+EXPOSE 3000
+
+CMD ["node", "server.js"]`;
+
+function go(idx) {
+  document.getElementById('s'+cur).classList.remove('active');
+  document.querySelectorAll('.nav-link')[cur].classList.remove('active');
+  cur = idx;
+  done.add(idx);
+  document.getElementById('s'+idx).classList.add('active');
+  document.querySelectorAll('.nav-link')[idx].classList.add('active');
+  document.getElementById('bcName').textContent = bcNames[idx];
+  const chip = document.getElementById('lvChip');
+  chip.className = 'level-chip ' + lvls[idx];
+  chip.textContent = lvNames[idx];
+  updateXP();
+  window.scrollTo(0,0);
+}
+
+function updateXP() {
+  const pct = Math.round((done.size/15)*100);
+  document.getElementById('xpFill').style.width = pct+'%';
+  document.getElementById('xpText').textContent = done.size+' / 15 lessons';
+}
+
+function Q(el, correct, idx) {
+  el.parentElement.querySelectorAll('.qopt').forEach(o => o.style.pointerEvents='none');
+  const fb = document.getElementById('qf'+idx);
+  if(correct) {
+    el.classList.add('correct');
+    fb.className='qfb show ok';
+    fb.textContent='✅ Correct! Well done.';
+  } else {
+    el.classList.add('wrong');
+    fb.className='qfb show no';
+    fb.textContent='❌ Not quite — review the lesson above and try to identify the correct answer.';
+    el.parentElement.querySelectorAll('.qopt').forEach(o => {
+      if(o.onclick && o.onclick.toString().includes('true')) o.classList.add('correct');
+    });
+  }
+}
+
+function resetCode(id, val) { document.getElementById(id).value = val; }
+function showSolution(id, val) { document.getElementById(id).value = val; }
+
+function type(outId, lines, delay=55) {
+  const out = document.getElementById(outId);
+  out.innerHTML='';
+  let i=0;
+  (function next(){
+    if(i<lines.length){
+      out.innerHTML+=lines[i]+'\n';
+      i++;
+      out.scrollTop=out.scrollHeight;
+      setTimeout(next, delay+Math.random()*30);
+    }
+  })();
+}
+function show(id){ document.getElementById(id).style.display='block'; }
+
+function runInstall(){
+  show('t-install');
+  type('o-install',[
+    '<span class="tp">$</span> <span class="tc">sudo apt-get update</span>',
+    '<span class="to">Hit:1 http://archive.ubuntu.com focal InRelease</span>',
+    '<span class="tp">$</span> <span class="tc">sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin</span>',
+    '<span class="to">Reading package lists... Done</span>',
+    '<span class="to">The following NEW packages will be installed:</span>',
+    '<span class="to">  containerd.io docker-ce docker-ce-cli docker-compose-plugin</span>',
+    '<span class="ts">Setting up docker-ce (5:24.0.7-1~ubuntu.22.04~jammy)...</span>',
+    '<span class="ts">Setting up docker-compose-plugin (2.21.0-1~ubuntu.22.04~jammy)...</span>',
+    '<span class="tp">$</span> <span class="tc">docker --version</span>',
+    '<span class="ti">Docker version 24.0.7, build afdd53b</span>',
+    '<span class="tp">$</span> <span class="tc">docker run hello-world</span>',
+    '<span class="to">Unable to find image \'hello-world:latest\' locally</span>',
+    '<span class="to">latest: Pulling from library/hello-world</span>',
+    '<span class="ts">Hello from Docker!</span>',
+    '<span class="ts">✅ Docker installed successfully!</span>',
+  ]);
+}
+
+function runCmds(){
+  show('t-cmds');
+  type('o-cmds',[
+    '<span class="tp">$</span> <span class="tc">docker pull nginx:latest</span>',
+    '<span class="to">latest: Pulling from library/nginx</span>',
+    '<span class="ts">Status: Downloaded newer image for nginx:latest</span>',
+    '<span class="tp">$</span> <span class="tc">docker images</span>',
+    '<span class="ti">REPOSITORY   TAG       IMAGE ID       CREATED        SIZE</span>',
+    '<span class="to">nginx        latest    a6bd71f48f68   2 weeks ago    187MB</span>',
+    '<span class="tp">$</span> <span class="tc">docker run -d -p 8080:80 --name webserver nginx</span>',
+    '<span class="to">a3f9c21d4e2b8f5c1a9d7e3f2b4c6a8d0e2f4b6c8a0d2e4f6b8c0a2d</span>',
+    '<span class="tp">$</span> <span class="tc">docker ps</span>',
+    '<span class="ti">CONTAINER ID   IMAGE   COMMAND                  STATUS        PORTS</span>',
+    '<span class="ts">a3f9c21d4e2b   nginx   "/docker-entrypoint.…"   Up 3 seconds  0.0.0.0:8080->80/tcp</span>',
+    '<span class="tp">$</span> <span class="tc">docker logs webserver</span>',
+    '<span class="to">/docker-entrypoint.sh: Configuration complete; ready for start up</span>',
+    '<span class="tp">$</span> <span class="tc">docker stop webserver && docker rm webserver</span>',
+    '<span class="ts">webserver</span>',
+    '<span class="ts">✅ Container stopped and removed.</span>',
+  ]);
+}
+
+function validateDF(){
+  show('t-df');
+  const code = document.getElementById('df-basic').value;
+  const checks = [
+    [code.includes('FROM node:18'), '✅ FROM node:18-alpine'],
+    [code.includes('WORKDIR'), '✅ WORKDIR set'],
+    [code.includes('COPY package'), '✅ package.json copied first (layer caching)'],
+    [code.includes('RUN npm install'), '✅ npm install runs'],
+    [code.includes('COPY .'), '✅ Source code copied'],
+    [code.includes('EXPOSE 3000'), '✅ Port 3000 exposed'],
+    [code.includes('CMD') && code.includes('server.js'), '✅ CMD starts server.js'],
+  ];
+  const lines = ['<span class="ti">Validating Dockerfile...</span>',''];
+  let p=0;
+  checks.forEach(([ok,msg])=>{
+    if(ok){lines.push('<span class="ts">'+msg+'</span>');p++;}
+    else lines.push('<span class="te">❌ '+msg.replace('✅','Missing:')+'</span>');
+  });
+  lines.push('');
+  if(p===7) lines.push('<span class="ts">🎉 Perfect Dockerfile! All '+p+'/7 checks passed.</span>');
+  else lines.push('<span class="tw">Score: '+p+'/7 — Fix missing instructions above.</span>');
+  type('o-df',lines);
+}
+
+function runBuild(){
+  show('t-build');
+  type('o-build',[
+    '<span class="tp">$</span> <span class="tc">docker build -t myapp:1.0 .</span>',
+    '<span class="ti">[+] Building 47.3s (12/12) FINISHED</span>',
+    '<span class="to"> => [internal] load build definition from Dockerfile           0.1s</span>',
+    '<span class="to"> => [internal] load .dockerignore                              0.0s</span>',
+    '<span class="to"> => [internal] load metadata for eclipse-temurin:21-jdk-alpine 2.1s</span>',
+    '<span class="to"> => [builder 1/5] FROM eclipse-temurin:21-jdk-alpine           0.0s</span>',
+    '<span class="ts"> => CACHED [builder 2/5] WORKDIR /workspace                   0.0s</span>',
+    '<span class="ts"> => CACHED [builder 3/5] COPY build.gradle settings.gradle     0.0s</span>',
+    '<span class="to"> => [builder 4/5] COPY src src                                 0.3s</span>',
+    '<span class="to"> => [builder 5/5] RUN gradle bootJar --no-daemon -x test      39.2s</span>',
+    '<span class="to"> => [runtime 1/3] COPY --from=builder .../build/libs/*.jar    0.4s</span>',
+    '<span class="to"> => exporting to image                                         1.1s</span>',
+    '<span class="ts"> => => naming to docker.io/library/myapp:1.0                  0.0s</span>',
+    '',
+    '<span class="tp">$</span> <span class="tc">docker images myapp</span>',
+    '<span class="ti">REPOSITORY   TAG   IMAGE ID       SIZE</span>',
+    '<span class="ts">myapp        1.0   8f3a2c9d1e4b   178MB</span>',
+    '<span class="ts">✅ Build successful! Image is 178MB (multi-stage reduced from 800MB)</span>',
+  ]);
+}
+
+function runMultistage(){
+  show('t-ms');
+  type('o-ms',[
+    '<span class="tp">$</span> <span class="tc">docker build -t pims/human:latest .</span>',
+    '<span class="ti">[+] Building 68.4s (14/14) FINISHED</span>',
+    '<span class="to"> => [builder 1/5] FROM gradle:8.10-jdk21-alpine              3.2s</span>',
+    '<span class="ts"> => CACHED [builder 2/5] WORKDIR /workspace                 0.0s</span>',
+    '<span class="ts"> => CACHED [builder 3/5] COPY build.gradle settings.gradle  0.0s ← cached!</span>',
+    '<span class="ts"> => CACHED [builder 4/5] RUN gradle dependencies            0.0s ← cached!</span>',
+    '<span class="to"> => [builder 5/5] COPY src src                              1.1s</span>',
+    '<span class="to"> => [builder 6/5] RUN gradle bootJar --no-daemon -x test   52.3s</span>',
+    '<span class="to"> => [runtime 1/4] FROM eclipse-temurin:21.0.4-jre-alpine    0.0s</span>',
+    '<span class="to"> => [runtime 2/4] RUN addgroup -S pims && adduser -S human  0.4s</span>',
+    '<span class="to"> => [runtime 3/4] COPY --from=builder /workspace/build/...  0.3s</span>',
+    '<span class="to"> => [runtime 4/4] COPY opentelemetry-javaagent.jar          0.1s</span>',
+    '<span class="ts"> => => naming to docker.io/pims/human:latest                0.0s</span>',
+    '',
+    '<span class="ti">Builder stage: ~820MB  →  Final image: <span class="ts">183MB</span> ✅</span>',
+    '<span class="ts">✅ Multi-stage build complete! 78% smaller than single-stage.</span>',
+  ]);
+}
+
+function runNetwork(){
+  show('t-net');
+  type('o-net',[
+    '<span class="tp">$</span> <span class="tc">docker network create human-network</span>',
+    '<span class="to">c4a9f2e8b1d3a5c7e9f1b3d5a7c9e1f3b5d7a9c1e3f5b7d9a1c3e5f7</span>',
+    '<span class="tp">$</span> <span class="tc">docker run -d --name oracle-db --network human-network gvenzl/oracle-xe:21-slim</span>',
+    '<span class="ts">Started oracle-db on human-network</span>',
+    '<span class="tp">$</span> <span class="tc">docker run -d --name human-app --network human-network -p 9191:9191 human:latest</span>',
+    '<span class="ts">Started human-app on human-network</span>',
+    '<span class="tp">$</span> <span class="tc">docker network inspect human-network</span>',
+    '<span class="ti">"Containers": {</span>',
+    '<span class="to">  "oracle-db": { "IPv4Address": "172.20.0.2/16" }</span>',
+    '<span class="to">  "human-app": { "IPv4Address": "172.20.0.3/16" }</span>',
+    '<span class="ti">}</span>',
+    '',
+    '<span class="ts">✅ human-app can reach oracle-db using hostname "oracle-db"</span>',
+    '<span class="ts">✅ jdbc:oracle:thin:@//oracle-db:1521/pimshuman works!</span>',
+  ]);
+}
+
+function runCompose(){
+  show('t-compose');
+  const code = document.getElementById('compose-code').value;
+  const checks = [
+    [code.includes('oracle-db') || code.includes('oracle'), '✅ Oracle DB service defined'],
+    [code.includes('depends_on'), '✅ depends_on configured (startup order)'],
+    [code.includes('healthcheck'), '✅ Healthcheck defined'],
+    [code.includes('networks:'), '✅ Custom network defined'],
+    [code.includes('volumes:'), '✅ Volumes defined for persistence'],
+    [code.includes('oracle-db:1521') || code.includes('service_healthy'), '✅ Services use service names not localhost'],
+    [code.includes('restart:'), '✅ Restart policy set'],
+  ];
+  const lines = ['<span class="tp">$</span> <span class="tc">docker compose config</span>','<span class="ti">Validating docker-compose.yml...</span>',''];
+  let p=0;
+  checks.forEach(([ok,msg])=>{
+    if(ok){lines.push('<span class="ts">'+msg+'</span>');p++;}
+    else lines.push('<span class="tw">⚠️  '+msg.slice(3)+'</span>');
+  });
+  lines.push('');
+  if(p>=5){
+    lines.push('<span class="ts">docker-compose.yml is valid ✅</span>');
+    lines.push('<span class="ti">Run: docker compose up -d</span>');
+  }
+  type('o-compose',lines);
+}
+
+function runHuman(){
+  show('t-human');
+  type('o-human',[
+    '<span class="tp">$</span> <span class="tc">./gradlew bootJar -x test</span>',
+    '<span class="ts">BUILD SUCCESSFUL in 42s</span>',
+    '<span class="tp">$</span> <span class="tc">docker compose build human</span>',
+    '<span class="ti">[+] Building 28.1s (14/14) FINISHED</span>',
+    '<span class="ts"> => CACHED [builder 3/5] RUN gradle dependencies          0.0s ← cached!</span>',
+    '<span class="to"> => [builder 5/5] RUN gradle bootJar                      18.4s</span>',
+    '<span class="ts"> => [runtime] Final image: 183MB                          ✅</span>',
+    '<span class="tp">$</span> <span class="tc">docker compose up -d</span>',
+    '<span class="ti"> ✔ Network human_human-net    Created</span>',
+    '<span class="ti"> ✔ Volume  human_oracle-data   Created</span>',
+    '<span class="ti"> ✔ Volume  human_redis-data    Created</span>',
+    '<span class="to"> ✔ Container oracle-db          Started</span>',
+    '<span class="to"> ✔ Container ielts_redis        Started</span>',
+    '<span class="to"> ✔ Container jaeger             Started</span>',
+    '<span class="to"> Waiting for oracle-db to be healthy...</span>',
+    '<span class="ts"> ✔ Container human              Started</span>',
+    '',
+    '<span class="tp">$</span> <span class="tc">docker compose ps</span>',
+    '<span class="ti">NAME          IMAGE                    STATUS</span>',
+    '<span class="ts">oracle-db     oracle/database:19.3.0   Up (healthy)</span>',
+    '<span class="ts">ielts_redis   redis:7-alpine            Up (healthy)</span>',
+    '<span class="ts">jaeger        jaegertracing/all-in-one  Up</span>',
+    '<span class="ts">human         pims/human:latest         Up (healthy)</span>',
+    '',
+    '<span class="ts">🚀 All services running!</span>',
+    '<span class="ti">App:    http://localhost:9191</span>',
+    '<span class="ti">Jaeger: http://localhost:16686</span>',
+  ], 80);
+}
+
+function validateChallenge(){
+  show('t-challenge');
+  const code = document.getElementById('challenge').value;
+  const checks = [
+    { ok: code.includes('AS builder') && (code.includes('AS runtime') || code.includes('AS final')), label: 'Multi-stage build (AS builder + AS runtime)' },
+    { ok: code.includes('USER ') && !code.includes('USER root'), label: 'Non-root USER defined' },
+    { ok: code.includes('HEALTHCHECK'), label: 'HEALTHCHECK instruction present' },
+    { ok: (code.match(/^\s*\w+:/gm)||[]).length >= 2, label: 'At least 2 services in compose' },
+    { ok: !code.includes('localhost') || code.includes('host.docker.internal'), label: 'Services use service names not localhost' },
+    { ok: code.includes('${') && code.includes('}'), label: 'Environment variables use ${} references' },
+    { ok: code.match(/volumes:\s*\n(\s+\w+)/m) !== null, label: 'Named volume defined' },
+  ];
+  const lines = ['<span class="ti">🔍 Running all 7 checks...</span>',''];
+  let p=0;
+  checks.forEach((c,i)=>{
+    if(c.ok){lines.push('<span class="ts">✅ ['+(i+1)+'] '+c.label+'</span>');p++;}
+    else lines.push('<span class="te">❌ ['+(i+1)+'] '+c.label+'</span>');
+  });
+  lines.push('');
+  if(p===7){
+    lines.push('<span class="tpu">🏆 ALL 7 CHECKS PASSED! You are a Docker Expert!</span>');
+    setTimeout(()=>{
+      document.getElementById('victory-banner').style.display='block';
+      done.add(14);updateXP();
+    },2000);
+  } else {
+    lines.push('<span class="tw">Score: '+p+'/7 — Keep going! Review the failing checks.</span>');
+  }
+  type('o-challenge',lines,100);
+}
+
+updateXP();
+</script>
+</body>
+</html>

@@ -1,0 +1,2683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CI/CD Zero → Expert</title>
+<link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@300;400;500;600;700;800&family=Fira+Code:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07080c;
+  --s1:#0c0e14;
+  --s2:#111420;
+  --s3:#161a28;
+  --s4:#1c2135;
+  --bd:#1e2540;
+  --bd2:#252d4a;
+  --violet:#7c6fff;
+  --cyan:#00e5ff;
+  --green:#39ff8c;
+  --amber:#ffb700;
+  --red:#ff4757;
+  --pink:#ff6eb4;
+  --blue:#4da6ff;
+  --teal:#00cfb4;
+  --txt:#ccd6f6;
+  --muted:#4a5580;
+  --code:#abe9cd;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--txt);
+  font-family:'Fira Code',monospace;
+  min-height:100vh;overflow-x:hidden;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 80% 40% at 15% 5%,rgba(124,111,255,.05) 0%,transparent 60%),
+    radial-gradient(ellipse 60% 40% at 85% 95%,rgba(0,229,255,.04) 0%,transparent 55%),
+    repeating-linear-gradient(0deg,transparent,transparent 40px,rgba(30,37,64,.3) 40px,rgba(30,37,64,.3) 41px),
+    repeating-linear-gradient(90deg,transparent,transparent 40px,rgba(30,37,64,.3) 40px,rgba(30,37,64,.3) 41px);
+  pointer-events:none;z-index:0;
+}
+
+.wrap{display:flex;min-height:100vh;position:relative;z-index:1}
+
+/* ══ SIDEBAR ══ */
+.sidebar{
+  width:268px;flex-shrink:0;
+  background:rgba(12,14,20,.96);
+  border-right:1px solid var(--bd);
+  position:fixed;top:0;left:0;bottom:0;
+  overflow-y:auto;z-index:200;
+  display:flex;flex-direction:column;
+}
+.sb-head{
+  padding:20px 18px 16px;
+  border-bottom:1px solid var(--bd);
+  position:sticky;top:0;z-index:10;
+  background:rgba(12,14,20,.98);
+}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-badge{
+  width:44px;height:44px;border-radius:10px;
+  background:linear-gradient(135deg,var(--violet),var(--cyan));
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;flex-shrink:0;
+  box-shadow:0 0 20px rgba(124,111,255,.3);
+}
+.brand-name{
+  font-family:'Oxanium',sans-serif;
+  font-size:20px;font-weight:800;
+  color:#fff;letter-spacing:1px;line-height:1;
+}
+.brand-sub{font-size:9px;color:var(--muted);letter-spacing:3px;margin-top:3px}
+
+.sg{padding:14px 16px 4px;font-size:9px;color:var(--muted);letter-spacing:3px;text-transform:uppercase}
+.si{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 12px;margin:1px 8px;
+  border-radius:7px;cursor:pointer;
+  font-size:11px;color:var(--muted);
+  border:1px solid transparent;
+  transition:all .15s;
+}
+.si:hover{background:var(--s2);color:var(--txt)}
+.si.active{background:rgba(124,111,255,.1);color:var(--violet);border-color:rgba(124,111,255,.25)}
+.si.done::after{content:'✓';margin-left:auto;font-size:10px;color:var(--green);opacity:.7}
+.sico{font-size:14px;width:20px;text-align:center;flex-shrink:0}
+
+.sb-foot{
+  margin-top:auto;
+  padding:14px 18px;
+  border-top:1px solid var(--bd);
+}
+.pl{display:flex;justify-content:space-between;font-size:9px;color:var(--muted);letter-spacing:2px;margin-bottom:6px}
+.pt{height:3px;background:var(--bd2);border-radius:2px;overflow:hidden}
+.pb{height:100%;background:linear-gradient(90deg,var(--violet),var(--cyan));border-radius:2px;width:0%;transition:width .5s ease}
+.px{font-size:10px;color:var(--violet);margin-top:5px}
+
+/* ══ MAIN ══ */
+.main{margin-left:268px;flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{
+  background:rgba(7,8,12,.9);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--bd);
+  padding:12px 36px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;
+}
+.bc{font-size:11px;color:var(--muted)}
+.bc em{color:var(--violet);font-style:normal}
+.chip{
+  padding:4px 14px;border-radius:20px;
+  font-size:9px;font-weight:700;letter-spacing:2px;
+  font-family:'Oxanium',sans-serif;
+}
+.lz{background:rgba(57,255,140,.1);color:var(--green)}
+.lb{background:rgba(255,183,0,.1);color:var(--amber)}
+.li{background:rgba(0,229,255,.1);color:var(--cyan)}
+.le{background:rgba(255,71,87,.1);color:var(--red)}
+
+.page{padding:40px 44px;max-width:980px}
+
+/* ══ SECTIONS ══ */
+.sec{display:none}
+.sec.active{display:block;animation:up .3s ease}
+@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+.ey{font-size:9px;color:var(--violet);letter-spacing:4px;text-transform:uppercase;margin-bottom:10px}
+.ht{
+  font-family:'Oxanium',sans-serif;
+  font-size:48px;font-weight:800;
+  color:#fff;line-height:.95;
+  letter-spacing:1px;margin-bottom:16px;
+}
+.intro{font-size:13px;color:var(--muted);line-height:1.85;max-width:640px;margin-bottom:32px}
+
+/* ══ PIPELINE VISUAL ══ */
+.pipeline{
+  display:flex;align-items:center;gap:0;
+  margin:24px 0;overflow-x:auto;padding:4px 0;
+}
+.pstage{
+  display:flex;flex-direction:column;align-items:center;
+  gap:8px;flex-shrink:0;
+}
+.pbox{
+  background:var(--s3);
+  border:1px solid var(--bd2);
+  border-radius:8px;
+  padding:12px 16px;
+  font-size:11px;font-weight:700;
+  color:#fff;text-align:center;
+  min-width:100px;
+  transition:all .3s;
+  position:relative;
+}
+.pbox.running{border-color:var(--amber);box-shadow:0 0 12px rgba(255,183,0,.3);animation:pulse .8s ease-in-out infinite alternate}
+.pbox.done{border-color:var(--green);box-shadow:0 0 10px rgba(57,255,140,.2)}
+.pbox.fail{border-color:var(--red);box-shadow:0 0 10px rgba(255,71,87,.2)}
+@keyframes pulse{from{opacity:.7}to{opacity:1}}
+.parr{
+  width:32px;height:2px;
+  background:linear-gradient(90deg,var(--violet),var(--cyan));
+  flex-shrink:0;
+  position:relative;
+}
+.parr::after{
+  content:'▶';position:absolute;right:-6px;top:-6px;
+  font-size:10px;color:var(--cyan);
+}
+.pstep{font-size:9px;color:var(--muted);letter-spacing:1px}
+
+/* ══ CARDS ══ */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin:22px 0}
+.card{
+  background:var(--s2);border:1px solid var(--bd);
+  border-radius:10px;padding:18px;
+  transition:border-color .2s,transform .2s;
+}
+.card:hover{border-color:var(--violet);transform:translateY(-2px)}
+.ci{font-size:22px;margin-bottom:10px}
+.ct{font-size:12px;font-weight:700;color:#fff;margin-bottom:5px}
+.cb{font-size:11px;color:var(--muted);line-height:1.65}
+
+/* ══ EDITOR ══ */
+.editor{
+  background:var(--s1);border:1px solid var(--bd);
+  border-radius:10px;overflow:hidden;margin:22px 0;
+}
+.ebar{
+  background:var(--s2);padding:10px 16px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--bd);
+}
+.ef{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.edot{width:7px;height:7px;border-radius:50%;background:var(--violet)}
+.ebs{display:flex;gap:8px}
+.eb{
+  padding:5px 14px;border-radius:5px;border:none;
+  cursor:pointer;font-family:'Fira Code',monospace;
+  font-size:10px;font-weight:600;letter-spacing:.5px;
+  transition:all .15s;
+}
+.run{background:var(--green);color:#000}
+.run:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.rst{background:var(--s3);color:var(--muted);border:1px solid var(--bd)}
+.rst:hover{color:var(--txt)}
+.sol{background:rgba(124,111,255,.12);color:var(--violet);border:1px solid rgba(124,111,255,.25)}
+
+.ca{
+  width:100%;min-height:200px;
+  background:transparent;border:none;outline:none;
+  color:var(--code);
+  font-family:'Fira Code',monospace;
+  font-size:12.5px;line-height:1.9;
+  padding:18px 20px;
+  resize:vertical;tab-size:2;
+  caret-color:var(--violet);
+}
+.ca::placeholder{color:var(--muted);opacity:.4}
+
+/* ══ TERMINAL ══ */
+.term{
+  background:#02030a;border:1px solid var(--bd);
+  border-radius:10px;overflow:hidden;
+  margin:14px 0;display:none;
+}
+.tbar{
+  background:var(--s2);padding:9px 14px;
+  display:flex;align-items:center;gap:6px;
+  border-bottom:1px solid var(--bd);
+}
+.td{width:10px;height:10px;border-radius:50%}
+.td1{background:#ff5f57}.td2{background:#febc2e}.td3{background:#28c840}
+.tlb{font-size:10px;color:var(--muted);margin-left:8px}
+.tbody{
+  padding:14px 18px;
+  font-family:'Fira Code',monospace;
+  font-size:12px;line-height:2;
+  min-height:80px;max-height:400px;
+  overflow-y:auto;
+}
+.tp{color:var(--green)}.tc{color:var(--txt)}.to{color:#4a5580}
+.ts{color:#39ff8c}.te{color:var(--red)}.tw{color:var(--amber)}
+.ti{color:var(--blue)}.tpu{color:var(--violet)}.tcy{color:var(--cyan)}
+.tpk{color:var(--pink)}
+
+/* ══ DIAGRAM ══ */
+.diag{
+  background:var(--s1);border:1px solid var(--bd);
+  border-radius:10px;padding:22px;margin:22px 0;
+  overflow-x:auto;
+}
+.dlb{font-size:9px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px}
+
+/* ══ QUIZ ══ */
+.quiz{
+  background:var(--s2);border:1px solid var(--bd);
+  border-radius:10px;padding:22px;margin:26px 0;
+}
+.qq{font-size:14px;font-weight:700;color:#fff;margin-bottom:18px;line-height:1.5}
+.qopts{display:flex;flex-direction:column;gap:9px}
+.qo{
+  padding:12px 16px;border-radius:7px;
+  border:1px solid var(--bd);cursor:pointer;
+  font-size:12px;color:var(--txt);
+  background:var(--s3);transition:all .15s;
+}
+.qo:hover{border-color:var(--violet);color:var(--violet)}
+.qo.ok{border-color:var(--green)!important;background:rgba(57,255,140,.06);color:var(--green)!important;pointer-events:none}
+.qo.no{border-color:var(--red)!important;background:rgba(255,71,87,.06);color:var(--red)!important;pointer-events:none}
+.qfb{margin-top:14px;padding:12px 16px;border-radius:7px;font-size:11px;display:none;line-height:1.7}
+.qfb.show{display:block}
+.qfb.y{background:rgba(57,255,140,.06);border:1px solid rgba(57,255,140,.2);color:var(--green)}
+.qfb.n{background:rgba(255,71,87,.06);border:1px solid rgba(255,71,87,.2);color:var(--red)}
+
+/* ══ ALERTS ══ */
+.alert{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:13px 16px;border-radius:8px;
+  font-size:12px;line-height:1.75;margin:16px 0;
+}
+.at{background:rgba(57,255,140,.06);border:1px solid rgba(57,255,140,.18);color:#7fffc4}
+.aw{background:rgba(255,183,0,.06);border:1px solid rgba(255,183,0,.18);color:var(--amber)}
+.ai{background:rgba(0,229,255,.06);border:1px solid rgba(0,229,255,.18);color:#80f0ff}
+.ad{background:rgba(255,71,87,.06);border:1px solid rgba(255,71,87,.18);color:var(--red)}
+
+/* ══ TABLE ══ */
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:12px}
+th{background:var(--s3);color:var(--cyan);padding:10px 14px;text-align:left;font-weight:700;border:1px solid var(--bd)}
+td{padding:10px 14px;border:1px solid var(--bd);color:var(--txt);vertical-align:top;line-height:1.6}
+tr:hover td{background:var(--s2)}
+
+/* ══ STEPS ══ */
+.steps{margin:20px 0}
+.step{display:flex;gap:16px;padding:16px 0;border-bottom:1px solid var(--bd)}
+.step:last-child{border-bottom:none}
+.sn{
+  width:30px;height:30px;border-radius:50%;flex-shrink:0;
+  background:rgba(124,111,255,.1);border:1px solid rgba(124,111,255,.3);
+  color:var(--violet);font-size:11px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+}
+.st{font-size:13px;font-weight:700;color:#fff;margin-bottom:5px}
+.sd{font-size:12px;color:var(--muted);line-height:1.75}
+
+/* ══ NAV ══ */
+.lnav{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-top:52px;padding-top:26px;
+  border-top:1px solid var(--bd);
+}
+.nb{
+  padding:10px 24px;border-radius:7px;
+  border:1px solid var(--bd);background:var(--s2);
+  color:var(--txt);cursor:pointer;
+  font-family:'Fira Code',monospace;font-size:11px;font-weight:700;
+  display:flex;align-items:center;gap:8px;transition:all .15s;
+}
+.nb:hover{border-color:var(--violet);color:var(--violet)}
+.nb:disabled{opacity:.3;cursor:default}
+.nb.go{background:var(--violet);color:#fff;border-color:var(--violet)}
+.nb.go:hover{filter:brightness(1.1)}
+
+code{background:rgba(124,111,255,.1);color:#b8b3ff;padding:1px 7px;border-radius:4px;font-size:11px}
+h3{font-size:14px;font-weight:700;color:#fff;margin:26px 0 10px;letter-spacing:.5px}
+h4{font-size:12px;font-weight:700;color:var(--cyan);margin:18px 0 8px}
+p{font-size:13px;color:var(--muted);line-height:1.85;margin-bottom:10px}
+strong{color:var(--txt)}
+
+.victory{
+  text-align:center;
+  background:linear-gradient(135deg,rgba(124,111,255,.1),rgba(0,229,255,.08));
+  border:1px solid rgba(124,111,255,.3);
+  border-radius:16px;padding:52px 32px;margin:32px 0;
+}
+.vi{font-size:60px;margin-bottom:18px}
+.vt{
+  font-family:'Oxanium',sans-serif;
+  font-size:44px;font-weight:800;
+  color:var(--violet);margin-bottom:10px;letter-spacing:2px;
+}
+.vs{font-size:13px;color:var(--muted);line-height:1.8}
+
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--s1)}
+::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:3px}
+
+.hbox{
+  background:var(--s2);border:1px solid var(--bd2);
+  border-left:3px solid var(--violet);
+  border-radius:0 8px 8px 0;
+  padding:14px 18px;margin:14px 0;
+  font-size:12px;color:var(--txt);line-height:1.8;
+}
+
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:20px 0}
+@media(max-width:720px){.two{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ══════════ SIDEBAR ══════════ -->
+<nav class="sidebar">
+  <div class="sb-head">
+    <div class="brand">
+      <div class="brand-badge">🔄</div>
+      <div>
+        <div class="brand-name">CI/CD</div>
+        <div class="brand-sub">Zero → Expert</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sg">Zero — Concepts</div>
+  <div class="si active" onclick="go(0)"><span class="sico">🧠</span>What is CI/CD?</div>
+  <div class="si" onclick="go(1)"><span class="sico">🔄</span>CI vs CD vs CD</div>
+  <div class="si" onclick="go(2)"><span class="sico">🌿</span>Git Branching Strategy</div>
+
+  <div class="sg">Beginner — GitHub Actions</div>
+  <div class="si" onclick="go(3)"><span class="sico">📄</span>Workflow File Anatomy</div>
+  <div class="si" onclick="go(4)"><span class="sico">⚡</span>Your First Pipeline</div>
+  <div class="si" onclick="go(5)"><span class="sico">🧪</span>Build & Test Stage</div>
+  <div class="si" onclick="go(6)"><span class="sico">🐳</span>Docker Build & Push</div>
+
+  <div class="sg">Intermediate — Real Pipelines</div>
+  <div class="si" onclick="go(7)"><span class="sico">🔐</span>Secrets & Environments</div>
+  <div class="si" onclick="go(8)"><span class="sico">🌐</span>Deploy to Server (SSH)</div>
+  <div class="si" onclick="go(9)"><span class="sico">📦</span>Multi-environment Deploy</div>
+  <div class="si" onclick="go(10)"><span class="sico">⚙️</span>Matrix & Reusable Workflows</div>
+
+  <div class="sg">Advanced — Expert Patterns</div>
+  <div class="si" onclick="go(11)"><span class="sico">🔍</span>Code Quality & SonarQube</div>
+  <div class="si" onclick="go(12)"><span class="sico">🚦</span>Deployment Strategies</div>
+  <div class="si" onclick="go(13)"><span class="sico">🔁</span>Rollback & Recovery</div>
+  <div class="si" onclick="go(14)"><span class="sico">📊</span>Monitoring & Notifications</div>
+  <div class="si" onclick="go(15)"><span class="sico">🔒</span>Security in CI/CD</div>
+
+  <div class="sg">Real World</div>
+  <div class="si" onclick="go(16)"><span class="sico">☕</span>Spring Boot "human" Pipeline</div>
+  <div class="si" onclick="go(17)"><span class="sico">🏆</span>Final Challenge</div>
+
+  <div class="sb-foot">
+    <div class="pl"><span>PROGRESS</span><span id="pct">0%</span></div>
+    <div class="pt"><div class="pb" id="pbar"></div></div>
+    <div class="px" id="pxp">0 / 18 lessons</div>
+  </div>
+</nav>
+
+<!-- ══════════ MAIN ══════════ -->
+<main class="main">
+  <div class="topbar">
+    <div class="bc">ci-cd / <em id="bcn">introduction</em></div>
+    <div class="chip lz" id="lvchip">ZERO</div>
+  </div>
+
+  <div class="page">
+
+  <!-- ══════════════════════════════════════════
+       S0 — What is CI/CD
+  ══════════════════════════════════════════ -->
+  <div class="sec active" id="s0">
+    <div class="ey">LESSON 01 — INTRODUCTION</div>
+    <div class="ht">WHAT IS CI/CD?</div>
+    <div class="intro">CI/CD is the practice of automating the steps between writing code and running it in production. Instead of manually building, testing, and deploying — every code push triggers an automated pipeline that does it for you.</div>
+
+    <div class="diag">
+      <div class="dlb">THE PAIN WITHOUT CI/CD</div>
+      <pre style="color:#4a5580;line-height:2.3;font-size:12px">
+  <span style="color:#ff4757">Developer workflow WITHOUT CI/CD:</span>
+  1. Write code locally
+  2. "Works on my machine!" ✅
+  3. Manually build JAR: ./gradlew bootJar (hope it works)
+  4. SCP file to server: scp human.jar user@server:/opt/human/
+  5. SSH to server: ssh user@server
+  6. Stop old app: pkill -f "human.jar"
+  7. Start new app: java -jar /opt/human/human.jar &
+  8. Manually test: curl http://server/api/health
+  9. 3 hours later: "Why is prod down??" 💥
+  10. Hotfix... repeat from step 1
+
+  <span style="color:#39ff8c">Developer workflow WITH CI/CD:</span>
+  1. Write code
+  2. git push origin main
+  3. ✅ Automated: build → test → docker build → deploy → health check
+  4. Get Slack notification: "✅ Deployed human v1.4.2 to production"
+  5. Go drink coffee ☕
+      </pre>
+    </div>
+
+    <div class="cards">
+      <div class="card"><div class="ci">⚡</div><div class="ct">Speed</div><div class="cb">Deploy multiple times per day instead of once per sprint. Smaller releases = smaller risk.</div></div>
+      <div class="card"><div class="ci">🛡️</div><div class="ct">Confidence</div><div class="cb">Automated tests catch bugs before they reach production. Every push is validated.</div></div>
+      <div class="card"><div class="ci">🔁</div><div class="ct">Consistency</div><div class="cb">Every deployment follows the exact same steps. No more "I forgot to run migrations."</div></div>
+      <div class="card"><div class="ci">👥</div><div class="ct">Collaboration</div><div class="cb">Team members can deploy safely. No single "deployment wizard" bottleneck.</div></div>
+      <div class="card"><div class="ci">🔍</div><div class="ct">Visibility</div><div class="cb">Every deploy is logged, traceable, and auditable. Know exactly what changed and when.</div></div>
+      <div class="card"><div class="ci">↩️</div><div class="ct">Rollback</div><div class="cb">Automated rollback on failure. Production recovers in seconds, not hours.</div></div>
+    </div>
+
+    <div class="quiz">
+      <div class="qq">🧠 A team deploys manually once every 2 weeks — deployment takes 4 hours and occasionally breaks prod. What is the ROOT CAUSE of their problem?</div>
+      <div class="qopts">
+        <div class="qo" onclick="Q(this,false,0)">A) They need better developers</div>
+        <div class="qo" onclick="Q(this,true,0)">B) Large infrequent deployments accumulate many changes at once — bugs are harder to isolate and manual steps introduce human error. CI/CD solves both.</div>
+        <div class="qo" onclick="Q(this,false,0)">C) Their server is too slow</div>
+        <div class="qo" onclick="Q(this,false,0)">D) They should use a different programming language</div>
+      </div>
+      <div class="qfb" id="qf0"></div>
+    </div>
+
+    <div class="lnav">
+      <button class="nb" disabled>← Prev</button>
+      <button class="nb go" onclick="go(1)">CI vs CD vs CD →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       S1 — CI vs CD vs CD
+  ══════════════════════════════════════════ -->
+  <div class="sec" id="s1">
+    <div class="ey">LESSON 02 — CONCEPTS</div>
+    <div class="ht">CI vs CD vs CD</div>
+    <div class="intro">There are TWO different "CD"s. Most people confuse them. Understanding the difference between Continuous Integration, Continuous Delivery, and Continuous Deployment is fundamental.</div>
+
+    <div class="diag">
+      <div class="dlb">THE FULL CI/CD PIPELINE</div>
+      <pre style="color:#4a5580;line-height:2.3;font-size:12px">
+  <span style="color:#7c6fff">── CONTINUOUS INTEGRATION (CI) ──────────────────────────────</span>
+  Developer pushes code
+       │
+       ▼
+  ┌─────────────────────────────────────────────────────────┐
+  │  Automated: Build → Unit Tests → Integration Tests      │
+  │  Code Quality → Security Scan → Coverage Report         │
+  └─────────────────────────────────────────────────────────┘
+  Goal: Detect bugs FAST. Merge small changes often.
+
+  <span style="color:#00e5ff">── CONTINUOUS DELIVERY (CD #1) ──────────────────────────────</span>
+       │  (after CI passes)
+       ▼
+  ┌─────────────────────────────────────────────────────────┐
+  │  Automated: Docker Build → Push to Registry             │
+  │  Deploy to Staging → Run E2E Tests → Ready for prod     │
+  └──────────────────────┬──────────────────────────────────┘
+                         │ 👆 MANUAL APPROVAL REQUIRED
+                         ▼
+                    Production Deploy
+
+  Goal: Code is ALWAYS deployable. Human decides WHEN to release.
+
+  <span style="color:#39ff8c">── CONTINUOUS DEPLOYMENT (CD #2) ────────────────────────────</span>
+       │  (after all tests pass — NO human approval)
+       ▼
+  ┌─────────────────────────────────────────────────────────┐
+  │  Automated: Everything above + Auto-deploy to prod      │
+  │  Health check → Rollback if unhealthy                   │
+  └─────────────────────────────────────────────────────────┘
+  Goal: Every passing commit automatically reaches production.
+  Used by: Netflix, Facebook, Amazon (thousands of deploys/day)
+      </pre>
+    </div>
+
+    <table>
+      <tr><th>Practice</th><th>Automation Level</th><th>Who triggers prod deploy?</th><th>Best for</th></tr>
+      <tr><td><strong>Continuous Integration</strong></td><td>Build + Test auto</td><td>Manual</td><td>All teams — minimum viable CI/CD</td></tr>
+      <tr><td><strong>Continuous Delivery</strong></td><td>Build + Test + Stage auto</td><td>Human approves</td><td>Enterprise, regulated industries</td></tr>
+      <tr><td><strong>Continuous Deployment</strong></td><td>Everything automated</td><td>No one — fully automated</td><td>High-trust, well-tested products</td></tr>
+    </table>
+
+    <div class="quiz">
+      <div class="qq">🧠 Your company requires a manager to approve every production release but everything else is automated. Which practice is this?</div>
+      <div class="qopts">
+        <div class="qo" onclick="Q(this,false,1)">A) Continuous Integration</div>
+        <div class="qo" onclick="Q(this,true,1)">B) Continuous Delivery — automated pipeline up to production, manual approval gate before release</div>
+        <div class="qo" onclick="Q(this,false,1)">C) Continuous Deployment</div>
+        <div class="qo" onclick="Q(this,false,1)">D) Manual Deployment</div>
+      </div>
+      <div class="qfb" id="qf1"></div>
+    </div>
+
+    <div class="lnav">
+      <button class="nb" onclick="go(0)">← Prev</button>
+      <button class="nb go" onclick="go(2)">Git Branching →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       S2 — Git Branching
+  ══════════════════════════════════════════ -->
+  <div class="sec" id="s2">
+    <div class="ey">LESSON 03 — GIT STRATEGY</div>
+    <div class="ht">GIT BRANCHING<br>STRATEGY</div>
+    <div class="intro">Your branching strategy determines how CI/CD pipelines trigger and what gets deployed where. The right strategy prevents chaos on a team of any size.</div>
+
+    <div class="diag">
+      <div class="dlb">GITFLOW — MOST POPULAR FOR ENTERPRISE</div>
+      <pre style="color:#4a5580;line-height:2.3;font-size:12px">
+  <span style="color:#7c6fff">main</span>     ────●──────────────────────────●────── (production)
+                  ↑                          ↑
+  <span style="color:#ff6eb4">release</span>      ●──●──●                  ●──●──●   (release candidate)
+                ↑                        ↑
+  <span style="color:#00e5ff">develop</span>  ──●──●──●──●──●──●──●──●──●──●──     (integration)
+               ↑     ↑     ↑
+  <span style="color:#39ff8c">feature</span>  ●──●  ●──●  ●──●                    (your feature work)
+
+  <span style="color:#ffb700">hotfix</span>   ────────────────●──●                 (emergency fixes)
+
+  Pipeline triggers:
+  feature/* push   → CI only (build + test)
+  develop push     → CI + deploy to DEV environment
+  release/* push   → CI + deploy to STAGING environment
+  main push        → CI + deploy to PRODUCTION ✅
+      </pre>
+    </div>
+
+    <div class="diag">
+      <div class="dlb">TRUNK-BASED DEVELOPMENT — USED BY GOOGLE, FACEBOOK</div>
+      <pre style="color:#4a5580;line-height:2.3;font-size:12px">
+  <span style="color:#7c6fff">main</span>  ──●──●──●──●──●──●──●──●──●──●──  (everyone pushes here!)
+             ↑  ↑  ↑  ↑
+  Short-lived feature branches (max 1-2 days)
+  Merge to main multiple times per day
+  Feature flags control visibility in production
+
+  Pros: Simple, fast feedback, no merge hell
+  Cons: Requires excellent test coverage and feature flags
+      </pre>
+    </div>
+
+    <div class="alert ai">ℹ️ <span>For your <strong>human Spring Boot project</strong>, GitFlow is recommended: <code>main</code> → production, <code>develop</code> → staging, <code>feature/*</code> → dev testing. Simple and battle-tested for enterprise Java apps.</span></div>
+
+    <div class="quiz">
+      <div class="qq">🧠 In GitFlow, a developer pushes to a <code>feature/add-payroll-report</code> branch. What should the CI/CD pipeline do?</div>
+      <div class="qopts">
+        <div class="qo" onclick="Q(this,false,2)">A) Deploy directly to production</div>
+        <div class="qo" onclick="Q(this,true,2)">B) Run CI only — build the code and run tests. No deployment to any environment until merged to develop.</div>
+        <div class="qo" onclick="Q(this,false,2)">C) Deploy to production after manual approval</div>
+        <div class="qo" onclick="Q(this,false,2)">D) Skip CI since it's just a feature branch</div>
+      </div>
+      <div class="qfb" id="qf2"></div>
+    </div>
+
+    <div class="lnav">
+      <button class="nb" onclick="go(1)">← Prev</button>
+      <button class="nb go" onclick="go(3)">Workflow Anatomy →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       S3 — Workflow Anatomy
+  ══════════════════════════════════════════ -->
+  <div class="sec" id="s3">
+    <div class="ey">LESSON 04 — GITHUB ACTIONS</div>
+    <div class="ht">WORKFLOW FILE<br>ANATOMY</div>
+    <div class="intro">GitHub Actions uses YAML files in <code>.github/workflows/</code>. Every concept — triggers, jobs, steps, runners — is explained here with real examples.</div>
+
+    <div class="editor">
+      <div class="ebar">
+        <div class="ef"><div class="edot"></div>.github/workflows/anatomy.yml — every concept explained</div>
+      </div>
+      <textarea class="ca" spellcheck="false" style="min-height:680px"># ── NAME ─────────────────────────────────────────────────────────
+name: Human App CI/CD Pipeline     # Shown in GitHub Actions UI
+
+# ── TRIGGERS (on:) ───────────────────────────────────────────────
+on:
+  push:
+    branches: [main, develop]       # Run on push to these branches
+    paths-ignore:
+      - '**.md'                     # Skip if only .md files changed
+      - 'docs/**'
+
+  pull_request:
+    branches: [main, develop]       # Run on PRs targeting these branches
+
+  workflow_dispatch:                # Allow manual trigger from GitHub UI
+    inputs:
+      environment:
+        description: 'Deploy to which environment?'
+        required: true
+        default: 'staging'
+        type: choice
+        options: [dev, staging, production]
+
+  schedule:
+    - cron: '0 2 * * *'            # Run nightly at 2 AM (for full test suite)
+
+# ── ENV VARIABLES (global) ───────────────────────────────────────
+env:
+  JAVA_VERSION: '21'
+  IMAGE_NAME: pims/human
+  REGISTRY: ghcr.io                 # GitHub Container Registry
+
+# ── JOBS ─────────────────────────────────────────────────────────
+jobs:
+
+  # ── JOB 1: Build & Test ────────────────────────────────────────
+  build-test:
+    name: 🔨 Build & Test            # Display name in UI
+    runs-on: ubuntu-latest           # Runner OS (GitHub-hosted)
+    # runs-on: self-hosted           # Or your own server!
+
+    # Job-level permissions
+    permissions:
+      contents: read
+      checks: write
+
+    # ── STEPS ────────────────────────────────────────────────────
+    steps:
+      # Step 1: Check out your code
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4    # Use a pre-built action
+
+      # Step 2: Set up Java
+      - name: ☕ Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+
+      # Step 3: Cache Gradle dependencies (HUGE speed boost!)
+      - name: 📦 Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: ${{ runner.os }}-gradle-
+
+      # Step 4: Run tests
+      - name: 🧪 Run tests
+        run: ./gradlew test --no-daemon
+
+      # Step 5: Build JAR
+      - name: 🔨 Build JAR
+        run: ./gradlew bootJar --no-daemon -x test
+
+      # Step 6: Upload artifact for next job
+      - name: 📤 Upload JAR artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: human-jar
+          path: build/libs/*.jar
+          retention-days: 1
+
+  # ── JOB 2: Docker (depends on Job 1) ────────────────────────────
+  docker:
+    name: 🐳 Build & Push Docker Image
+    runs-on: ubuntu-latest
+    needs: build-test               # ONLY runs if build-test succeeds!
+    if: github.ref == 'refs/heads/main'  # Only on main branch
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: 📥 Download JAR artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: human-jar
+          path: build/libs/
+
+      - name: 🐳 Build & Push image
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} .
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}</textarea>
+    </div>
+
+    <h3>Key Concepts Summary</h3>
+    <table>
+      <tr><th>Concept</th><th>What it is</th><th>Example</th></tr>
+      <tr><td><code>on:</code></td><td>What triggers the workflow</td><td>push, pull_request, schedule</td></tr>
+      <tr><td><code>jobs:</code></td><td>Parallel or sequential work units</td><td>build, test, deploy</td></tr>
+      <tr><td><code>steps:</code></td><td>Individual commands inside a job</td><td>checkout, run gradle, docker build</td></tr>
+      <tr><td><code>uses:</code></td><td>Use a pre-built GitHub Action</td><td>actions/checkout@v4</td></tr>
+      <tr><td><code>run:</code></td><td>Execute a shell command</td><td>./gradlew test</td></tr>
+      <tr><td><code>needs:</code></td><td>Job dependencies</td><td>deploy needs: [build, test]</td></tr>
+      <tr><td><code>if:</code></td><td>Conditional execution</td><td>if: github.ref == 'refs/heads/main'</td></tr>
+      <tr><td><code>env:</code></td><td>Environment variables</td><td>JAVA_VERSION: '21'</td></tr>
+      <tr><td><code>secrets:</code></td><td>Encrypted values from GitHub</td><td>secrets.DOCKER_PASSWORD</td></tr>
+    </table>
+
+    <div class="quiz">
+      <div class="qq">🧠 Job B has <code>needs: [job-a, job-c]</code>. When does Job B start?</div>
+      <div class="qopts">
+        <div class="qo" onclick="Q(this,false,3)">A) At the same time as job-a and job-c</div>
+        <div class="qo" onclick="Q(this,true,3)">B) Only after BOTH job-a AND job-c complete successfully</div>
+        <div class="qo" onclick="Q(this,false,3)">C) After either job-a OR job-c completes</div>
+        <div class="qo" onclick="Q(this,false,3)">D) Before job-a and job-c</div>
+      </div>
+      <div class="qfb" id="qf3"></div>
+    </div>
+
+    <div class="lnav">
+      <button class="nb" onclick="go(2)">← Prev</button>
+      <button class="nb go" onclick="go(4)">Your First Pipeline →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       S4 — First Pipeline
+  ══════════════════════════════════════════ -->
+  <div class="sec" id="s4">
+    <div class="ey">LESSON 05 — HANDS ON</div>
+    <div class="ht">YOUR FIRST<br>PIPELINE</div>
+    <div class="intro">Build a working CI pipeline for a Spring Boot Gradle project from scratch. This runs on every push and pull request.</div>
+
+    <h3>✏️ Practice — Write a CI Pipeline</h3>
+    <div class="editor">
+      <div class="ebar">
+        <div class="ef"><div class="edot"></div>.github/workflows/ci.yml</div>
+        <div class="ebs">
+          <button class="eb rst" onclick="reset4()">Clear</button>
+          <button class="eb sol" onclick="showSol('c4',sol4)">Solution</button>
+          <button class="eb run" onclick="validate4()">▶ Validate</button>
+        </div>
+      </div>
+      <textarea class="ca" id="c4" spellcheck="false" placeholder="# Write a CI workflow that:
+# 1. name: it 'CI Pipeline'
+# 2. Triggers on push AND pull_request to main branch
+# 3. Has one job called 'build' running on ubuntu-latest
+# 4. Step 1: uses actions/checkout@v4
+# 5. Step 2: uses actions/setup-java@v4 with java-version 21 and distribution temurin
+# 6. Step 3: runs ./gradlew test --no-daemon
+# 7. Step 4: runs ./gradlew bootJar --no-daemon -x test"></textarea>
+    </div>
+    <div class="term" id="t4"><div class="tbar"><div class="td td1"></div><div class="td td2"></div><div class="td td3"></div><div class="tlb">validation</div></div><div class="tbody" id="o4"></div></div>
+
+    <h3>What Happens When You Push</h3>
+    <div class="editor">
+      <div class="ebar">
+        <div class="ef"><div class="edot"></div>terminal — git push triggers pipeline</div>
+        <div class="ebs"><button class="eb run" onclick="runPush()">▶ Simulate Push</button></div>
+      </div>
+      <textarea class="ca" spellcheck="false" style="min-height:120px">git add .
+git commit -m "feat: add payroll report endpoint"
+git push origin main
+# This instantly triggers your GitHub Actions workflow!</textarea>
+    </div>
+    <div class="term" id="t4b"><div class="tbar"><div class="td td1"></div><div class="td td2"></div><div class="td td3"></div><div class="tlb">pipeline execution</div></div><div class="tbody" id="o4b"></div></div>
+
+    <div class="lnav">
+      <button class="nb" onclick="go(3)">← Prev</button>
+      <button class="nb go" onclick="go(5)">Build & Test Stage →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       S5 — Build & Test Stage
+  ══════════════════════════════════════════ -->
+  <div class="sec" id="s5">
+    <div class="ey">LESSON 06 — TESTING</div>
+    <div class="ht">BUILD &<br>TEST STAGE</div>
+    <div class="intro">A CI pipeline without good tests is just an expensive build tool. Learn how to run tests, generate coverage reports, and fail fast when code breaks.</div>
+
+    <div class="editor">
+      <div class="ebar">
+        <div class="ef"><div class="edot"></div>.github/workflows/ci.yml — full test stage</div>
+        <div class="ebs"><button class="eb run" onclick="runTests()">▶ Simulate Tests</button></div>
+      </div>
+      <textarea class="ca" spellcheck="false" style="min-height:560px">name: CI — Build & Test
+
+on:
+  push:
+    branches: [main, develop, 'feature/**']
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test:
+    name: 🧪 Build, Test & Quality
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0              # Full history needed for SonarQube
+
+      - name: ☕ Setup JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      # ── CACHING (critical for fast pipelines) ──────────────────
+      - name: 📦 Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*','**/gradle-wrapper.properties') }}
+          restore-keys: gradle-${{ runner.os }}-
+
+      # ── RUN TESTS ──────────────────────────────────────────────
+      - name: 🧪 Run Unit Tests
+        run: ./gradlew test --no-daemon
+        # Tests fail? Pipeline stops here. Deployment blocked. ✅
+
+      # ── TEST REPORT ────────────────────────────────────────────
+      - name: 📊 Publish Test Results
+        uses: dorny/test-reporter@v1
+        if: always()                  # Even if tests fail!
+        with:
+          name: Gradle Test Results
+          path: build/test-results/**/*.xml
+          reporter: java-junit
+
+      # ── CODE COVERAGE ──────────────────────────────────────────
+      - name: 📈 Check Test Coverage
+        run: ./gradlew jacocoTestReport jacocoTestCoverageVerification --no-daemon
+        # Fails if coverage drops below threshold set in build.gradle
+
+      # ── BUILD ──────────────────────────────────────────────────
+      - name: 🔨 Build JAR
+        run: ./gradlew bootJar --no-daemon -x test
+
+      # ── UPLOAD ARTIFACT ────────────────────────────────────────
+      - name: 📤 Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: human-jar-${{ github.sha }}
+          path: build/libs/*.jar
+          retention-days: 7</textarea>
+    </div>
+    <div class="term" id="t5"><div class="tbar"><div class="td td1"></div><div class="td td2"></div><div class="td td3"></div><div class="tlb">test pipeline output</div></div><div class="tbody" id="o5"></div></div>
+
+    <h3>Jacoco Coverage in build.gradle</h3>
+    <div class="editor">
+      <div class="ebar">
+        <div class="ef"><div class="edot"></div>build.gradle — coverage thresholds</div>
+      </div>
+      <textarea class="ca" spellcheck="false" style="min-height:200px">plugins {
+    id 'jacoco'
+}
+
+jacoco {
+    toolVersion = "0.8.11"
+}
+
+jacocoTestReport {
+    reports {
+        xml.required = true          // Required for SonarQube
+        html.required = true         // Human-readable report
+    }
+}
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.70       // 70% coverage required — pipeline fails below this!
+            }
+        }
+    }
+}</textarea>
+    </div>
+
+    <div class="alert at">💡 <span>Add <code>check.dependsOn jacocoTestCoverageVerification</code> to ensure coverage is enforced on every build. A team-agreed coverage threshold prevents coverage from silently dropping over time.</span></div>
+
+    <div class="lnav">
+      <button class="nb" onclick="go(4)">← Prev</button>
+      <button class="nb go" onclick="go(6)">Docker Build & Push →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       S6 — Docker Build & Push
+  ══════════════════════════════════════════ -->
+  <div class="sec" id="s6">
+    <div class="ey">LESSON 07 — DOCKER IN CI/CD</div>
+    <div class="ht">DOCKER BUILD<br>& PUSH</div>
+    <div class="intro">After tests pass, build a Docker image and push it to a registry. The image becomes the deployable artifact — identical on every environment.</div>
+
+    <div class="editor">
+      <div class="ebar">
+        <div class="ef"><div class="edot"></div>.github/workflows/docker.yml</div>
+        <div class="ebs"><button class="eb run" onclick="runDocker()">▶ Simulate Build</button></div>
+      </div>
+      <textarea class="ca" spellcheck="false" style="min-height:540px">name: Docker Build & Push
+
+on:
+  push:
+    branches: [main, develop]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}    # e.g. your-org/human
+
+jobs:
+  docker:
+    name: 🐳 Build & Push Image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write                     # Required to push to GHCR
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      # ── DOCKER METADATA (auto-generates tags) ──────────────────
+      - name: 🏷️ Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha                      # ghcr.io/org/human:sha-abc1234
+            type=ref,event=branch         # ghcr.io/org/human:main
+            type=semver,pattern={{version}} # ghcr.io/org/human:1.4.2
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+
+      # ── LOGIN TO REGISTRY ──────────────────────────────────────
+      - name: 🔐 Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}  # Auto-provided by GitHub!
+
+      # ── SETUP BUILDX (multi-platform builds) ──────────────────
+      - name: 🔧 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # ── BUILD AND PUSH ─────────────────────────────────────────
+      - name: 🐳 Build and Push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha              # Use GitHub Actions cache
+          cache-to: type=gha,mode=max       # Cache layers between runs
+          build-args: |
+            BUILD_DATE=${{ github.event.head_commit.timestamp }}
+            VCS_REF=${{ github.sha }}
+
+      # ── SHOW IMAGE DIGEST ──────────────────────────────────────
+      - name: 📋 Image digest
+        run: echo "Image pushed with digest ${{ steps.build.outputs.digest }}"</textarea>
+    </div>
+    <div class="term" id="t6"><div class="tbar"><div class="td td1"></div><div class="td td2"></div><div class="td td3"></div><div class="tlb">docker pipeline output</div></div><div class="tbody" id="o6"></div></div>
+
+    <div class="alert ai">ℹ️ <span><code>secrets.GITHUB_TOKEN</code> is automatically provided by GitHub Actions — you don't need to create it manually. It has permission to push to your repository's GitHub Container Registry (ghcr.io).</span></div>
+
+    <div class="quiz">
+      <div class="qq">🧠 Why do we use <code>cache-from: type=gha</code> in docker/build-push-action?</div>
+      <div class="qopts">
+        <div class="qo" onclick="Q(this,false,6)">A) It downloads the image from Docker Hub cache</div>
+        <div class="qo" onclick="Q(this,true,6)">B) It reuses cached Docker layer builds from previous GitHub Actions runs — if your base image or dependencies didn't change, those layers are not rebuilt, cutting build time from 5 minutes to 30 seconds</div>
+        <div class="qo" onclick="Q(this,false,6)">C) It creates a local cache on the runner machine</div>
+        <div class="qo" onclick="Q(this,false,6)">D) It's required for multi-platform builds</div>
+      </div>
+      <div class="qfb" id="qf6"></div>
+    </div>
+
+    <div class="lnav">
+      <button class="nb" onclick="go(5)">← Prev</button>
+      <button class="nb go" onclick="go(7)">Secrets & Environments →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       S7 — Secrets & Environments
+  ══════════════════════════════════════════ -->
+  <div class="sec" id="s7">
+    <div class="ey">LESSON 08 — SECRETS</div>
+    <div class="ht">SECRETS &<br>ENVIRONMENTS</div>
+    <div class="intro">Never put passwords, API keys, or tokens in your workflow files. GitHub Secrets encrypts them and injects them securely at runtime.</div>
+
+    <div class="diag">
+      <div class="dlb">3 LEVELS OF SECRETS IN GITHUB</div>
+      <pre style="color:#4a5580;line-height:2.3;font-size:12px">
+  <span style="color:#7c6fff">Repository Secrets</span>  (Settings → Secrets → Actions)
+  Available to all workflows in the repo.
+  Use for: DOCKER_PASSWORD, SSH_PRIVATE_KEY, SONAR_TOKEN
+
+  <span style="color:#00e5ff">Environment Secrets</span>  (Settings → Environments → staging/production)
+  Only available to workflows targeting that environment.
+  Can require manual approval before use!
+  Use for: PROD_DB_PASSWORD, PROD_SERVER_IP (different per env)
+
+  <span style="color:#39ff8c">Organization Secrets</span>  (Organization → Settings → Secrets)
+  Shared across multiple repositories.
+  Use for: shared Docker Hub credentials, SonarQube token
+      </pre>
+    </div>
+
+    <div class="editor">
+      <div class="ebar">
+        <div class="ef"><div class="edot"></div>.github/workflows/deploy.yml — using secrets + environments</div>
+      </div>
+      <textarea class="ca" spellcheck="false" style="min-height:440px">name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+
+  # ── Deploy to Staging (auto) ────────────────────────────────────
+  deploy-staging:
+    name: 🚀 Deploy to Staging
+    runs-on: ubuntu-latest
+    environment: staging             # Links to GitHub Environment "staging"
+    # No approval required for staging
+
+    env:
+      SERVER_IP: ${{ secrets.STAGING_SERVER_IP }}    # From "staging" environment
+      SERVER_USER: ${{ secrets.SERVER_USER }}
+      DB_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
+
+    steps:
+      - name: 🚀 Deploy to staging
+        run: |
+          echo "Deploying to $SERVER_IP"
+          # Uses environment-specific secrets
+
+  # ── Deploy to Production (requires approval) ────────────────────
+  deploy-production:
+    name: 🏭 Deploy to Production
+    runs-on: ubuntu-latest
+    needs: deploy-staging            # Must pass staging first
+    environment: production          # Requires manual approval!
+
+    # GitHub will PAUSE here and notify reviewers
+    # Reviewer must click "Approve" in GitHub UI before this runs
+
+    env:
+      SERVER_IP: ${{ secrets.PROD_SERVER_IP }}       # Different from staging!
+      DB_PASSWORD: ${{ secrets.PROD_DB_PASSWORD }}   # Different password!
+
+    steps:
+      - name: 🏭 Deploy to production
+        run: |
+          echo "Deploying to production: $SERVER_IP"
+
+# ── How to set up in GitHub: ──────────────────────────────────────
+# 1. Go to: Settings → Environments → New environment → "production"
+# 2. Add "Required reviewers" → add yourself or team lead
+# 3. Add environment secrets: PROD_SERVER_IP, PROD_DB_PASSWORD
+# 4. Now every production deployment requires your approval!</textarea>
+    </div>
+
+    <div class="alert ad">🚨 <span>NEVER do <code>run: echo "${{ secrets.MY_SECRET }}"</code> — this prints the secret in the log (even though GitHub masks it, it's a bad habit). Use secrets only in commands that need them.</span></div>
+
+    <div class="quiz">
+      <div class="qq">🧠 You want production deploys to require a team lead's approval before running. What GitHub feature do you use?</div>
+      <div class="qopts">
+        <div class="qo" onclick="Q(this,false,7)">A) Repository secrets with a password</div>
+        <div class="qo" onclick="Q(this,true,7)">B) GitHub Environments with "Required reviewers" configured — the workflow pauses and waits for approval before the production job runs</div>
+        <div class="qo" onclick="Q(this,false,7)">C) A separate workflow file for production</div>
+        <div class="qo" onclick="Q(this,false,7)">D) The workflow_dispatch trigger</div>
+      </div>
+      <div class="qfb" id="qf7"></div>
+    </div>
+
+    <div class="lnav">
+      <button class="nb" onclick="go(6)">← Prev</button>
+      <button class="nb go" onclick="go(8)">Deploy via SSH →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       S8 — Deploy to Server via SSH
+  ══════════════════════════════════════════ -->
+  <div class="sec" id="s8">
+    <div class="ey">LESSON 09 — DEPLOYMENT</div>
+    <div class="ht">DEPLOY TO<br>SERVER (SSH)</div>
+    <div class="intro">The most common deployment pattern for teams without Kubernetes — SSH into your production server, pull the new Docker image, and restart the container.</div>
+
+    <div class="diag">
+      <div class="dlb">SSH DEPLOYMENT FLOW</div>
+      <pre style="color:#4a5580;line-height:2.3;font-size:12px">
+  GitHub Actions Runner
+       │
+       │  SSH with private key
+       ▼
+  Production Server (your VPS/cloud instance)
+       │
+       ├── docker pull ghcr.io/org/human:sha-abc1234
+       ├── docker stop human-app
+       ├── docker rm human-app
+       ├── docker run -d --name human-app ...new image...
+       └── curl http://localhost:9191/actuator/health → ✅ UP
+
+  Setup:
+  1. Generate SSH key pair: ssh-keygen -t ed25519 -f deploy_key
+  2. Add PUBLIC key to server: ~/.ssh/authorized_keys
+  3. Add PRIVATE key to GitHub: Settings → Secrets → SSH_PRIVATE_KEY
+      </pre>
+    </div>
+
+    <div class="editor">
+      <div class="ebar">
+        <div class="ef"><div class="edot"></div>.github/workflows/deploy.yml — SSH deployment</div>
+        <div class="ebs"><button class="eb run" onclick="runDeploy()">▶ Simulate Deploy</button></div>
+      </div>
+      <textarea class="ca" spellcheck="false" style="min-height:560px">name: Build, Test & Deploy
+
+on:
+  push:
+    branches: [main]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_TAG: ${{ github.sha }}
+
+jobs:
+
+  # Job 1: Build & Test
+  ci:
+    name: 🔨 Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { java-version: '21', distribution: 'temurin' }
+      - uses: actions/cache@v4
+        with:
+          path: ~/.gradle/caches
+          key: gradle-${{ hashFiles('**/*.gradle*') }}
+      - run: ./gradlew test bootJar --no-daemon
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: jar
+          path: build/libs/*.jar
+
+  # Job 2: Docker Build & Push
+  docker:
+    name: 🐳 Docker Build & Push
+    runs-on: ubuntu-latest
+    needs: ci
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { name: jar, path: build/libs/ }
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # Job 3: Deploy to Production Server via SSH
+  deploy:
+    name: 🚀 Deploy to Production
+    runs-on: ubuntu-latest
+    needs: docker
+    environment: production           # Requires approval!
+
+    steps:
+      - name: 🔑 Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: 🚀 Deploy via SSH
+        run: |
+          ssh -o StrictHostKeyChecking=no \
+              ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} \
+              "
+              set -e
+
+              echo '🐳 Pulling new image...'
+              docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+
+              echo '🛑 Stopping old container...'
+              docker stop human-app || true
+              docker rm human-app || true
+
+              echo '🚀 Starting new container...'
+              docker run -d \
+                --name human-app \
+                --restart unless-stopped \
+                -p 9191:9191 \
+                -e SPRING_DATASOURCE_URL=${{ secrets.DB_URL }} \
+                -e SPRING_DATASOURCE_USERNAME=${{ secrets.DB_USER }} \
+                -e SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }} \
+                -e SPRING_PROFILES_ACTIVE=prod \
+                ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+
+              echo '🏥 Health check...'
+              sleep 15
+              curl -f http://localhost:9191/actuator/health || exit 1
+
+              echo '🧹 Cleaning old images...'
+              docker image prune -f
+
+              echo '✅ Deployment complete!'
+              "
+
+      - name: ✅ Notify success
+        if: success()
+        run: echo "Deployed ${{ env.IMAGE_TAG }} to production successfully!"
+
+      - name: ❌ Notify failure
+        if: failure()
+        run: echo "DEPLOYMENT FAILED! Check logs immediately."</textarea>
+    </div>
+    <div class="term" id="t8"><div class="tbar"><div class="td td1"></div><div class="td td2"></div><div class="td td3"></div><div class="tlb">deployment simulation</div></div><div class="tbody" id="o8"></div></div>
+
+    <div class="lnav">
+      <button class="nb" onclick="go(7)">← Prev</button>
+      <button class="nb go" onclick="go(9)">Multi-environment →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       S9 — Multi-environment Deploy
+  ══════════════════════════════════════════ -->
+  <div class="sec" id="s9">
+    <div class="ey">LESSON 10 — ENVIRONMENTS</div>
+    <div class="ht">MULTI-ENVIRONMENT<br>DEPLOY</div>
+    <div class="intro">Production systems run across multiple environments. Each has its own database, config, and approval gates. Learn the full dev → staging → production promotion flow.</div>
+
+    <div class="diag">
+      <div class="dlb">ENVIRONMENT PROMOTION PIPELINE</div>
+      <pre style="color:#4a5580;line-height:2.3;font-size:12px">
+  Developer pushes to <span style="color:#7c6fff">feature/xxx</span>
+       │  CI only (build + test)
+       │
+       ▼ PR merged to <span style="color:#ffb700">develop</span>
+  ┌─────────────────────────────────────────────┐
+  │  DEV Environment (auto-deploy)              │
+  │  URL: dev.yourdomain.com                    │
+  │  DB: Oracle dev schema                      │
+  │  Purpose: Developer testing                 │
+  └──────────────────────┬──────────────────────┘
+                         │  PR merged to release/*
+                         ▼
+  ┌─────────────────────────────────────────────┐
+  │  STAGING Environment (auto-deploy)          │
+  │  URL: staging.yourdomain.com                │
+  │  DB: Oracle staging (copy of prod data)     │
+  │  Purpose: QA testing, UAT                   │
+  └──────────────────────┬──────────────────────┘
+                         │  release merged to main
+                         │  🔐 Manual approval required
+                         ▼
+  ┌─────────────────────────────────────────────┐
+  │  PRODUCTION Environment                     │
+  │  URL: yourdomain.com                        │
+  │  DB: Oracle production                      │
+  │  Purpose: Real users, real data             │
+  └─────────────────────────────────────────────┘
+      </pre>
+    </div>
+
+    <div class="editor">
+      <div class="ebar">
+        <div class="ef"><div class="edot"></div>.github/workflows/deploy-multi-env.yml</div>
+      </div>
+      <textarea class="ca" spellcheck="false" style="min-height:500px">name: Multi-Environment Deploy
+
+on:
+  push:
+    branches: [develop, 'release/**', main]
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      image-tag: ${{ steps.set-tag.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set image tag
+        id: set-tag
+        run: echo "tag=${{ github.sha }}" >> $GITHUB_OUTPUT
+      - uses: actions/setup-java@v4
+        with: { java-version: '21', distribution: 'temurin' }
+      - run: ./gradlew test bootJar --no-daemon
+      # ... docker build & push steps
+
+  deploy-dev:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: dev
+    if: github.ref == 'refs/heads/develop'    # Only on develop branch
+    steps:
+      - name: Deploy to DEV
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DEV_SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            docker pull ghcr.io/${{ github.repository }}:${{ needs.build.outputs.image-tag }}
+            docker stop human-dev || true
+            docker rm human-dev || true
+            docker run -d --name human-dev -p 9192:9191 \
+              -e SPRING_PROFILES_ACTIVE=dev \
+              -e SPRING_DATASOURCE_URL=${{ secrets.DEV_DB_URL }} \
+              ghcr.io/${{ github.repository }}:${{ needs.build.outputs.image-tag }}
+
+  deploy-staging:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: staging
+    if: startsWith(github.ref, 'refs/heads/release/')
+    steps:
+      - name: Deploy to STAGING
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.STAGING_SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            docker pull ghcr.io/${{ github.repository }}:${{ needs.build.outputs.image-tag }}
+            docker stop human-staging || true && docker rm human-staging || true
+            docker run -d --name human-staging -p 9193:9191 \
+              -e SPRING_PROFILES_ACTIVE=staging \
+              -e SPRING_DATASOURCE_URL=${{ secrets.STAGING_DB_URL }} \
+              ghcr.io/${{ github.repository }}:${{ needs.build.outputs.image-tag }}
+
+  deploy-production:
+    needs: [build, deploy-staging]
+    runs-on: ubuntu-latest
+    environment: production           # ← REQUIRES MANUAL APPROVAL
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Deploy to PRODUCTION
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.PROD_SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            docker pull ghcr.io/${{ github.repository }}:${{ needs.build.outputs.image-tag }}
+            docker stop human-prod || true && docker rm human-prod || true
+            docker run -d --name human-prod -p 9191:9191 \
+              -e SPRING_PROFILES_ACTIVE=prod \
+              -e SPRING_DATASOURCE_URL=${{ secrets.PROD_DB_URL }} \
+              ghcr.io/${{ github.repository }}:${{ needs.build.outputs.image-tag }}
+            sleep 20
+            curl -f http://localhost:9191/actuator/health || exit 1</textarea>
+    </div>
+
+    <div class="lnav">
+      <button class="nb" onclick="go(8)">← Prev</button>
+      <button class="nb go" onclick="go(10)">Matrix & Reusable →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       S10 — Matrix & Reusable Workflows
+  ══════════════════════════════════════════ -->
+  <div class="sec" id="s10">
+    <div class="ey">LESSON 11 — ADVANCED ACTIONS</div>
+    <div class="ht">MATRIX &<br>REUSABLE WORKFLOWS</div>
+    <div class="intro">Matrix builds test your code across multiple versions/OS combinations in parallel. Reusable workflows eliminate duplication across repositories.</div>
+
+    <div class="editor">
+      <div class="ebar">
+        <div class="ef"><div class="edot"></div>matrix strategy — test on multiple Java versions</div>
+      </div>
+      <textarea class="ca" spellcheck="false" style="min-height:280px">jobs:
+  test:
+    name: Test Java ${{ matrix.java }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        java: ['17', '21', '23']          # Test on 3 Java versions
+        os: [ubuntu-latest, windows-latest] # Test on 2 OSes
+        # Total: 3 × 2 = 6 parallel jobs!
+
+      fail-fast: false                    # Don't cancel others if one fails
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: 'temurin'
+      - run: ./gradlew test --no-daemon</textarea>
+    </div>
+
+    <div class="editor">
+      <div class="ebar">
+        <div class="ef"><div class="edot"></div>reusable workflow — .github/workflows/reusable-deploy.yml</div>
+      </div>
+      <textarea class="ca" spellcheck="false" style="min-height:360px"># ── REUSABLE WORKFLOW DEFINITION ────────────────────────────────
+# .github/workflows/reusable-deploy.yml
+name: Reusable Deploy
+
+on:
+  workflow_call:                          # Makes this reusable!
+    inputs:
+      environment:
+        required: true
+        type: string
+      server-ip-secret:
+        required: true
+        type: string
+      image-tag:
+        required: true
+        type: string
+    secrets:
+      SSH_PRIVATE_KEY:
+        required: true
+      DB_URL:
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets[inputs.server-ip-secret] }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            docker pull ghcr.io/org/human:${{ inputs.image-tag }}
+            docker stop human || true
+            docker run -d --name human -p 9191:9191 \
+              -e DB_URL=${{ secrets.DB_URL }} \
+              ghcr.io/org/human:${{ inputs.image-tag }}
+
+# ── CALL THE REUSABLE WORKFLOW ────────────────────────────────────
+# In another workflow:
+# jobs:
+#   deploy-prod:
+#     uses: ./.github/workflows/reusable-deploy.yml
+#     with:
+#       environment: production
+#       server-ip-secret: PROD_SERVER_IP
+#       image-tag: ${{ github.sha }}
+#     secrets:
+#       SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+#       DB_URL: ${{ secrets.PROD_DB_URL }}</textarea>
+    </div>
+
+    <div class="lnav">
+      <button class="nb" onclick="go(9)">← Prev</button>
+      <button class="nb go" onclick="go(11)">Code Quality →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       S11 — SonarQube
+  ══════════════════════════════════════════ -->
+  <div class="sec" id="s11">
+    <div class="ey">LESSON 12 — CODE QUALITY</div>
+    <div class="ht">CODE QUALITY &<br>SONARQUBE</div>
+    <div class="intro">SonarQube scans your code for bugs, security vulnerabilities, and code smells. A quality gate can block deployment if code quality drops below standards.</div>
+
+    <div class="editor">
+      <div class="ebar">
+        <div class="ef"><div class="edot"></div>.github/workflows/ci.yml — with SonarQube</div>
+        <div class="ebs"><button class="eb run" onclick="runSonar()">▶ Simulate Scan</button></div>
+      </div>
+      <textarea class="ca" spellcheck="false" style="min-height:360px">name: CI with Quality Gate
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  quality:
+    name: 🔍 Build, Test & Quality Gate
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0              # Full history for blame analysis
+
+      - uses: actions/setup-java@v4
+        with: { java-version: '21', distribution: 'temurin' }
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.sonar/cache             # Cache SonarQube scanner
+          key: sonar-${{ runner.os }}-${{ hashFiles('**/*.gradle*') }}
+
+      # ── Run Tests with Coverage ────────────────────────────────
+      - name: 🧪 Test with Coverage
+        run: ./gradlew test jacocoTestReport --no-daemon
+
+      # ── SonarQube Analysis ────────────────────────────────────
+      - name: 🔍 SonarQube Scan
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   # For PR decoration
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}     # From SonarCloud/SonarQube
+        run: |
+          ./gradlew sonar --no-daemon \
+            -Dsonar.projectKey=pims-human \
+            -Dsonar.organization=your-org \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.coverage.jacoco.xmlReportPaths=build/reports/jacoco/test/jacocoTestReport.xml</textarea>
+    </div>
+    <div class="term" id="t11"><div class="tbar"><div class="td td1"></div><div class="td td2"></div><div class="td td3"></div><div class="tlb">sonarqube analysis</div></div><div class="tbody" id="o11"></div></div>
+
+    <h3>SonarQube Quality Gate Rules</h3>
+    <table>
+      <tr><th>Metric</th><th>Fail Condition</th><th>Why it matters</th></tr>
+      <tr><td>Coverage on new code</td><td>&lt; 80%</td><td>New features must have tests</td></tr>
+      <tr><td>Duplicated lines</td><td>&gt; 3%</td><td>Duplication = maintenance debt</td></tr>
+      <tr><td>Security vulnerabilities</td><td>Any Critical/Blocker</td><td>No known security holes in prod</td></tr>
+      <tr><td>Bugs</td><td>Any Blocker</td><td>Definite bugs blocked from prod</td></tr>
+      <tr><td>Code smells</td><td>&gt; 5 days of debt</td><td>Maintainability threshold</td></tr>
+    </table>
+
+    <div class="lnav">
+      <button class="nb" onclick="go(10)">← Prev</button>
+      <button class="nb go" onclick="go(12)">Deployment Strategies →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       S12 — Deployment Strategies
+  ══════════════════════════════════════════ -->
+  <div class="sec" id="s12">
+    <div class="ey">LESSON 13 — DEPLOY STRATEGIES</div>
+    <div class="ht">DEPLOYMENT<br>STRATEGIES</div>
+    <div class="intro">HOW you deploy matters as much as WHAT you deploy. Different strategies offer different tradeoffs between risk, downtime, and rollback speed.</div>
+
+    <div class="diag">
+      <div class="dlb">DEPLOYMENT STRATEGY COMPARISON</div>
+      <pre style="color:#4a5580;line-height:2.2;font-size:12px">
+  <span style="color:#ff4757">1. Big Bang / Recreate</span>
+  Stop v1 → Deploy v2 → Start v2
+  Downtime: YES ⚠️  Rollback: Redeploy v1 (slow)
+  Use: Dev environments only
+
+  <span style="color:#ffb700">2. Rolling Update</span>
+  Instance: [v2] [v1] [v1] → [v2] [v2] [v1] → [v2] [v2] [v2]
+  Downtime: NO  Rollback: Redeploy v1 (medium speed)
+  Use: Standard production updates
+
+  <span style="color:#00e5ff">3. Blue-Green</span>
+  Blue (v1) = LIVE          Green (v2) = IDLE
+  Deploy v2 to Green → Test → Switch load balancer to Green
+  Blue becomes standby for instant rollback!
+  Downtime: NO  Rollback: Switch back to Blue (INSTANT!) ✅
+  Use: Critical services, zero-risk deploys
+
+  <span style="color:#39ff8c">4. Canary Release</span>
+  5% traffic → v2  (watch metrics for 30 min)
+  10% traffic → v2  (still healthy?)
+  50% → v2  (looks good!)
+  100% → v2  (full rollout)
+  Rollback: Route 100% back to v1
+  Use: High-traffic apps, A/B testing features
+      </pre>
+    </div>
+
+    <div class="editor">
+      <div class="ebar">
+        <div class="ef"><div class="edot"></div>blue-green deployment with Nginx</div>
+      </div>
+      <textarea class="ca" spellcheck="false" style="min-height:360px"># Blue-Green with Nginx + Docker on a single server
+
+# Setup: Run TWO app instances
+# Blue = current live (port 9191)
+# Green = new version (port 9192)
+
+# deploy-blue-green.sh (runs on production server via SSH)
+
+#!/bin/bash
+NEW_IMAGE=$1   # e.g. ghcr.io/org/human:sha-abc1234
+set -e
+
+echo "🟢 Starting GREEN deployment on port 9192..."
+docker pull $NEW_IMAGE
+docker stop human-green || true
+docker rm human-green || true
+docker run -d --name human-green -p 9192:9191 \
+  -e SPRING_PROFILES_ACTIVE=prod \
+  -e SPRING_DATASOURCE_URL=$DB_URL \
+  $NEW_IMAGE
+
+echo "⏳ Waiting for GREEN to be healthy..."
+for i in {1..12}; do
+  if curl -sf http://localhost:9192/actuator/health | grep -q '"UP"'; then
+    echo "✅ GREEN is healthy!"
+    break
+  fi
+  echo "Attempt $i/12 - waiting..."
+  sleep 5
+done
+
+echo "🔀 Switching Nginx to GREEN..."
+# Update Nginx upstream to point to 9192
+sed -i 's/server localhost:9191/server localhost:9192/' /etc/nginx/sites-available/human
+nginx -t && systemctl reload nginx
+
+echo "🔵 Stopping BLUE (old version)..."
+docker stop human-blue || true
+
+echo "✅ Blue-Green deploy complete! GREEN is now live."
+echo "💡 BLUE stopped but not deleted — run 'docker rm human-blue' when confident"</textarea>
+    </div>
+
+    <div class="quiz">
+      <div class="qq">🧠 A critical bug is found 5 minutes after a Blue-Green deployment to production. What's the fastest recovery?</div>
+      <div class="qopts">
+        <div class="qo" onclick="Q(this,false,12)">A) Re-run the CI/CD pipeline with a hotfix branch</div>
+        <div class="qo" onclick="Q(this,true,12)">B) Switch the Nginx load balancer back to the Blue environment — instant rollback with zero rebuild needed since Blue is still running</div>
+        <div class="qo" onclick="Q(this,false,12)">C) Restore from database backup</div>
+        <div class="qo" onclick="Q(this,false,12)">D) Redeploy the previous Docker image tag</div>
+      </div>
+      <div class="qfb" id="qf12"></div>
+    </div>
+
+    <div class="lnav">
+      <button class="nb" onclick="go(11)">← Prev</button>
+      <button class="nb go" onclick="go(13)">Rollback & Recovery →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       S13 — Rollback
+  ══════════════════════════════════════════ -->
+  <div class="sec" id="s13">
+    <div class="ey">LESSON 14 — RESILIENCE</div>
+    <div class="ht">ROLLBACK &<br>RECOVERY</div>
+    <div class="intro">Something WILL go wrong in production. Having automated rollback built into your pipeline is the difference between a 30-second incident and a 3-hour outage.</div>
+
+    <div class="editor">
+      <div class="ebar">
+        <div class="ef"><div class="edot"></div>.github/workflows/deploy-with-rollback.yml</div>
+        <div class="ebs"><button class="eb run" onclick="runRollback()">▶ Simulate Failure + Rollback</button></div>
+      </div>
+      <textarea class="ca" spellcheck="false" style="min-height:560px">name: Deploy with Auto-Rollback
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    name: 🚀 Deploy with Rollback Safety Net
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 📋 Get previous image tag (for rollback)
+        id: previous
+        run: |
+          # Save current running tag before deploying
+          PREV=$(ssh user@${{ secrets.SERVER_IP }} \
+            "docker inspect human-app --format='{{.Config.Image}}' 2>/dev/null || echo 'none'")
+          echo "tag=$PREV" >> $GITHUB_OUTPUT
+          echo "Previous image: $PREV"
+
+      - name: 🚀 Deploy new version
+        id: deploy
+        run: |
+          ssh -o StrictHostKeyChecking=no \
+              ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} \
+              "
+              docker pull ghcr.io/${{ github.repository }}:${{ github.sha }}
+              docker stop human-app || true
+              docker rm human-app || true
+              docker run -d \
+                --name human-app \
+                --restart unless-stopped \
+                -p 9191:9191 \
+                -e SPRING_PROFILES_ACTIVE=prod \
+                -e SPRING_DATASOURCE_URL=${{ secrets.DB_URL }} \
+                ghcr.io/${{ github.repository }}:${{ github.sha }}
+              "
+
+      - name: 🏥 Health Check (30 second window)
+        id: healthcheck
+        run: |
+          echo "Waiting for application to start..."
+          sleep 20
+          for i in {1..6}; do
+            STATUS=$(curl -sf -o /dev/null -w "%{http_code}" \
+              http://${{ secrets.SERVER_IP }}:9191/actuator/health || echo "000")
+            if [ "$STATUS" = "200" ]; then
+              echo "✅ Health check passed! Status: $STATUS"
+              exit 0
+            fi
+            echo "Attempt $i/6 - Status: $STATUS - waiting 10s..."
+            sleep 10
+          done
+          echo "❌ Health check FAILED after 6 attempts!"
+          exit 1
+
+      - name: ❌ AUTO-ROLLBACK on failure
+        if: failure() && steps.deploy.outcome == 'success'
+        run: |
+          echo "🔴 DEPLOYMENT FAILED! Rolling back to: ${{ steps.previous.outputs.tag }}"
+          ssh -o StrictHostKeyChecking=no \
+              ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} \
+              "
+              docker stop human-app || true
+              docker rm human-app || true
+              docker run -d \
+                --name human-app \
+                --restart unless-stopped \
+                -p 9191:9191 \
+                -e SPRING_PROFILES_ACTIVE=prod \
+                -e SPRING_DATASOURCE_URL=${{ secrets.DB_URL }} \
+                ${{ steps.previous.outputs.tag }}
+              sleep 15
+              curl -f http://localhost:9191/actuator/health && echo '✅ Rollback successful!'
+              "
+
+      - name: 📣 Notify on rollback
+        if: failure()
+        run: |
+          echo "::error::PRODUCTION ROLLBACK EXECUTED - check pipeline for details"
+          # In real life: post to Slack, PagerDuty, email etc.</textarea>
+    </div>
+    <div class="term" id="t13"><div class="tbar"><div class="td td1"></div><div class="td td2"></div><div class="td td3"></div><div class="tlb">deploy + rollback simulation</div></div><div class="tbody" id="o13"></div></div>
+
+    <div class="lnav">
+      <button class="nb" onclick="go(12)">← Prev</button>
+      <button class="nb go" onclick="go(14)">Monitoring & Notifications →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       S14 — Monitoring & Notifications
+  ══════════════════════════════════════════ -->
+  <div class="sec" id="s14">
+    <div class="ey">LESSON 15 — OBSERVABILITY</div>
+    <div class="ht">MONITORING &<br>NOTIFICATIONS</div>
+    <div class="intro">A pipeline nobody watches is worthless. Set up Slack/Discord notifications so your team knows immediately when deployments succeed, fail, or rollback.</div>
+
+    <div class="editor">
+      <div class="ebar">
+        <div class="ef"><div class="edot"></div>.github/workflows/notify.yml — Slack notifications</div>
+        <div class="ebs"><button class="eb run" onclick="runNotify()">▶ Simulate Notifications</button></div>
+      </div>
+      <textarea class="ca" spellcheck="false" style="min-height:460px">name: Deploy with Notifications
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # ── Notify: Deployment Starting ────────────────────────────
+      - name: 📣 Notify Start
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "🚀 *Deployment Starting*",
+              "attachments": [{
+                "color": "warning",
+                "fields": [
+                  {"title": "Service", "value": "human", "short": true},
+                  {"title": "Version", "value": "${{ github.sha }}", "short": true},
+                  {"title": "Triggered by", "value": "${{ github.actor }}", "short": true},
+                  {"title": "Branch", "value": "${{ github.ref_name }}", "short": true}
+                ]
+              }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      # ── Deploy ─────────────────────────────────────────────────
+      - name: 🚀 Deploy
+        id: deploy
+        run: |
+          ssh user@${{ secrets.SERVER_IP }} "docker pull && docker run ..."
+
+      # ── Notify: Success ────────────────────────────────────────
+      - name: ✅ Notify Success
+        if: success()
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "✅ *Deployment Successful!*",
+              "attachments": [{
+                "color": "good",
+                "fields": [
+                  {"title": "Service", "value": "human", "short": true},
+                  {"title": "Version", "value": "${{ github.sha }}", "short": true},
+                  {"title": "Duration", "value": "${{ job.duration }}s", "short": true},
+                  {"title": "URL", "value": "https://yourdomain.com", "short": true}
+                ]
+              }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      # ── Notify: Failure ────────────────────────────────────────
+      - name: ❌ Notify Failure
+        if: failure()
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "🔴 *DEPLOYMENT FAILED — Immediate Action Required!*",
+              "attachments": [{
+                "color": "danger",
+                "fields": [
+                  {"title": "Service", "value": "human", "short": true},
+                  {"title": "Failed Version", "value": "${{ github.sha }}", "short": true},
+                  {"title": "Logs", "value": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}", "short": false}
+                ]
+              }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}</textarea>
+    </div>
+    <div class="term" id="t14"><div class="tbar"><div class="td td1"></div><div class="td td2"></div><div class="td td3"></div><div class="tlb">notification simulation</div></div><div class="tbody" id="o14"></div></div>
+
+    <div class="lnav">
+      <button class="nb" onclick="go(13)">← Prev</button>
+      <button class="nb go" onclick="go(15)">Security in CI/CD →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       S15 — Security in CI/CD
+  ══════════════════════════════════════════ -->
+  <div class="sec" id="s15">
+    <div class="ey">LESSON 16 — SECURITY</div>
+    <div class="ht">SECURITY IN<br>CI/CD</div>
+    <div class="intro">Your CI/CD pipeline is a high-privilege system with access to production servers, databases, and registries. Securing it is non-negotiable.</div>
+
+    <div class="steps">
+      <div class="step"><div class="sn">1</div><div class=""><div class="st">Pin action versions with SHA hashes</div><div class="sd">Use <code>actions/checkout@abc123def456</code> not <code>@v4</code>. An attacker could push malicious code to a tag. SHA is immutable.</div></div></div>
+      <div class="step"><div class="sn">2</div><div class=""><div class="st">Use OIDC instead of long-lived secrets for cloud</div><div class="sd">GitHub Actions can authenticate to AWS/GCP/Azure using short-lived OIDC tokens instead of static API keys stored as secrets.</div></div></div>
+      <div class="step"><div class="sn">3</div><div class=""><div class="st">Scan Docker images for vulnerabilities</div><div class="sd">Add Trivy or Snyk scan to your pipeline. Block deployment if CRITICAL vulnerabilities found in your image.</div></div></div>
+      <div class="step"><div class="sn">4</div><div class=""><div class="st">Least privilege permissions</div><div class="sd">Set <code>permissions: read-all</code> at workflow level, then explicitly grant only what each job needs.</div></div></div>
+      <div class="step"><div class="sn">5</div><div class=""><div class="st">Audit your secrets regularly</div><div class="sd">Rotate credentials every 90 days. Use GitHub's secret scanning to detect if secrets are accidentally committed.</div></div></div>
+    </div>
+
+    <div class="editor">
+      <div class="ebar">
+        <div class="ef"><div class="edot"></div>security scanning in pipeline</div>
+      </div>
+      <textarea class="ca" spellcheck="false" style="min-height:320px">name: Security Scan
+
+on: [push, pull_request]
+
+# Minimal permissions by default
+permissions:
+  contents: read
+
+jobs:
+  security:
+    name: 🔒 Security Scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write          # Required to upload SARIF results
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # ── Scan Java dependencies for CVEs ────────────────────────
+      - name: 🔍 OWASP Dependency Check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: 'human'
+          path: '.'
+          format: 'SARIF'
+          failBuildOnCVSS: 7          # Fail on HIGH severity CVEs
+
+      # ── Scan Docker image for vulnerabilities ──────────────────
+      - name: 🐳 Build image for scanning
+        run: docker build -t human:scan .
+
+      - name: 🔍 Trivy vulnerability scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'human:scan'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '1'              # Fail pipeline on CRITICAL findings
+
+      # ── Secret scanning ────────────────────────────────────────
+      - name: 🔑 Scan for secrets in code
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}</textarea>
+    </div>
+
+    <div class="alert ad">🚨 <span>The most common CI/CD security mistake: storing database passwords or SSH keys as plaintext in workflow files or scripts checked into the repository. Always use <strong>GitHub Secrets</strong> — never hardcode credentials.</span></div>
+
+    <div class="lnav">
+      <button class="nb" onclick="go(14)">← Prev</button>
+      <button class="nb go" onclick="go(16)">Spring Boot Pipeline →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       S16 — Spring Boot "human" Pipeline
+  ══════════════════════════════════════════ -->
+  <div class="sec" id="s16">
+    <div class="ey">LESSON 17 — REAL WORLD</div>
+    <div class="ht">SPRING BOOT "HUMAN"<br>COMPLETE PIPELINE</div>
+    <div class="intro">The complete, production-ready CI/CD pipeline for your actual Spring Boot human project — combining every concept from this course.</div>
+
+    <div class="diag">
+      <div class="dlb">YOUR COMPLETE PIPELINE FLOW</div>
+      <pre style="color:#4a5580;line-height:2.2;font-size:12px">
+  git push origin main
+       │
+       ▼
+  ┌─── JOB 1: CI ───────────────────────────────────────────────┐
+  │  ☕ Setup JDK 21                                            │
+  │  📦 Restore Gradle cache (fast!)                           │
+  │  🧪 ./gradlew test (JUnit + Spring Boot Test)              │
+  │  📊 Jacoco coverage report                                  │
+  │  🔍 SonarQube quality gate                                  │
+  │  🔨 ./gradlew bootJar                                       │
+  └──────────────────────────────────────────────────────────────┘
+       │ needs: ci
+       ▼
+  ┌─── JOB 2: DOCKER ───────────────────────────────────────────┐
+  │  🐳 Multi-stage build (builder → runtime:183MB)             │
+  │  🔒 Trivy security scan                                     │
+  │  📤 Push to ghcr.io/org/human:sha                          │
+  └──────────────────────────────────────────────────────────────┘
+       │ needs: docker + manual approval
+       ▼
+  ┌─── JOB 3: DEPLOY ───────────────────────────────────────────┐
+  │  📋 Save current image tag (rollback safety)                │
+  │  🔑 SSH to production server                                │
+  │  🐳 docker pull new image                                   │
+  │  🔄 Blue-green swap                                         │
+  │  🏥 Health check /actuator/health (retry 6x)               │
+  │  ↩️  Auto-rollback if unhealthy                             │
+  │  📣 Slack notification                                      │
+  └──────────────────────────────────────────────────────────────┘
+      </pre>
+    </div>
+
+    <div class="editor">
+      <div class="ebar">
+        <div class="ef"><div class="edot"></div>.github/workflows/main.yml — COMPLETE PRODUCTION PIPELINE</div>
+        <div class="ebs"><button class="eb run" onclick="runHuman()">▶ Simulate Full Pipeline</button></div>
+      </div>
+      <textarea class="ca" id="c16" spellcheck="false" style="min-height:800px">name: Human CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+    paths-ignore: ['**.md', 'docs/**']
+  pull_request:
+    branches: [main, develop]
+
+env:
+  JAVA_VERSION: '21'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+# Minimal permissions
+permissions:
+  contents: read
+  packages: write
+  checks: write
+  security-events: write
+
+jobs:
+
+  # ══════════════════════════════════════════════════════════════
+  # JOB 1: CI — Build, Test, Quality
+  # ══════════════════════════════════════════════════════════════
+  ci:
+    name: 🔨 Build, Test & Quality
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: ☕ Setup JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+
+      - name: 📦 Cache Gradle & SonarQube
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            ~/.sonar/cache
+          key: ${{ runner.os }}-gradle-sonar-${{ hashFiles('**/*.gradle*') }}
+
+      - name: 🧪 Test with Coverage
+        run: ./gradlew test jacocoTestReport --no-daemon
+
+      - name: 📊 Publish Test Results
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Test Results
+          path: build/test-results/**/*.xml
+          reporter: java-junit
+
+      - name: 🔍 SonarQube Quality Gate
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          ./gradlew sonar --no-daemon \
+            -Dsonar.projectKey=pims-human \
+            -Dsonar.host.url=https://sonarcloud.io
+
+      - name: 🔨 Build JAR
+        run: ./gradlew bootJar --no-daemon -x test
+
+      - name: 📤 Upload JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: human-jar-${{ github.sha }}
+          path: build/libs/*.jar
+          retention-days: 3
+
+  # ══════════════════════════════════════════════════════════════
+  # JOB 2: Docker Build & Push (only on main/develop, not PRs)
+  # ══════════════════════════════════════════════════════════════
+  docker:
+    name: 🐳 Docker Build & Push
+    runs-on: ubuntu-latest
+    needs: ci
+    if: github.event_name == 'push'
+
+    outputs:
+      image-tag: ${{ github.sha }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 📥 Download JAR
+        uses: actions/download-artifact@v4
+        with:
+          name: human-jar-${{ github.sha }}
+          path: build/libs/
+
+      - name: 🔐 Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🔧 Setup Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 🐳 Build & Push
+        id: push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: 🔍 Trivy Security Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          severity: 'CRITICAL'
+          exit-code: '1'
+
+  # ══════════════════════════════════════════════════════════════
+  # JOB 3: Deploy to Production
+  # ══════════════════════════════════════════════════════════════
+  deploy:
+    name: 🚀 Deploy to Production
+    runs-on: ubuntu-latest
+    needs: docker
+    if: github.ref == 'refs/heads/main'
+    environment: production           # Requires manual approval!
+
+    steps:
+      - name: 🔑 Setup SSH Agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: 📋 Save previous image (rollback)
+        id: prev
+        run: |
+          PREV=$(ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} \
+            "docker inspect human-app --format='{{.Config.Image}}' 2>/dev/null || echo 'none'")
+          echo "tag=$PREV" >> $GITHUB_OUTPUT
+
+      - name: 📣 Notify Deploy Start
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: '{"text":"🚀 Deploying human ${{ github.sha }} to production..."}'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: 🚀 Deploy
+        id: deploy
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "
+            set -e
+            echo 'Pulling new image...'
+            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            echo 'Swapping container...'
+            docker stop human-app || true
+            docker rm human-app || true
+            docker run -d \
+              --name human-app \
+              --restart unless-stopped \
+              -p 9191:9191 \
+              -e SPRING_PROFILES_ACTIVE=prod \
+              -e SPRING_DATASOURCE_URL=${{ secrets.PROD_DB_URL }} \
+              -e SPRING_DATASOURCE_USERNAME=${{ secrets.PROD_DB_USER }} \
+              -e SPRING_DATASOURCE_PASSWORD=${{ secrets.PROD_DB_PASSWORD }} \
+              -e OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317 \
+              -v /opt/human/logs:/app/logs \
+              ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          "
+
+      - name: 🏥 Health Check
+        run: |
+          sleep 20
+          for i in {1..6}; do
+            STATUS=$(curl -sf -o /dev/null -w '%{http_code}' \
+              http://${{ secrets.SERVER_IP }}:9191/actuator/health || echo 000)
+            [ "$STATUS" = "200" ] && echo "✅ Healthy!" && exit 0
+            echo "Attempt $i/6 status=$STATUS waiting 10s..."
+            sleep 10
+          done
+          exit 1
+
+      - name: ↩️ Auto-Rollback
+        if: failure() && steps.deploy.outcome == 'success'
+        run: |
+          echo "🔴 Rolling back to ${{ steps.prev.outputs.tag }}"
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "
+            docker stop human-app || true
+            docker rm human-app || true
+            docker run -d --name human-app --restart unless-stopped -p 9191:9191 \
+              -e SPRING_PROFILES_ACTIVE=prod \
+              -e SPRING_DATASOURCE_URL=${{ secrets.PROD_DB_URL }} \
+              ${{ steps.prev.outputs.tag }}
+          "
+
+      - name: ✅ Notify Success
+        if: success()
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: '{"text":"✅ *human deployed successfully!* Version: ${{ github.sha }}"}'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: ❌ Notify Failure
+        if: failure()
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: '{"text":"🔴 *DEPLOYMENT FAILED + ROLLED BACK!* Check: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}</textarea>
+    </div>
+    <div class="term" id="t16"><div class="tbar"><div class="td td1"></div><div class="td td2"></div><div class="td td3"></div><div class="tlb">full pipeline simulation</div></div><div class="tbody" id="o16"></div></div>
+
+    <h3>Required GitHub Secrets Setup</h3>
+    <table>
+      <tr><th>Secret Name</th><th>Value</th><th>Level</th></tr>
+      <tr><td><code>SSH_PRIVATE_KEY</code></td><td>Content of ~/.ssh/deploy_key</td><td>Repository</td></tr>
+      <tr><td><code>SERVER_USER</code></td><td>ubuntu (your SSH user)</td><td>Repository</td></tr>
+      <tr><td><code>SONAR_TOKEN</code></td><td>From SonarCloud → My Account → Security</td><td>Repository</td></tr>
+      <tr><td><code>SLACK_WEBHOOK_URL</code></td><td>From Slack → Apps → Incoming Webhooks</td><td>Repository</td></tr>
+      <tr><td><code>SERVER_IP</code></td><td>Your production server IP</td><td>production environment</td></tr>
+      <tr><td><code>PROD_DB_URL</code></td><td>jdbc:oracle:thin:@//oracle:1521/pimshuman</td><td>production environment</td></tr>
+      <tr><td><code>PROD_DB_USER</code></td><td>pims_human</td><td>production environment</td></tr>
+      <tr><td><code>PROD_DB_PASSWORD</code></td><td>your-db-password</td><td>production environment</td></tr>
+    </table>
+
+    <div class="lnav">
+      <button class="nb" onclick="go(15)">← Prev</button>
+      <button class="nb go" onclick="go(17)">Final Challenge →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       S17 — Final Challenge
+  ══════════════════════════════════════════ -->
+  <div class="sec" id="s17">
+    <div class="ey">LESSON 18 — EXPERT CHALLENGE</div>
+    <div class="ht">FINAL<br>CHALLENGE</div>
+    <div class="intro">Write a complete CI/CD pipeline from scratch. All 10 requirements must pass to earn the CI/CD Expert badge.</div>
+
+    <div class="card" style="border-color:rgba(124,111,255,.4);margin-bottom:24px">
+      <div class="ct" style="font-size:13px;margin-bottom:12px">📋 Requirements — All 10 Must Pass</div>
+      <div class="cb" style="line-height:2.6">
+        1. Workflow name defined<br>
+        2. Triggers on push to main AND pull_request<br>
+        3. Has a job that runs on ubuntu-latest<br>
+        4. Uses actions/checkout@v4<br>
+        5. Sets up Java 21 with temurin distribution<br>
+        6. Caches Gradle dependencies (actions/cache)<br>
+        7. Runs ./gradlew test<br>
+        8. Builds Docker image and pushes to a registry<br>
+        9. Has a deploy job with needs: pointing to docker job<br>
+        10. Includes health check after deployment (curl or wget)
+      </div>
+    </div>
+
+    <div class="editor">
+      <div class="ebar">
+        <div class="ef"><div class="edot"></div>your complete CI/CD pipeline</div>
+        <div class="ebs">
+          <button class="eb rst" onclick="reset17()">Clear</button>
+          <button class="eb run" onclick="validateChallenge()">▶ Check All 10 Requirements</button>
+        </div>
+      </div>
+      <textarea class="ca" id="c17" spellcheck="false" style="min-height:500px" placeholder="# Write your complete GitHub Actions CI/CD pipeline here.
+# .github/workflows/pipeline.yml
+# Cover all 10 requirements listed above!"></textarea>
+    </div>
+    <div class="term" id="t17"><div class="tbar"><div class="td td1"></div><div class="td td2"></div><div class="td td3"></div><div class="tlb">challenge results</div></div><div class="tbody" id="o17"></div></div>
+
+    <div id="victory" style="display:none">
+      <div class="victory">
+        <div class="vi">🔄🏆</div>
+        <div class="vt">CI/CD EXPERT</div>
+        <div class="vs">You've mastered CI/CD from zero to expert level.<br>Your code now ships automatically, safely, and with full<br>confidence — every single push.</div>
+      </div>
+    </div>
+
+    <div class="lnav">
+      <button class="nb" onclick="go(16)">← Prev</button>
+      <button class="nb" style="opacity:.3;cursor:default">Course Complete 🎉</button>
+    </div>
+  </div>
+
+  </div><!-- /page -->
+</main>
+</div><!-- /wrap -->
+
+<script>
+let cur=0,done=new Set([0]);
+const N=18;
+const bcs=['introduction','ci-vs-cd','git-branching','workflow-anatomy','first-pipeline',
+  'build-test','docker-build-push','secrets-environments','deploy-ssh',
+  'multi-environment','matrix-reusable','sonarqube','deploy-strategies',
+  'rollback','notifications','security','spring-boot-human','final-challenge'];
+const lvs=['lz','lz','lz','lb','lb','lb','lb','li','li','li','li','li','le','le','le','le','le','le'];
+const lvn=['ZERO','ZERO','ZERO','BEGINNER','BEGINNER','BEGINNER','BEGINNER',
+  'INTER','INTER','INTER','INTER','INTER','EXPERT','EXPERT','EXPERT','EXPERT','EXPERT','EXPERT'];
+
+function go(i){
+  document.getElementById('s'+cur).classList.remove('active');
+  document.querySelectorAll('.si')[cur].classList.remove('active');
+  cur=i;done.add(i);
+  document.getElementById('s'+i).classList.add('active');
+  document.querySelectorAll('.si')[i].classList.add('active');
+  document.querySelectorAll('.si').forEach((el,idx)=>{if(done.has(idx))el.classList.add('done')});
+  document.getElementById('bcn').textContent=bcs[i];
+  const chip=document.getElementById('lvchip');
+  chip.className='chip '+lvs[i];chip.textContent=lvn[i];
+  updateProg();window.scrollTo(0,0);
+}
+function updateProg(){
+  const p=Math.round((done.size/N)*100);
+  document.getElementById('pbar').style.width=p+'%';
+  document.getElementById('pct').textContent=p+'%';
+  document.getElementById('pxp').textContent=done.size+' / '+N+' lessons';
+}
+function Q(el,correct,idx){
+  el.parentElement.querySelectorAll('.qo').forEach(o=>o.style.pointerEvents='none');
+  const fb=document.getElementById('qf'+idx);
+  if(correct){el.classList.add('ok');fb.className='qfb show y';fb.textContent='✅ Correct!';}
+  else{
+    el.classList.add('no');fb.className='qfb show n';fb.textContent='❌ Not quite — review the lesson above.';
+    el.parentElement.querySelectorAll('.qo').forEach(o=>{if(o.onclick&&o.onclick.toString().includes('true'))o.classList.add('ok')});
+  }
+}
+function showTerm(id){document.getElementById(id).style.display='block'}
+function type(id,lines,delay=60){
+  const out=document.getElementById(id);out.innerHTML='';let i=0;
+  (function next(){if(i<lines.length){out.innerHTML+=lines[i]+'\n';i++;out.scrollTop=out.scrollHeight;setTimeout(next,delay+Math.random()*25);}})();
+}
+function showSol(id,v){document.getElementById(id).value=v}
+function reset4(){document.getElementById('c4').value=''}
+function reset17(){document.getElementById('c17').value=''}
+
+const sol4=`name: CI Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Run tests
+        run: ./gradlew test --no-daemon
+
+      - name: Build JAR
+        run: ./gradlew bootJar --no-daemon -x test`;
+
+function validate4(){
+  showTerm('t4');
+  const code=document.getElementById('c4').value;
+  const checks=[
+    [code.includes('name:'),'Workflow name defined'],
+    [code.includes('push:')&&code.includes('main'),'push trigger on main'],
+    [code.includes('pull_request:'),'pull_request trigger'],
+    [code.includes('ubuntu-latest'),'runs-on: ubuntu-latest'],
+    [code.includes('actions/checkout@v4'),'actions/checkout@v4'],
+    [code.includes('actions/setup-java@v4'),'actions/setup-java@v4'],
+    [code.includes("java-version: '21'"),'Java 21 configured'],
+    [code.includes('./gradlew test'),'./gradlew test runs'],
+  ];
+  const lines=['<span class="tcy">Validating your CI pipeline...</span>',''];
+  let p=0;
+  checks.forEach(([ok,msg])=>{if(ok){lines.push('<span class="ts">✅ '+msg+'</span>');p++;}else lines.push('<span class="te">❌ Missing: '+msg+'</span>');});
+  lines.push('');
+  if(p===8)lines.push('<span class="ts">🎉 Perfect! All 8 checks passed. Push to GitHub to see it run!</span>');
+  else lines.push('<span class="tw">Score: '+p+'/8 — fix missing items above.</span>');
+  type('o4',lines);
+}
+
+function runPush(){
+  showTerm('t4b');
+  type('o4b',[
+    '<span class="tp">$</span> <span class="tc">git push origin main</span>',
+    '<span class="to">Enumerating objects: 5, done.</span>',
+    '<span class="to">Writing objects: 100% (5/5), 1.23 KiB | 1.23 MiB/s, done.</span>',
+    '<span class="to">To https://github.com/your-org/human.git</span>',
+    '<span class="to">   abc1234..def5678  main -> main</span>',
+    '',
+    '<span class="tcy">GitHub Actions triggered:</span>',
+    '<span class="tpu">🔄 Workflow: CI Pipeline</span>',
+    '<span class="to">  Job: build → Queued</span>',
+    '<span class="tw">  Runner: ubuntu-latest → Starting...</span>',
+    '<span class="to">  Step: 📥 Checkout code → ✅</span>',
+    '<span class="to">  Step: ☕ Setup JDK 21 → ✅</span>',
+    '<span class="to">  Step: 🧪 Run tests → Running...</span>',
+    '<span class="to">  > Task :test</span>',
+    '<span class="to">  EmployeeServiceTest > testGetAll() PASSED</span>',
+    '<span class="to">  PayrollServiceTest > testCalculate() PASSED</span>',
+    '<span class="to">  HumanServiceTest > testCreate() PASSED</span>',
+    '<span class="ts">  BUILD SUCCESSFUL in 42s</span>',
+    '<span class="to">  Step: 🔨 Build JAR → ✅</span>',
+    '',
+    '<span class="ts">✅ All jobs passed! Pipeline complete in 1m 28s</span>',
+    '<span class="tcy">GitHub PR check: ✅ CI Pipeline passed</span>',
+  ],80);
+}
+
+function runTests(){
+  showTerm('t5');
+  type('o5',[
+    '<span class="tcy">🧪 Running test suite...</span>','',
+    '<span class="to">> Task :compileJava UP-TO-DATE</span>',
+    '<span class="to">> Task :compileTestJava</span>',
+    '<span class="to">> Task :test</span>',
+    '<span class="ts">  EmployeeControllerTest > testGetEmployees() PASSED</span>',
+    '<span class="ts">  EmployeeControllerTest > testCreateEmployee() PASSED</span>',
+    '<span class="ts">  PayrollServiceTest > testMonthlyCalculation() PASSED</span>',
+    '<span class="ts">  BatchJobTest > testPayrollBatch() PASSED</span>',
+    '<span class="ts">  SecurityConfigTest > testJwtValidation() PASSED</span>',
+    '<span class="te">  EmailServiceTest > testSendPayslip() FAILED</span>',
+    '<span class="te">  >> AssertionError: Expected status 200, was 500</span>',
+    '',
+    '<span class="te">❌ BUILD FAILED — 1 test failure</span>',
+    '<span class="te">Pipeline stopped. Deployment blocked. ✅ (This is the system working!)</span>',
+    '',
+    '<span class="tcy">Fix the failing test, push again, pipeline retries automatically.</span>',
+  ],70);
+}
+
+function runDocker(){
+  showTerm('t6');
+  type('o6',[
+    '<span class="tcy">🐳 Building Docker image...</span>','',
+    '<span class="to">[+] Building 28.3s (14/14) FINISHED</span>',
+    '<span class="ts"> => CACHED [builder 3/6] RUN gradle dependencies    0.0s ← cached!</span>',
+    '<span class="ts"> => CACHED [builder 4/6] COPY build.gradle           0.0s ← cached!</span>',
+    '<span class="to"> => [builder 5/6] COPY src src                       0.3s</span>',
+    '<span class="to"> => [builder 6/6] RUN gradle bootJar                18.4s</span>',
+    '<span class="to"> => [runtime 1/3] FROM eclipse-temurin:21-jre-alpine 0.0s</span>',
+    '<span class="to"> => [runtime 2/3] COPY --from=builder *.jar app.jar  0.4s</span>',
+    '<span class="ts"> => Final image: 183MB ✅</span>',
+    '',
+    '<span class="tcy">🔐 Pushing to ghcr.io...</span>',
+    '<span class="to">The push refers to repository [ghcr.io/your-org/human]</span>',
+    '<span class="ts">sha256:abc123: Pushed</span>',
+    '<span class="ts">latest: digest: sha256:def456 size: 1847</span>',
+    '',
+    '<span class="tcy">🔍 Running Trivy security scan...</span>',
+    '<span class="ts">Total: 0 (CRITICAL: 0)</span>',
+    '<span class="ts">✅ No critical vulnerabilities found!</span>',
+    '',
+    '<span class="ts">✅ Image pushed: ghcr.io/your-org/human:abc1234def5678</span>',
+  ],80);
+}
+
+function runDeploy(){
+  showTerm('t8');
+  type('o8',[
+    '<span class="tcy">🔑 Setting up SSH agent...</span>',
+    '<span class="ts">SSH agent started. Key loaded.</span>',
+    '',
+    '<span class="tp">ssh ubuntu@203.45.12.67</span>',
+    '<span class="to">Welcome to Ubuntu 22.04.3 LTS</span>',
+    '',
+    '<span class="tc">🐳 Pulling new image...</span>',
+    '<span class="to">ghcr.io/org/human:abc1234: Pulling from org/human</span>',
+    '<span class="ts">Status: Downloaded newer image for ghcr.io/org/human:abc1234</span>',
+    '',
+    '<span class="tc">🛑 Stopping old container...</span>',
+    '<span class="ts">human-app stopped and removed</span>',
+    '',
+    '<span class="tc">🚀 Starting new container...</span>',
+    '<span class="ts">Container human-app started (port 9191)</span>',
+    '',
+    '<span class="tc">🏥 Health check...</span>',
+    '<span class="to">Attempt 1/6 - waiting 10s...</span>',
+    '<span class="to">Attempt 2/6 - status=000 - Spring Boot still starting...</span>',
+    '<span class="ts">Attempt 3/6 - status=200 ✅</span>',
+    '',
+    '<span class="tc">🧹 Cleaning old images...</span>',
+    '<span class="ts">Deleted 2 old images (saved 366MB)</span>',
+    '',
+    '<span class="ts">✅ Deployment complete! human v1.4.2 is live on production.</span>',
+    '<span class="tcy">📣 Slack: "✅ human deployed successfully!"</span>',
+  ],80);
+}
+
+function runSonar(){
+  showTerm('t11');
+  type('o11',[
+    '<span class="tcy">🔍 Running SonarQube analysis...</span>','',
+    '<span class="to">INFO: Scanner configuration file: /runner/sonar-scanner.properties</span>',
+    '<span class="to">INFO: Project root configuration file: NONE</span>',
+    '<span class="to">INFO: Indexing files...</span>',
+    '<span class="to">INFO: 234 files indexed</span>',
+    '<span class="to">INFO: Quality profile for java: "Sonar way"</span>',
+    '<span class="to">INFO: Sensor JavaSquidSensor [java]</span>',
+    '<span class="to">INFO: 234 source files to be analyzed</span>',
+    '',
+    '<span class="tcy">Quality Gate Results:</span>',
+    '<span class="ts">✅ Coverage on new code: 84.2% (threshold: 80%)</span>',
+    '<span class="ts">✅ Duplicated lines: 1.2% (threshold: 3%)</span>',
+    '<span class="ts">✅ Security vulnerabilities: 0 (threshold: 0)</span>',
+    '<span class="ts">✅ Bugs: 0 blockers (threshold: 0)</span>',
+    '<span class="tw">⚠️  Code smells: 8 (2.1 days of debt)</span>',
+    '',
+    '<span class="ts">Quality Gate: ✅ PASSED</span>',
+    '<span class="tcy">Pipeline continues to Docker build stage...</span>',
+  ],80);
+}
+
+function runRollback(){
+  showTerm('t13');
+  type('o13',[
+    '<span class="tcy">📋 Saving previous image tag: ghcr.io/org/human:prev-abc000</span>','',
+    '<span class="tc">🚀 Deploying: ghcr.io/org/human:new-def999...</span>',
+    '<span class="ts">Container started on port 9191</span>',
+    '',
+    '<span class="tc">🏥 Health checking...</span>',
+    '<span class="to">Attempt 1/6 - status=000 - starting...</span>',
+    '<span class="to">Attempt 2/6 - status=000 - starting...</span>',
+    '<span class="te">Attempt 3/6 - status=500 - INTERNAL SERVER ERROR</span>',
+    '<span class="te">Attempt 4/6 - status=500 - INTERNAL SERVER ERROR</span>',
+    '<span class="te">Attempt 5/6 - status=500</span>',
+    '<span class="te">Attempt 6/6 - status=500</span>',
+    '<span class="te">❌ Health check FAILED after 6 attempts!</span>',
+    '',
+    '<span class="tw">🔴 DEPLOYMENT FAILED — TRIGGERING AUTOMATIC ROLLBACK</span>',
+    '<span class="tc">Rolling back to: ghcr.io/org/human:prev-abc000</span>',
+    '<span class="ts">Previous container started...</span>',
+    '<span class="ts">Health check: 200 OK ✅</span>',
+    '<span class="ts">✅ ROLLBACK SUCCESSFUL! Production restored to previous version.</span>',
+    '',
+    '<span class="tpk">📣 Slack: "🔴 DEPLOYMENT FAILED + ROLLED BACK! Check pipeline logs."</span>',
+    '<span class="to">Total production downtime: ~0 seconds (health check failed before traffic)</span>',
+  ],80);
+}
+
+function runNotify(){
+  showTerm('t14');
+  type('o14',[
+    '<span class="tcy">Simulating Slack notifications during pipeline...</span>','',
+    '<span class="tpu">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>',
+    '<span class="tpu">Slack #deployments channel:</span>',
+    '',
+    '<span class="tw">🚀 Deployment Starting</span>',
+    '<span class="to">  Service:     human</span>',
+    '<span class="to">  Version:     abc1234def5678</span>',
+    '<span class="to">  Triggered by: moeen775</span>',
+    '<span class="to">  Branch:      main</span>',
+    '',
+    '<span class="to">... pipeline running ...</span>','',
+    '<span class="ts">✅ Deployment Successful!</span>',
+    '<span class="to">  Service:     human</span>',
+    '<span class="to">  Version:     abc1234def5678</span>',
+    '<span class="to">  Duration:    2m 14s</span>',
+    '<span class="to">  URL:         https://yourdomain.com</span>',
+    '',
+    '<span class="tpu">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>',
+    '<span class="tcy">Team sees real-time deploy status without opening GitHub. ✅</span>',
+  ],80);
+}
+
+function runHuman(){
+  showTerm('t16');
+  type('o16',[
+    '<span class="tcy">🔄 Full CI/CD Pipeline starting...</span>','',
+    '<span class="tpu">JOB 1: 🔨 Build, Test & Quality</span>',
+    '<span class="ts">  ☕ JDK 21 (temurin) ready</span>',
+    '<span class="ts">  📦 Gradle cache restored (saved 45s)</span>',
+    '<span class="ts">  🧪 47 tests passed (0 failed)</span>',
+    '<span class="ts">  📊 Coverage: 82.4% ✅</span>',
+    '<span class="ts">  🔍 SonarQube: Quality Gate PASSED ✅</span>',
+    '<span class="ts">  🔨 JAR built: human-0.0.1-SNAPSHOT.jar (42MB)</span>',
+    '<span class="ts">  JOB 1 complete in 1m 52s ✅</span>',
+    '',
+    '<span class="tpu">JOB 2: 🐳 Docker Build & Push</span>',
+    '<span class="ts">  🐳 Multi-stage build: 183MB ✅</span>',
+    '<span class="ts">  🔍 Trivy: 0 CRITICAL vulnerabilities ✅</span>',
+    '<span class="ts">  📤 Pushed: ghcr.io/org/human:abc1234 ✅</span>',
+    '<span class="ts">  JOB 2 complete in 0m 38s ✅</span>',
+    '',
+    '<span class="tpu">JOB 3: 🚀 Deploy to Production</span>',
+    '<span class="tw">  ⏸  Waiting for manual approval from team lead...</span>',
+    '<span class="ts">  ✅ Approved by: moeen775</span>',
+    '<span class="ts">  🔑 SSH connected to 203.45.12.67</span>',
+    '<span class="ts">  📋 Previous image saved for rollback</span>',
+    '<span class="ts">  🐳 New container started</span>',
+    '<span class="ts">  🏥 Health check: 200 OK ✅</span>',
+    '<span class="ts">  📣 Slack notified: "✅ Deployed human v1.4.2!"</span>',
+    '<span class="ts">  JOB 3 complete in 0m 52s ✅</span>',
+    '',
+    '<span class="tcy">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>',
+    '<span class="ts">✅ Full pipeline complete in 3m 22s</span>',
+    '<span class="ts">🎉 human v1.4.2 is live on https://yourdomain.com</span>',
+  ],80);
+}
+
+function validateChallenge(){
+  showTerm('t17');
+  const code=document.getElementById('c17').value;
+  const reqs=[
+    {ok:code.includes('name:'),label:'Workflow name defined'},
+    {ok:code.includes('push:')&&(code.includes('main')||code.includes('branches')),label:'push trigger on main'},
+    {ok:code.includes('pull_request:'),label:'pull_request trigger'},
+    {ok:code.includes('ubuntu-latest'),label:'runs-on: ubuntu-latest'},
+    {ok:code.includes('actions/checkout@v4'),label:'actions/checkout@v4 used'},
+    {ok:code.includes('actions/setup-java@v4')&&code.includes("'21'"),label:'Java 21 with setup-java@v4'},
+    {ok:code.includes('actions/cache@v4')&&code.includes('gradle'),label:'Gradle cache configured'},
+    {ok:code.includes('./gradlew test'),label:'./gradlew test runs'},
+    {ok:(code.includes('docker build')||code.includes('build-push-action'))&&(code.includes('docker push')||code.includes('push: true')),label:'Docker build and push'},
+    {ok:code.includes('needs:')&&(code.includes('docker')||code.includes('ci')),label:'Deploy job has needs: dependency'},
+    {ok:code.includes('curl')||code.includes('wget')||(code.includes('health')&&code.includes('check')),label:'Health check after deployment'},
+  ];
+  const lines=['<span class="tcy">🔍 Checking all 10 requirements...</span>',''];
+  let p=0;
+  reqs.forEach((r,i)=>{
+    if(r.ok){lines.push('<span class="ts">✅ ['+(i+1)+'] '+r.label+'</span>');p++;}
+    else lines.push('<span class="te">❌ ['+(i+1)+'] '+r.label+'</span>');
+  });
+  lines.push('');
+  if(p>=10){
+    lines.push('<span class="tpu">🏆 ALL REQUIREMENTS PASSED! You are a CI/CD Expert!</span>');
+    setTimeout(()=>{document.getElementById('victory').style.display='block';done.add(17);updateProg();},1500);
+  } else {
+    lines.push('<span class="tw">Score: '+p+'/'+reqs.length+' — keep going!</span>');
+  }
+  type('o17',lines,90);
+}
+
+updateProg();
+</script>
+</body>
+</html>

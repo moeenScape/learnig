@@ -1,0 +1,2560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nginx Zero → Expert</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Clash+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080c10;
+  --s1:#0e1318;
+  --s2:#131a22;
+  --s3:#1a2332;
+  --bd:#1e2d3d;
+  --bd2:#243447;
+  --green:#00ff88;
+  --blue:#4d9eff;
+  --orange:#ff8c42;
+  --red:#ff4d6a;
+  --yellow:#ffd166;
+  --purple:#c77dff;
+  --teal:#06d6a0;
+  --txt:#d4e0ed;
+  --muted:#5a7a94;
+  --code:#b8f0d0;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--txt);
+  font-family:'DM Mono',monospace;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+body::after{
+  content:'';position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 100% 60% at 0% 0%,rgba(0,255,136,0.04) 0%,transparent 55%),
+    radial-gradient(ellipse 70% 50% at 100% 100%,rgba(77,158,255,0.05) 0%,transparent 50%);
+  pointer-events:none;z-index:0;
+}
+
+/* ═══ LAYOUT ═══ */
+.shell{display:flex;min-height:100vh;position:relative;z-index:1}
+
+/* ═══ SIDEBAR ═══ */
+.nav{
+  width:272px;flex-shrink:0;
+  background:var(--s1);
+  border-right:1px solid var(--bd);
+  position:fixed;top:0;left:0;bottom:0;
+  overflow-y:auto;z-index:200;
+  display:flex;flex-direction:column;
+}
+.nav-top{
+  padding:22px 18px 18px;
+  border-bottom:1px solid var(--bd);
+  background:var(--s1);
+  position:sticky;top:0;z-index:10;
+}
+.logo-row{display:flex;align-items:center;gap:12px}
+.logo-icon{
+  width:42px;height:42px;
+  background:linear-gradient(135deg,var(--green),var(--teal));
+  border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;flex-shrink:0;
+}
+.logo-text{}
+.logo-name{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:22px;letter-spacing:2px;
+  color:#fff;line-height:1;
+}
+.logo-sub{font-size:9px;color:var(--muted);letter-spacing:3px;margin-top:2px}
+
+.nav-group{
+  padding:14px 16px 4px;
+  font-size:9px;color:var(--muted);
+  letter-spacing:3px;text-transform:uppercase;
+}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 12px;margin:1px 8px;
+  border-radius:7px;cursor:pointer;
+  font-size:11px;font-weight:500;
+  color:var(--muted);
+  border:1px solid transparent;
+  transition:all .15s;
+  position:relative;
+}
+.nav-item:hover{background:var(--s2);color:var(--txt)}
+.nav-item.active{
+  background:rgba(0,255,136,.08);
+  color:var(--green);
+  border-color:rgba(0,255,136,.2);
+}
+.nav-item.done::after{
+  content:'✓';
+  position:absolute;right:10px;
+  font-size:10px;color:var(--green);opacity:.6;
+}
+.ni{font-size:14px;width:20px;text-align:center;flex-shrink:0}
+
+.nav-bot{
+  margin-top:auto;
+  padding:16px 18px;
+  border-top:1px solid var(--bd);
+}
+.prog-label{
+  display:flex;justify-content:space-between;
+  font-size:9px;color:var(--muted);letter-spacing:2px;
+  margin-bottom:7px;
+}
+.prog-track{height:3px;background:var(--bd2);border-radius:2px;overflow:hidden}
+.prog-bar{
+  height:100%;
+  background:linear-gradient(90deg,var(--green),var(--teal));
+  border-radius:2px;width:0%;
+  transition:width .5s cubic-bezier(.4,0,.2,1);
+}
+.prog-xp{font-size:10px;color:var(--green);margin-top:5px}
+
+/* ═══ MAIN ═══ */
+.main{margin-left:272px;flex:1;display:flex;flex-direction:column;min-width:0}
+
+.topbar{
+  background:rgba(8,12,16,.85);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--bd);
+  padding:13px 36px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;
+}
+.bc{font-size:11px;color:var(--muted)}
+.bc em{color:var(--green);font-style:normal}
+.bc a:hover{color:var(--green)!important}
+.lv-pill{
+  padding:4px 14px;border-radius:20px;
+  font-size:9px;font-weight:700;letter-spacing:2px;
+}
+.lv-zero{background:rgba(0,255,136,.1);color:var(--green)}
+.lv-mid{background:rgba(255,140,66,.1);color:var(--orange)}
+.lv-adv{background:rgba(199,125,255,.1);color:var(--purple)}
+.lv-exp{background:rgba(255,77,106,.1);color:var(--red)}
+
+.page{padding:40px 44px;max-width:980px}
+
+/* ═══ SECTION ═══ */
+.sec{display:none}
+.sec.active{display:block;animation:rise .3s ease}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+.eyebrow{
+  font-size:9px;color:var(--green);
+  letter-spacing:4px;text-transform:uppercase;
+  margin-bottom:10px;
+}
+.headline{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:52px;letter-spacing:2px;
+  color:#fff;line-height:.95;
+  margin-bottom:16px;
+}
+.intro{
+  font-size:13px;color:var(--muted);
+  line-height:1.85;max-width:620px;
+  margin-bottom:36px;
+}
+
+/* ═══ CARDS ═══ */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin:22px 0}
+.card{
+  background:var(--s2);
+  border:1px solid var(--bd);
+  border-radius:10px;padding:18px;
+  transition:border-color .2s,transform .2s;
+}
+.card:hover{border-color:var(--green);transform:translateY(-2px)}
+.c-icon{font-size:24px;margin-bottom:10px}
+.c-title{font-size:12px;font-weight:700;color:#fff;margin-bottom:5px}
+.c-body{font-size:11px;color:var(--muted);line-height:1.65}
+
+/* ═══ CODE EDITOR ═══ */
+.editor{
+  background:var(--s1);
+  border:1px solid var(--bd);
+  border-radius:10px;overflow:hidden;
+  margin:22px 0;
+}
+.ebar{
+  background:var(--s2);
+  padding:10px 16px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--bd);
+}
+.efile{
+  font-size:11px;color:var(--muted);
+  display:flex;align-items:center;gap:8px;
+}
+.edot{width:7px;height:7px;border-radius:50%;background:var(--green)}
+.ebtns{display:flex;gap:8px}
+.ebtn{
+  padding:5px 14px;border-radius:5px;border:none;
+  cursor:pointer;font-family:'DM Mono',monospace;
+  font-size:10px;font-weight:700;letter-spacing:.5px;
+  transition:all .15s;
+}
+.run{background:var(--green);color:#000}
+.run:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.rst{background:var(--s3);color:var(--muted);border:1px solid var(--bd)}
+.rst:hover{color:var(--txt)}
+.sol{background:rgba(199,125,255,.12);color:var(--purple);border:1px solid rgba(199,125,255,.25)}
+.sol:hover{background:rgba(199,125,255,.2)}
+
+.carea{
+  width:100%;min-height:200px;
+  background:transparent;border:none;outline:none;
+  color:var(--code);
+  font-family:'DM Mono',monospace;
+  font-size:12.5px;line-height:1.9;
+  padding:18px 20px;
+  resize:vertical;tab-size:2;
+  caret-color:var(--green);
+}
+.carea::placeholder{color:var(--muted);opacity:.4}
+
+/* ═══ TERMINAL ═══ */
+.term{
+  background:#020508;
+  border:1px solid var(--bd);
+  border-radius:10px;overflow:hidden;
+  margin:14px 0;display:none;
+}
+.tbar{
+  background:var(--s2);padding:9px 14px;
+  display:flex;align-items:center;gap:6px;
+  border-bottom:1px solid var(--bd);
+}
+.td{width:10px;height:10px;border-radius:50%}
+.td1{background:#ff5f57}.td2{background:#febc2e}.td3{background:#28c840}
+.tlabel{font-size:10px;color:var(--muted);margin-left:8px}
+.tbody{
+  padding:14px 18px;
+  font-family:'DM Mono',monospace;
+  font-size:12px;line-height:2;
+  min-height:80px;max-height:380px;
+  overflow-y:auto;
+}
+.tp{color:var(--green)}.tc{color:var(--txt)}.to{color:#5a7a94}
+.ts{color:#00ff88}.te{color:var(--red)}.tw{color:var(--yellow)}
+.ti{color:var(--blue)}.tpu{color:var(--purple)}.tg{color:var(--teal)}
+
+/* ═══ DIAGRAM ═══ */
+.diag{
+  background:var(--s1);
+  border:1px solid var(--bd);
+  border-radius:10px;
+  padding:22px;margin:22px 0;
+  overflow-x:auto;
+}
+.dlabel{
+  font-size:9px;color:var(--muted);
+  letter-spacing:3px;text-transform:uppercase;
+  margin-bottom:14px;
+}
+
+/* ═══ QUIZ ═══ */
+.quiz{
+  background:var(--s2);
+  border:1px solid var(--bd);
+  border-radius:10px;
+  padding:22px;margin:26px 0;
+}
+.qq{font-size:14px;font-weight:700;color:#fff;margin-bottom:18px;line-height:1.5}
+.qopts{display:flex;flex-direction:column;gap:9px}
+.qo{
+  padding:12px 16px;border-radius:7px;
+  border:1px solid var(--bd);cursor:pointer;
+  font-size:12px;color:var(--txt);
+  background:var(--s3);transition:all .15s;
+}
+.qo:hover{border-color:var(--green);color:var(--green)}
+.qo.ok{border-color:var(--green)!important;background:rgba(0,255,136,.07);color:var(--green)!important;pointer-events:none}
+.qo.no{border-color:var(--red)!important;background:rgba(255,77,106,.07);color:var(--red)!important;pointer-events:none}
+.qfb{margin-top:14px;padding:12px 16px;border-radius:7px;font-size:11px;display:none;line-height:1.7}
+.qfb.show{display:block}
+.qfb.y{background:rgba(0,255,136,.07);border:1px solid rgba(0,255,136,.2);color:var(--green)}
+.qfb.n{background:rgba(255,77,106,.07);border:1px solid rgba(255,77,106,.2);color:var(--red)}
+
+/* ═══ ALERTS ═══ */
+.alert{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:13px 16px;border-radius:8px;
+  font-size:12px;line-height:1.75;margin:16px 0;
+}
+.a-tip{background:rgba(0,255,136,.06);border:1px solid rgba(0,255,136,.18);color:#7fffc4}
+.a-warn{background:rgba(255,209,102,.06);border:1px solid rgba(255,209,102,.18);color:var(--yellow)}
+.a-info{background:rgba(77,158,255,.06);border:1px solid rgba(77,158,255,.18);color:#90c8ff}
+.a-danger{background:rgba(255,77,106,.06);border:1px solid rgba(255,77,106,.18);color:var(--red)}
+
+/* ═══ STEPS ═══ */
+.steps{margin:20px 0}
+.step{display:flex;gap:16px;padding:16px 0;border-bottom:1px solid var(--bd)}
+.step:last-child{border-bottom:none}
+.snum{
+  width:30px;height:30px;border-radius:50%;flex-shrink:0;
+  background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.25);
+  color:var(--green);font-size:11px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+}
+.sbody{}
+.stitle{font-size:13px;font-weight:700;color:#fff;margin-bottom:5px}
+.sdesc{font-size:12px;color:var(--muted);line-height:1.75}
+
+/* ═══ TABLE ═══ */
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:12px}
+th{background:var(--s3);color:var(--blue);padding:10px 14px;text-align:left;font-weight:700;border:1px solid var(--bd)}
+td{padding:10px 14px;border:1px solid var(--bd);color:var(--txt);vertical-align:top;line-height:1.6}
+tr:hover td{background:var(--s2)}
+
+/* ═══ NAV ═══ */
+.lnav{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-top:52px;padding-top:26px;
+  border-top:1px solid var(--bd);
+}
+.nb{
+  padding:10px 24px;border-radius:7px;
+  border:1px solid var(--bd);background:var(--s2);
+  color:var(--txt);cursor:pointer;
+  font-family:'DM Mono',monospace;font-size:11px;font-weight:700;
+  display:flex;align-items:center;gap:8px;transition:all .15s;
+}
+.nb:hover{border-color:var(--green);color:var(--green)}
+.nb:disabled{opacity:.3;cursor:default}
+.nb.go{background:var(--green);color:#000;border-color:var(--green)}
+.nb.go:hover{filter:brightness(1.08)}
+
+/* ═══ MISC ═══ */
+code{
+  background:rgba(0,255,136,.08);color:#7fffc4;
+  padding:1px 7px;border-radius:4px;font-size:11px;
+}
+h3{font-size:14px;font-weight:700;color:#fff;margin:26px 0 10px;letter-spacing:.5px}
+h4{font-size:12px;font-weight:700;color:var(--blue);margin:18px 0 8px}
+p{font-size:13px;color:var(--muted);line-height:1.85;margin-bottom:10px}
+strong{color:var(--txt)}
+
+.victory{
+  text-align:center;
+  background:linear-gradient(135deg,rgba(0,255,136,.08),rgba(77,158,255,.08));
+  border:1px solid rgba(0,255,136,.25);
+  border-radius:16px;padding:52px 32px;margin:32px 0;
+}
+.v-icon{font-size:60px;margin-bottom:18px}
+.v-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:48px;letter-spacing:3px;
+  color:var(--green);margin-bottom:10px;
+}
+.v-sub{font-size:13px;color:var(--muted);line-height:1.8}
+
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--s1)}
+::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:3px}
+
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;background:rgba(0,255,136,.08);color:var(--green);border:1px solid rgba(0,255,136,.18);margin:2px}
+
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:20px 0}
+@media(max-width:700px){.two-col{grid-template-columns:1fr}}
+
+.highlight-box{
+  background:var(--s2);border:1px solid var(--bd2);
+  border-left:3px solid var(--green);
+  border-radius:0 8px 8px 0;
+  padding:14px 18px;margin:14px 0;
+  font-size:12px;color:var(--txt);line-height:1.8;
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- ═══════════ SIDEBAR ═══════════ -->
+<nav class="nav">
+  <div class="nav-top">
+    <div class="logo-row">
+      <div class="logo-icon">⚡</div>
+      <div class="logo-text">
+        <div class="logo-name">NGINX</div>
+        <div class="logo-sub">Zero → Expert</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-group">Zero — Foundations</div>
+  <div class="nav-item active" onclick="go(0)"><span class="ni">🌐</span>What is Nginx?</div>
+  <div class="nav-item" onclick="go(1)"><span class="ni">⚙️</span>Install & Architecture</div>
+  <div class="nav-item" onclick="go(2)"><span class="ni">📁</span>Config Structure</div>
+  <div class="nav-item" onclick="go(3)"><span class="ni">🖥️</span>Essential Commands</div>
+
+  <div class="nav-group">Beginner — Core</div>
+  <div class="nav-item" onclick="go(4)"><span class="ni">🔀</span>Static File Server</div>
+  <div class="nav-item" onclick="go(5)"><span class="ni">🔁</span>Reverse Proxy</div>
+  <div class="nav-item" onclick="go(6)"><span class="ni">🗺️</span>Location Blocks</div>
+  <div class="nav-item" onclick="go(7)"><span class="ni">🔢</span>Variables & Directives</div>
+
+  <div class="nav-group">Intermediate — Features</div>
+  <div class="nav-item" onclick="go(8)"><span class="ni">⚖️</span>Load Balancing</div>
+  <div class="nav-item" onclick="go(9)"><span class="ni">🔒</span>SSL / HTTPS</div>
+  <div class="nav-item" onclick="go(10)"><span class="ni">🛡️</span>Rate Limiting</div>
+  <div class="nav-item" onclick="go(11)"><span class="ni">💾</span>Caching</div>
+  <div class="nav-item" onclick="go(12)"><span class="ni">🗜️</span>Gzip & Compression</div>
+
+  <div class="nav-group">Advanced — Expert</div>
+  <div class="nav-item" onclick="go(13)"><span class="ni">📋</span>Logging & Debugging</div>
+  <div class="nav-item" onclick="go(14)"><span class="ni">🔐</span>Security Hardening</div>
+  <div class="nav-item" onclick="go(15)"><span class="ni">⚡</span>Performance Tuning</div>
+  <div class="nav-item" onclick="go(16)"><span class="ni">🌍</span>Upstream & Health Checks</div>
+  <div class="nav-item" onclick="go(17)"><span class="ni">☕</span>Spring Boot Production</div>
+  <div class="nav-item" onclick="go(18)"><span class="ni">🏆</span>Final Challenge</div>
+
+  <div class="nav-bot">
+    <div class="prog-label"><span>PROGRESS</span><span id="pct">0%</span></div>
+    <div class="prog-track"><div class="prog-bar" id="pbar"></div></div>
+    <div class="prog-xp" id="pxp">0 / 19 lessons complete</div>
+  </div>
+</nav>
+
+<!-- ═══════════ MAIN ═══════════ -->
+<main class="main">
+  <div class="topbar">
+    <div class="bc">
+      <a href="index.html" style="color: var(--muted); text-decoration: none; transition: color 0.2s;">🏠 home</a> / nginx / <em id="bcn">introduction</em>
+    </div>
+    <div class="lv-pill lv-zero" id="lvchip">ZERO</div>
+  </div>
+
+  <div class="page">
+
+  <!-- ════════════════════════════════════════════════
+       S0 — What is Nginx
+  ════════════════════════════════════════════════ -->
+  <div class="sec active" id="s0">
+    <div class="eyebrow">LESSON 01 — INTRODUCTION</div>
+    <div class="headline">WHAT IS NGINX?</div>
+    <div class="intro">Nginx (pronounced "engine-x") was created in 2004 by Igor Sysoev to solve the C10K problem — handling 10,000 concurrent connections. Today it powers over <strong>34% of all websites</strong>, including Netflix, Dropbox, GitHub, and WordPress.com.</div>
+
+    <div class="grid">
+      <div class="card"><div class="c-icon">🌐</div><div class="c-title">Web Server</div><div class="c-body">Serves static files (HTML, CSS, JS, images) directly to browsers — blazing fast.</div></div>
+      <div class="card"><div class="c-icon">🔀</div><div class="c-title">Reverse Proxy</div><div class="c-body">Sits in front of your app server. Forwards client requests, returns responses.</div></div>
+      <div class="card"><div class="c-icon">⚖️</div><div class="c-title">Load Balancer</div><div class="c-body">Distributes traffic across multiple app instances for high availability.</div></div>
+      <div class="card"><div class="c-icon">💾</div><div class="c-title">HTTP Cache</div><div class="c-body">Caches backend responses. Serves cached content without hitting your app.</div></div>
+      <div class="card"><div class="c-icon">🔒</div><div class="c-title">SSL Terminator</div><div class="c-body">Handles HTTPS/TLS so your app only needs to deal with plain HTTP internally.</div></div>
+      <div class="card"><div class="c-icon">🚪</div><div class="c-title">API Gateway</div><div class="c-body">Routes /api/* → backend, /static/* → CDN, /admin/* → separate service.</div></div>
+    </div>
+
+    <div class="diag">
+      <div class="dlabel">NGINX IN YOUR ARCHITECTURE</div>
+      <pre style="color:#5a7a94;line-height:2.3;font-size:12px">
+  <span style="color:#ffd166">Without Nginx:</span>
+  Browser  ──────────────────────────────►  Spring Boot :9191
+
+  <span style="color:#00ff88">With Nginx:</span>
+  Browser  ──►  <span style="color:#00ff88">Nginx :80/:443</span>  ──►  Spring Boot :9191
+                       │
+                       ├── Handle SSL/TLS termination
+                       ├── Serve static files (no app needed)
+                       ├── Rate limit abusive IPs
+                       ├── Cache frequent responses
+                       ├── Load balance across 3 instances
+                       ├── Add security headers
+                       └── Log every request with timing
+      </pre>
+    </div>
+
+    <h3>Nginx vs Apache — Why Nginx wins at scale</h3>
+    <table>
+      <tr><th>Feature</th><th>Nginx</th><th>Apache</th></tr>
+      <tr><td>Architecture</td><td>Event-driven, async (single thread handles thousands)</td><td>Process/thread per connection</td></tr>
+      <tr><td>Memory under load</td><td>~2.5MB for 10k connections</td><td>~300MB for 10k connections</td></tr>
+      <tr><td>Static file speed</td><td>⚡ Extremely fast</td><td>Good</td></tr>
+      <tr><td>Config syntax</td><td>Block-based, clean</td><td>.htaccess, verbose</td></tr>
+      <tr><td>Reverse proxy</td><td>Built-in, production-grade</td><td>Module required</td></tr>
+    </table>
+
+    <div class="quiz">
+      <div class="qq">🧠 What problem was Nginx originally created to solve?</div>
+      <div class="qopts">
+        <div class="qo" onclick="Q(this,false,0)">A) Replace Apache's .htaccess system</div>
+        <div class="qo" onclick="Q(this,true,0)">B) Handle 10,000 concurrent connections (the C10K problem)</div>
+        <div class="qo" onclick="Q(this,false,0)">C) Provide a faster PHP runtime</div>
+        <div class="qo" onclick="Q(this,false,0)">D) Create a new SSL protocol</div>
+      </div>
+      <div class="qfb" id="qf0"></div>
+    </div>
+
+    <div class="lnav">
+      <button class="nb" disabled>← Prev</button>
+      <button class="nb go" onclick="go(1)">Install & Architecture →</button>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       S1 — Install & Architecture
+  ════════════════════════════════════════════════ -->
+  <div class="sec" id="s1">
+    <div class="eyebrow">LESSON 02 — INSTALL</div>
+    <div class="headline">INSTALL &<br>ARCHITECTURE</div>
+    <div class="intro">Install Nginx and understand how it processes requests internally — the event loop that makes it handle millions of connections.</div>
+
+    <div class="editor">
+      <div class="ebar">
+        <div class="efile"><div class="edot"></div>terminal — ubuntu/debian install</div>
+        <div class="ebtns"><button class="ebtn run" onclick="runInstall()">▶ RUN</button></div>
+      </div>
+      <textarea class="carea" spellcheck="false"># Install Nginx
+sudo apt update
+sudo apt install nginx -y
+
+# Check version
+nginx -v
+
+# Start the service
+sudo systemctl start nginx
+sudo systemctl enable nginx          # Auto-start on boot
+
+# Verify it's running
+sudo systemctl status nginx
+
+# Test in browser - open http://localhost
+# You should see "Welcome to nginx!" page
+
+# Check which config file is loaded
+nginx -T | head -20                  # Print entire effective config</textarea>
+    </div>
+    <div class="term" id="t1"><div class="tbar"><div class="td td1"></div><div class="td td2"></div><div class="td td3"></div><div class="tlabel">output</div></div><div class="tbody" id="o1"></div></div>
+
+    <h3>How Nginx Handles Requests Internally</h3>
+    <div class="diag">
+      <div class="dlabel">NGINX EVENT-DRIVEN ARCHITECTURE</div>
+      <pre style="color:#5a7a94;line-height:2.2;font-size:12px">
+  <span style="color:#ffd166">Apache (thread-per-request):</span>
+  Request 1 → Thread 1 (blocked waiting for DB)
+  Request 2 → Thread 2 (blocked waiting for DB)
+  Request 3 → Thread 3 (blocked waiting for DB)
+  1000 requests → 1000 threads → 💥 memory exhausted
+
+  <span style="color:#00ff88">Nginx (event-driven, non-blocking):</span>
+  Master Process
+  └── Worker 1 (handles ALL connections with event loop)
+      ├── Connection 1: sent request to backend... (waiting, non-blocking)
+      ├── Connection 2: received response, sending to client
+      ├── Connection 3: reading request headers
+      └── Connection 4: serving cached file
+  Worker 2, Worker 3, Worker 4... (one per CPU core)
+
+  Result: 10,000 connections → same memory as 10 connections ✅
+      </pre>
+    </div>
+
+    <div class="alert a-info">ℹ️ <span>Nginx uses the OS's <strong>epoll</strong> (Linux) or <strong>kqueue</strong> (macOS/BSD) event notification system — the same tech that powers Node.js's event loop. This is why both are so fast at I/O.</span></div>
+
+    <div class="quiz">
+      <div class="qq">🧠 Why does Nginx use far less memory than Apache under high load?</div>
+      <div class="qopts">
+        <div class="qo" onclick="Q(this,false,1)">A) Nginx uses C++ while Apache uses C</div>
+        <div class="qo" onclick="Q(this,true,1)">B) Nginx is event-driven and non-blocking — one worker handles thousands of connections asynchronously instead of one thread per connection</div>
+        <div class="qo" onclick="Q(this,false,1)">C) Nginx compresses all data automatically</div>
+        <div class="qo" onclick="Q(this,false,1)">D) Nginx doesn't support dynamic content</div>
+      </div>
+      <div class="qfb" id="qf1"></div>
+    </div>
+
+    <div class="lnav">
+      <button class="nb" onclick="go(0)">← Prev</button>
+      <button class="nb go" onclick="go(2)">Config Structure →</button>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       S2 — Config Structure
+  ════════════════════════════════════════════════ -->
+  <div class="sec" id="s2">
+    <div class="eyebrow">LESSON 03 — CONFIGURATION</div>
+    <div class="headline">CONFIG FILE<br>STRUCTURE</div>
+    <div class="intro">Everything in Nginx is configured via text files. Understanding the <strong>context hierarchy</strong> is the key to mastering Nginx. Settings in outer contexts apply to inner contexts unless overridden.</div>
+
+    <div class="diag">
+      <div class="dlabel">FILE SYSTEM LAYOUT</div>
+      <pre style="color:#5a7a94;line-height:2.1;font-size:12px">
+  <span style="color:#00ff88">/etc/nginx/</span>
+  ├── <span style="color:#4d9eff">nginx.conf</span>              ← Main config. Includes everything else.
+  ├── <span style="color:#4d9eff">sites-available/</span>        ← ALL site configs (active or not)
+  │   ├── default             ← Default Nginx welcome page
+  │   └── <span style="color:#00ff88">human</span>              ← Your Spring Boot app config
+  ├── <span style="color:#4d9eff">sites-enabled/</span>          ← Only ACTIVE configs (symlinks to sites-available)
+  │   └── human ──────────────► ../sites-available/human
+  ├── <span style="color:#4d9eff">conf.d/</span>                 ← Additional config snippets (auto-included)
+  ├── <span style="color:#4d9eff">snippets/</span>               ← Reusable config fragments
+  │   ├── fastcgi-php.conf
+  │   └── snakeoil.conf
+  ├── modules-enabled/        ← Loaded Nginx modules
+  └── mime.types              ← File extension → Content-Type mapping
+
+  <span style="color:#ffd166">Log files:</span>
+  /var/log/nginx/access.log   ← All HTTP requests
+  /var/log/nginx/error.log    ← Errors and warnings
+      </pre>
+    </div>
+
+    <h3>Context Hierarchy</h3>
+    <div class="editor">
+      <div class="ebar">
+        <div class="efile"><div class="edot"></div>/etc/nginx/nginx.conf — full structure</div>
+      </div>
+      <textarea class="carea" spellcheck="false" style="min-height:400px"># ── MAIN CONTEXT (global) ────────────────────────────────────────
+user www-data;                       # Run worker processes as this user
+worker_processes auto;               # One worker per CPU core (auto-detect)
+pid /run/nginx.pid;                  # PID file location
+error_log /var/log/nginx/error.log warn;
+
+# ── EVENTS CONTEXT ────────────────────────────────────────────────
+events {
+    worker_connections 1024;         # Max connections per worker process
+    use epoll;                       # Use epoll on Linux (most efficient)
+    multi_accept on;                 # Accept multiple connections at once
+}
+
+# ── HTTP CONTEXT ──────────────────────────────────────────────────
+http {
+    include       /etc/nginx/mime.types;
+    default_type  application/octet-stream;
+
+    # Settings here apply to ALL server blocks below
+    sendfile        on;
+    keepalive_timeout 65;
+    server_tokens off;               # Hide Nginx version in headers
+
+    # Include all site configs
+    include /etc/nginx/conf.d/*.conf;
+    include /etc/nginx/sites-enabled/*;
+
+    # ── SERVER CONTEXT (virtual host) ─────────────────────────────
+    server {
+        listen 80;
+        server_name example.com www.example.com;
+
+        # Settings here apply to all locations in this server
+
+        # ── LOCATION CONTEXT ──────────────────────────────────────
+        location / {
+            # Settings here apply only to this location
+            proxy_pass http://localhost:9191;
+        }
+
+        location /static/ {
+            root /var/www/html;      # Different behavior per location
+        }
+    }
+}</textarea>
+    </div>
+
+    <div class="alert a-tip">💡 <span>The <strong>context inheritance</strong> rule: a directive set in <code>http {}</code> is inherited by all <code>server {}</code> blocks, which is inherited by all <code>location {}</code> blocks — unless overridden at a lower level.</span></div>
+
+    <h3>Enable a Site (symlink pattern)</h3>
+    <div class="editor">
+      <div class="ebar">
+        <div class="efile"><div class="edot"></div>terminal — enable site</div>
+        <div class="ebtns"><button class="ebtn run" onclick="runEnableSite()">▶ RUN</button></div>
+      </div>
+      <textarea class="carea" spellcheck="false" style="min-height:160px"># Create your config in sites-available
+sudo nano /etc/nginx/sites-available/human
+
+# Enable it by creating a symlink in sites-enabled
+sudo ln -s /etc/nginx/sites-available/human /etc/nginx/sites-enabled/
+
+# ALWAYS test config before reloading!
+sudo nginx -t
+
+# Reload without downtime
+sudo systemctl reload nginx</textarea>
+    </div>
+    <div class="term" id="t2b"><div class="tbar"><div class="td td1"></div><div class="td td2"></div><div class="td td3"></div><div class="tlabel">output</div></div><div class="tbody" id="o2b"></div></div>
+
+    <div class="quiz">
+      <div class="qq">🧠 You add a directive to the <code>http {}</code> block. Where does it apply?</div>
+      <div class="qopts">
+        <div class="qo" onclick="Q(this,false,2)">A) Only to the first server block</div>
+        <div class="qo" onclick="Q(this,true,2)">B) To all server and location blocks inside http, unless they override it</div>
+        <div class="qo" onclick="Q(this,false,2)">C) Only to static file locations</div>
+        <div class="qo" onclick="Q(this,false,2)">D) It doesn't apply to nested contexts</div>
+      </div>
+      <div class="qfb" id="qf2"></div>
+    </div>
+
+    <div class="lnav">
+      <button class="nb" onclick="go(1)">← Prev</button>
+      <button class="nb go" onclick="go(3)">Essential Commands →</button>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       S3 — Essential Commands
+  ════════════════════════════════════════════════ -->
+  <div class="sec" id="s3">
+    <div class="eyebrow">LESSON 04 — COMMANDS</div>
+    <div class="headline">ESSENTIAL<br>COMMANDS</div>
+    <div class="intro">These are the commands you will use every single day working with Nginx. Memorise them.</div>
+
+    <div class="editor">
+      <div class="ebar">
+        <div class="efile"><div class="edot"></div>nginx command reference</div>
+        <div class="ebtns"><button class="ebtn run" onclick="runCmds()">▶ SIMULATE ALL</button></div>
+      </div>
+      <textarea class="carea" spellcheck="false" style="min-height:420px">## ── SERVICE CONTROL ─────────────────────────────────────────────
+sudo systemctl start nginx           # Start Nginx
+sudo systemctl stop nginx            # Stop Nginx (drops all connections)
+sudo systemctl restart nginx         # Stop + Start (brief downtime)
+sudo systemctl reload nginx          # Reload config (ZERO downtime) ✅
+sudo systemctl enable nginx          # Start automatically at boot
+sudo systemctl status nginx          # Show running status + recent logs
+
+## ── CONFIG MANAGEMENT ────────────────────────────────────────────
+sudo nginx -t                        # ✅ Test config syntax (ALWAYS do before reload!)
+sudo nginx -T                        # Print full effective config to stdout
+sudo nginx -s reload                 # Alternative to systemctl reload
+sudo nginx -s stop                   # Alternative to systemctl stop
+nginx -v                             # Show version
+nginx -V                             # Show version + compiled modules + flags
+
+## ── LOGS ─────────────────────────────────────────────────────────
+sudo tail -f /var/log/nginx/access.log    # Watch all incoming requests
+sudo tail -f /var/log/nginx/error.log     # Watch errors in real time
+sudo cat /var/log/nginx/error.log | grep "crit"   # Filter critical errors
+
+## ── SITE MANAGEMENT ──────────────────────────────────────────────
+sudo ln -s /etc/nginx/sites-available/human /etc/nginx/sites-enabled/  # Enable
+sudo rm /etc/nginx/sites-enabled/human     # Disable (don't delete sites-available!)
+
+## ── DEBUGGING ────────────────────────────────────────────────────
+curl -I http://localhost                   # Check response headers
+curl -v http://localhost/api/test          # Verbose request/response
+curl -H "Host: human.com" http://localhost # Test virtual host</textarea>
+    </div>
+    <div class="term" id="t3"><div class="tbar"><div class="td td1"></div><div class="td td2"></div><div class="td td3"></div><div class="tlabel">simulation</div></div><div class="tbody" id="o3"></div></div>
+
+    <div class="alert a-warn">⚠️ <span>ALWAYS run <code>sudo nginx -t</code> before <code>sudo systemctl reload nginx</code>. A syntax error in your config will crash Nginx when you reload, taking down your site instantly.</span></div>
+
+    <table>
+      <tr><th>Command</th><th>When to use</th></tr>
+      <tr><td><code>nginx -t</code></td><td>After every config change, before reload</td></tr>
+      <tr><td><code>systemctl reload nginx</code></td><td>Apply config changes with zero downtime</td></tr>
+      <tr><td><code>systemctl restart nginx</code></td><td>Only when changing worker processes or modules</td></tr>
+      <tr><td><code>tail -f /var/log/nginx/error.log</code></td><td>Debug why requests are failing</td></tr>
+      <tr><td><code>nginx -T</code></td><td>See the complete merged config (great for debugging)</td></tr>
+    </table>
+
+    <div class="lnav">
+      <button class="nb" onclick="go(2)">← Prev</button>
+      <button class="nb go" onclick="go(4)">Static File Server →</button>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       S4 — Static File Server
+  ════════════════════════════════════════════════ -->
+  <div class="sec" id="s4">
+    <div class="eyebrow">LESSON 05 — BEGINNER</div>
+    <div class="headline">STATIC FILE<br>SERVER</div>
+    <div class="intro">Nginx's fastest use case — serving HTML, CSS, JS, and images directly from disk. No app server needed. This is how most CDNs and frontend deployments work.</div>
+
+    <div class="editor">
+      <div class="ebar">
+        <div class="efile"><div class="edot"></div>/etc/nginx/sites-available/static-site</div>
+      </div>
+      <textarea class="carea" spellcheck="false" style="min-height:340px">server {
+    listen 80;
+    server_name mysite.com www.mysite.com;
+
+    # Document root — where your files live
+    root /var/www/mysite;
+
+    # Default file to serve when directory is requested
+    index index.html index.htm;
+
+    # Main location — try to serve file, then directory, then 404
+    location / {
+        try_files $uri $uri/ =404;
+        # $uri      = try exact file match (/about → /var/www/mysite/about)
+        # $uri/     = try as directory (/about/ → /var/www/mysite/about/index.html)
+        # =404      = return 404 if nothing found
+    }
+
+    # Cache static assets for 1 year (with content hash in filename)
+    location ~* \.(css|js|png|jpg|jpeg|gif|ico|svg|woff2|woff)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        access_log off;              # Don't log static file requests
+    }
+
+    # Custom error pages
+    error_page 404 /404.html;
+    error_page 500 502 503 504 /50x.html;
+
+    location = /404.html {
+        internal;                    # Only accessible internally (not directly)
+    }
+}</textarea>
+    </div>
+
+    <h3>Serve a React / Angular / Vue Build</h3>
+    <div class="editor">
+      <div class="ebar">
+        <div class="efile"><div class="edot"></div>/etc/nginx/sites-available/spa</div>
+      </div>
+      <textarea class="carea" spellcheck="false" style="min-height:200px">server {
+    listen 80;
+    server_name app.example.com;
+
+    root /var/www/react-build;
+    index index.html;
+
+    location / {
+        # SPA routing: always serve index.html (React Router handles the rest)
+        try_files $uri $uri/ /index.html;
+        # Without this, refreshing /dashboard gives 404 because
+        # the file /dashboard doesn't exist on disk!
+    }
+
+    location /static/ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+}</textarea>
+    </div>
+
+    <div class="alert a-tip">💡 <span>The <code>try_files $uri $uri/ /index.html</code> pattern is essential for Single Page Applications (React, Angular, Vue). Without it, direct URL access or page refresh breaks with a 404.</span></div>
+
+    <div class="quiz">
+      <div class="qq">🧠 A user visits <code>/dashboard</code> on your React app. <code>try_files $uri $uri/ /index.html</code> — what file does Nginx ultimately serve?</div>
+      <div class="qopts">
+        <div class="qo" onclick="Q(this,false,4)">A) /var/www/react-build/dashboard (the file)</div>
+        <div class="qo" onclick="Q(this,false,4)">B) /var/www/react-build/dashboard/index.html (the directory)</div>
+        <div class="qo" onclick="Q(this,true,4)">C) /var/www/react-build/index.html (fallback), letting React Router render /dashboard</div>
+        <div class="qo" onclick="Q(this,false,4)">D) A 404 error</div>
+      </div>
+      <div class="qfb" id="qf4"></div>
+    </div>
+
+    <div class="lnav">
+      <button class="nb" onclick="go(3)">← Prev</button>
+      <button class="nb go" onclick="go(5)">Reverse Proxy →</button>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       S5 — Reverse Proxy
+  ════════════════════════════════════════════════ -->
+  <div class="sec" id="s5">
+    <div class="eyebrow">LESSON 06 — BEGINNER</div>
+    <div class="headline">REVERSE<br>PROXY</div>
+    <div class="intro">The most common Nginx use case. Nginx receives requests on port 80/443, forwards them to your backend, and returns the response to the client.</div>
+
+    <div class="diag">
+      <div class="dlabel">REVERSE PROXY FLOW</div>
+      <pre style="color:#5a7a94;line-height:2.3;font-size:12px">
+  Client Browser
+      │  GET https://human.com/api/employees
+      ▼
+  <span style="color:#00ff88">Nginx :443</span>  ← Handles SSL, rate limiting, headers
+      │  proxy_pass → http://localhost:9191/api/employees
+      ▼
+  <span style="color:#4d9eff">Spring Boot :9191</span>  ← Only accessible internally
+      │  SELECT * FROM employees WHERE...
+      ▼
+  <span style="color:#ffd166">Oracle DB :1521</span>
+      │
+      ▼  Response flows back through Nginx to client
+      </pre>
+    </div>
+
+    <h3>✏️ Practice — Write a Reverse Proxy Config</h3>
+    <div class="editor">
+      <div class="ebar">
+        <div class="efile"><div class="edot"></div>/etc/nginx/sites-available/human</div>
+        <div class="ebtns">
+          <button class="ebtn rst" onclick="resetCode('c5','')">Clear</button>
+          <button class="ebtn sol" onclick="showSol('c5',sol5)">Solution</button>
+          <button class="ebtn run" onclick="validateProxy()">▶ Validate</button>
+        </div>
+      </div>
+      <textarea class="carea" id="c5" spellcheck="false" placeholder="# Write a reverse proxy config that:
+# 1. Listens on port 80
+# 2. server_name is yourdomain.com
+# 3. Forwards ALL requests to http://localhost:9191
+# 4. Passes the original Host header
+# 5. Passes the real client IP in X-Real-IP
+# 6. Sets proxy_connect_timeout to 30s
+# 7. Sets proxy_read_timeout to 120s (for batch jobs)"></textarea>
+    </div>
+    <div class="term" id="t5"><div class="tbar"><div class="td td1"></div><div class="td td2"></div><div class="td td3"></div><div class="tlabel">validation</div></div><div class="tbody" id="o5"></div></div>
+
+    <h3>Complete Reference — All Proxy Headers Explained</h3>
+    <div class="editor">
+      <div class="ebar">
+        <div class="efile"><div class="edot"></div>proxy headers reference</div>
+      </div>
+      <textarea class="carea" spellcheck="false" style="min-height:300px">location / {
+    proxy_pass http://localhost:9191;
+
+    # ── HEADERS YOUR APP NEEDS ──────────────────────────────────
+    proxy_set_header Host              $host;
+    # Passes: "yourdomain.com" — your app needs this for virtual hosting
+
+    proxy_set_header X-Real-IP         $remote_addr;
+    # Passes: "203.45.12.67" — the actual client IP address
+    # Without this, your app sees "127.0.0.1" (Nginx's IP)
+
+    proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+    # Passes: "203.45.12.67, 10.0.0.1" — full proxy chain
+
+    proxy_set_header X-Forwarded-Proto $scheme;
+    # Passes: "https" — so your app knows the original protocol
+    # Important for generating correct redirect URLs
+
+    # ── TIMEOUTS ────────────────────────────────────────────────
+    proxy_connect_timeout 30s;         # Max time to connect to backend
+    proxy_send_timeout    60s;         # Max time to send request to backend
+    proxy_read_timeout    120s;        # Max time to wait for response (increase for batch!)
+
+    # ── BUFFERING ───────────────────────────────────────────────
+    proxy_buffering on;                # Buffer responses (better performance)
+    proxy_buffer_size 4k;
+    proxy_buffers 8 4k;
+}</textarea>
+    </div>
+
+    <div class="quiz">
+      <div class="qq">🧠 Your Spring Boot app logs show all requests coming from 127.0.0.1 instead of real client IPs. What's missing from your Nginx config?</div>
+      <div class="qopts">
+        <div class="qo" onclick="Q(this,false,5)">A) proxy_pass directive</div>
+        <div class="qo" onclick="Q(this,true,5)">B) proxy_set_header X-Real-IP $remote_addr — without this, app only sees Nginx's loopback address</div>
+        <div class="qo" onclick="Q(this,false,5)">C) listen 80 directive</div>
+        <div class="qo" onclick="Q(this,false,5)">D) gzip compression</div>
+      </div>
+      <div class="qfb" id="qf5"></div>
+    </div>
+
+    <div class="lnav">
+      <button class="nb" onclick="go(4)">← Prev</button>
+      <button class="nb go" onclick="go(6)">Location Blocks →</button>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       S6 — Location Blocks
+  ════════════════════════════════════════════════ -->
+  <div class="sec" id="s6">
+    <div class="eyebrow">LESSON 07 — BEGINNER</div>
+    <div class="headline">LOCATION<br>BLOCKS</div>
+    <div class="intro">Location blocks are the most powerful and confusing part of Nginx. They match incoming request URIs and apply different rules. Understanding matching priority is critical.</div>
+
+    <div class="diag">
+      <div class="dlabel">LOCATION MATCHING PRIORITY (highest to lowest)</div>
+      <pre style="color:#5a7a94;line-height:2.2;font-size:12px">
+  Priority 1 (highest): <span style="color:#ff4d6a">location = /exact</span>       Exact string match. Stops immediately.
+  Priority 2:           <span style="color:#ffd166">location ^~ /prefix</span>    Prefix match. Stops regex from running.
+  Priority 3:           <span style="color:#c77dff">location ~ \.php$</span>      Case-SENSITIVE regex match.
+  Priority 3:           <span style="color:#c77dff">location ~* \.PHP$</span>     Case-INSENSITIVE regex match.
+  Priority 4 (lowest):  <span style="color:#00ff88">location /prefix</span>       Regular prefix match (longest wins).
+
+  ┌────────────────────────────────────────────────────────┐
+  │  Request: GET /api/users/123                           │
+  │                                                        │
+  │  location = /api/users/123  → MATCHES (exact, wins!) │
+  │  location ^~ /api/          → would match             │
+  │  location ~ /api/\w+        → would match             │
+  │  location /api/             → would match             │
+  └────────────────────────────────────────────────────────┘
+      </pre>
+    </div>
+
+    <div class="editor">
+      <div class="ebar">
+        <div class="efile"><div class="edot"></div>/etc/nginx/sites-available/human — all location types</div>
+        <div class="ebtns"><button class="ebtn run" onclick="runLocations()">▶ Test Matching</button></div>
+      </div>
+      <textarea class="carea" spellcheck="false" style="min-height:500px">server {
+    listen 80;
+    server_name yourdomain.com;
+
+    # ── EXACT MATCH (=) — highest priority ──────────────────────
+    # Only matches /health exactly (not /health/ or /health/check)
+    location = /health {
+        return 200 '{"status":"UP"}';
+        add_header Content-Type application/json;
+    }
+
+    # ── PREFIX STOP (^~) — prevents regex matching ───────────────
+    # Matches /static/... and stops checking regex locations
+    location ^~ /static/ {
+        root /var/www;
+        expires 1y;
+        access_log off;
+    }
+
+    # ── CASE-INSENSITIVE REGEX (~*) ──────────────────────────────
+    # Match image files regardless of extension case (.PNG or .png)
+    location ~* \.(jpg|jpeg|png|gif|ico|svg|webp)$ {
+        root /var/www/uploads;
+        expires 30d;
+        add_header Cache-Control "public";
+    }
+
+    # ── API ROUTES — proxy to Spring Boot ────────────────────────
+    location /api/ {
+        proxy_pass http://localhost:9191;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_read_timeout 120s;
+    }
+
+    # ── ACTUATOR — internal only ─────────────────────────────────
+    location /actuator/ {
+        allow 127.0.0.1;
+        allow 10.0.0.0/8;
+        deny all;
+        proxy_pass http://localhost:9191;
+    }
+
+    # ── SWAGGER UI ───────────────────────────────────────────────
+    location /swagger-ui/ {
+        proxy_pass http://localhost:9191;
+    }
+
+    # ── DEFAULT — catch everything else ──────────────────────────
+    location / {
+        proxy_pass http://localhost:9191;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}</textarea>
+    </div>
+    <div class="term" id="t6"><div class="tbar"><div class="td td1"></div><div class="td td2"></div><div class="td td3"></div><div class="tlabel">location matching test</div></div><div class="tbody" id="o6"></div></div>
+
+    <div class="alert a-warn">⚠️ <span>A common mistake: putting <code>location /</code> before more specific locations. <strong>Order matters for regex</strong> — Nginx checks regex locations top-to-bottom. Exact and prefix matches use longest-match logic regardless of order.</span></div>
+
+    <div class="quiz">
+      <div class="qq">🧠 Request comes in for <code>/actuator/health</code>. You have both <code>location /actuator/</code> and <code>location /</code>. Which matches?</div>
+      <div class="qopts">
+        <div class="qo" onclick="Q(this,false,6)">A) location / because it comes last</div>
+        <div class="qo" onclick="Q(this,true,6)">B) location /actuator/ because it's the longer (more specific) prefix match</div>
+        <div class="qo" onclick="Q(this,false,6)">C) Both match simultaneously</div>
+        <div class="qo" onclick="Q(this,false,6)">D) Neither — exact match is required</div>
+      </div>
+      <div class="qfb" id="qf6"></div>
+    </div>
+
+    <div class="lnav">
+      <button class="nb" onclick="go(5)">← Prev</button>
+      <button class="nb go" onclick="go(7)">Variables & Directives →</button>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       S7 — Variables & Directives
+  ════════════════════════════════════════════════ -->
+  <div class="sec" id="s7">
+    <div class="eyebrow">LESSON 08 — BEGINNER</div>
+    <div class="headline">VARIABLES &<br>DIRECTIVES</div>
+    <div class="intro">Nginx has dozens of built-in variables that give you access to request/response data. Understanding them lets you build dynamic configs.</div>
+
+    <table>
+      <tr><th>Variable</th><th>Value Example</th><th>Use case</th></tr>
+      <tr><td><code>$host</code></td><td>yourdomain.com</td><td>Pass original Host header</td></tr>
+      <tr><td><code>$remote_addr</code></td><td>203.45.12.67</td><td>Real client IP</td></tr>
+      <tr><td><code>$request_uri</code></td><td>/api/users?page=1</td><td>Full URI with query string</td></tr>
+      <tr><td><code>$uri</code></td><td>/api/users</td><td>URI without query string</td></tr>
+      <tr><td><code>$args</code></td><td>page=1&limit=20</td><td>Query string parameters</td></tr>
+      <tr><td><code>$scheme</code></td><td>https</td><td>http or https</td></tr>
+      <tr><td><code>$request_method</code></td><td>GET</td><td>HTTP method</td></tr>
+      <tr><td><code>$status</code></td><td>200</td><td>Response status code</td></tr>
+      <tr><td><code>$request_time</code></td><td>0.045</td><td>Total request time in seconds</td></tr>
+      <tr><td><code>$upstream_response_time</code></td><td>0.043</td><td>Time your backend took</td></tr>
+      <tr><td><code>$http_user_agent</code></td><td>Mozilla/5.0...</td><td>Client's browser/agent string</td></tr>
+      <tr><td><code>$http_referer</code></td><td>https://google.com</td><td>Where request came from</td></tr>
+      <tr><td><code>$server_name</code></td><td>yourdomain.com</td><td>Matched server_name</td></tr>
+      <tr><td><code>$body_bytes_sent</code></td><td>4521</td><td>Response body size in bytes</td></tr>
+    </table>
+
+    <div class="editor">
+      <div class="ebar">
+        <div class="efile"><div class="edot"></div>using variables in config</div>
+      </div>
+      <textarea class="carea" spellcheck="false" style="min-height:280px">server {
+    listen 80;
+    server_name yourdomain.com;
+
+    # Use $scheme and $host to build redirect URL
+    return 301 https://$host$request_uri;  # HTTP → HTTPS redirect
+
+    # Custom 404 with variables
+    error_page 404 = @not_found;
+    location @not_found {
+        return 404 '{"error":"Not found","path":"$uri"}';
+        add_header Content-Type application/json;
+    }
+
+    # Conditional logic with map (in http context)
+    # map $http_user_agent $is_mobile {
+    #     ~*(android|iphone|ipad) 1;
+    #     default 0;
+    # }
+    
+    # Log slow requests using $request_time
+    # access_log format includes $request_time and $upstream_response_time
+    # Use these to find slow endpoints
+}</textarea>
+    </div>
+
+    <div class="lnav">
+      <button class="nb" onclick="go(6)">← Prev</button>
+      <button class="nb go" onclick="go(8)">Load Balancing →</button>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       S8 — Load Balancing
+  ════════════════════════════════════════════════ -->
+  <div class="sec" id="s8">
+    <div class="eyebrow">LESSON 09 — INTERMEDIATE</div>
+    <div class="headline">LOAD<br>BALANCING</div>
+    <div class="intro">When one app instance isn't enough, Nginx distributes traffic across multiple backends. The <code>upstream</code> block defines the server pool.</div>
+
+    <div class="grid">
+      <div class="card"><div class="c-icon">🔄</div><div class="c-title">round_robin (default)</div><div class="c-body">Requests rotate evenly: 1→server1, 2→server2, 3→server3, 4→server1...</div></div>
+      <div class="card"><div class="c-icon">⚡</div><div class="c-title">least_conn</div><div class="c-body">Sends to server with fewest active connections. Best for variable-length requests.</div></div>
+      <div class="card"><div class="c-icon">📌</div><div class="c-title">ip_hash</div><div class="c-body">Same IP always goes to same server. Maintains session affinity without shared sessions.</div></div>
+      <div class="card"><div class="c-icon">⚖️</div><div class="c-title">weight</div><div class="c-body">Proportional traffic. weight=3 gets 3x more requests than weight=1.</div></div>
+    </div>
+
+    <div class="editor">
+      <div class="ebar">
+        <div class="efile"><div class="edot"></div>/etc/nginx/sites-available/human — load balanced</div>
+        <div class="ebtns"><button class="ebtn run" onclick="runLB()">▶ Simulate Traffic</button></div>
+      </div>
+      <textarea class="carea" spellcheck="false" style="min-height:360px"># upstream block must be in http {} context (nginx.conf or conf.d/)
+upstream human_cluster {
+    least_conn;                             # Algorithm choice
+
+    # server <address> [parameters]
+    server 10.0.0.1:9191 weight=3;          # Primary: gets 60% of traffic
+    server 10.0.0.2:9191 weight=2;          # Secondary: gets 40%
+    server 10.0.0.3:9191 backup;            # Backup: only used if others fail!
+
+    # Connection tuning
+    keepalive 32;                           # Keep 32 idle connections per worker
+}
+
+server {
+    listen 443 ssl http2;
+    server_name yourdomain.com;
+
+    # Point to upstream group instead of single server
+    location /api/ {
+        proxy_pass http://human_cluster;    # Uses the upstream group
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+
+        # Required for keepalive to work with upstream
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+    }
+}
+
+# ip_hash example (for session stickiness):
+# upstream human_sticky {
+#     ip_hash;
+#     server 10.0.0.1:9191;
+#     server 10.0.0.2:9191;
+# }</textarea>
+    </div>
+    <div class="term" id="t8"><div class="tbar"><div class="td td1"></div><div class="td td2"></div><div class="td td3"></div><div class="tlabel">load balancer simulation</div></div><div class="tbody" id="o8"></div></div>
+
+    <div class="quiz">
+      <div class="qq">🧠 Your Spring Boot app stores user sessions in memory (not Redis). Which load balancing algorithm must you use to avoid session loss?</div>
+      <div class="qopts">
+        <div class="qo" onclick="Q(this,false,8)">A) least_conn — it will naturally route to the same server</div>
+        <div class="qo" onclick="Q(this,true,8)">B) ip_hash — guarantees the same client IP always reaches the same server</div>
+        <div class="qo" onclick="Q(this,false,8)">C) round_robin — it evenly distributes including sessions</div>
+        <div class="qo" onclick="Q(this,false,8)">D) weight — high weight servers hold sessions longer</div>
+      </div>
+      <div class="qfb" id="qf8"></div>
+    </div>
+
+    <div class="lnav">
+      <button class="nb" onclick="go(7)">← Prev</button>
+      <button class="nb go" onclick="go(9)">SSL / HTTPS →</button>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       S9 — SSL/HTTPS
+  ════════════════════════════════════════════════ -->
+  <div class="sec" id="s9">
+    <div class="eyebrow">LESSON 10 — INTERMEDIATE</div>
+    <div class="headline">SSL / HTTPS<br>SETUP</div>
+    <div class="intro">Nginx handles SSL/TLS termination — your app only deals with plain HTTP internally. Get free auto-renewing certificates with Let's Encrypt + Certbot.</div>
+
+    <div class="editor">
+      <div class="ebar">
+        <div class="efile"><div class="edot"></div>terminal — certbot install + certificate</div>
+        <div class="ebtns"><button class="ebtn run" onclick="runSSL()">▶ RUN</button></div>
+      </div>
+      <textarea class="carea" spellcheck="false"># Install Certbot
+sudo apt install certbot python3-certbot-nginx -y
+
+# Get FREE SSL certificate — auto-configures Nginx!
+sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
+
+# Dry-run renewal test (certificates auto-renew every 90 days)
+sudo certbot renew --dry-run
+
+# Check certificate expiry
+sudo certbot certificates</textarea>
+    </div>
+    <div class="term" id="t9"><div class="tbar"><div class="td td1"></div><div class="td td2"></div><div class="td td3"></div><div class="tlabel">certbot output</div></div><div class="tbody" id="o9"></div></div>
+
+    <h3>Production SSL Configuration (Manual)</h3>
+    <div class="editor">
+      <div class="ebar">
+        <div class="efile"><div class="edot"></div>/etc/nginx/sites-available/human — https</div>
+      </div>
+      <textarea class="carea" spellcheck="false" style="min-height:440px"># ── HTTP → HTTPS redirect ────────────────────────────────────────
+server {
+    listen 80;
+    listen [::]:80;                        # IPv6 support
+    server_name yourdomain.com www.yourdomain.com;
+
+    # Redirect ALL http traffic to https permanently
+    return 301 https://$host$request_uri;
+}
+
+# ── HTTPS server ─────────────────────────────────────────────────
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name yourdomain.com www.yourdomain.com;
+
+    # ── Certificates (set by Certbot) ────────────────────────────
+    ssl_certificate     /etc/letsencrypt/live/yourdomain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/yourdomain.com/privkey.pem;
+    include             /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam         /etc/letsencrypt/ssl-dhparams.pem;
+
+    # ── Strong TLS settings ──────────────────────────────────────
+    ssl_protocols TLSv1.2 TLSv1.3;        # Disable TLS 1.0, 1.1 (insecure!)
+    ssl_ciphers ECDHE-RSA-AES256-GCM-SHA512:ECDHE-RSA-AES256-GCM-SHA384;
+    ssl_prefer_server_ciphers on;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 10m;
+    ssl_session_tickets off;
+
+    # ── Security headers ─────────────────────────────────────────
+    add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
+    add_header X-Frame-Options DENY always;
+    add_header X-Content-Type-Options nosniff always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "no-referrer-when-downgrade" always;
+
+    # ── Proxy to Spring Boot ─────────────────────────────────────
+    location / {
+        proxy_pass http://localhost:9191;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}</textarea>
+    </div>
+
+    <div class="quiz">
+      <div class="qq">🧠 What does <code>Strict-Transport-Security: max-age=63072000; includeSubDomains</code> tell browsers?</div>
+      <div class="qopts">
+        <div class="qo" onclick="Q(this,false,9)">A) Only allow HTTPS connections to subdomains</div>
+        <div class="qo" onclick="Q(this,true,9)">B) For 2 years (63072000 seconds), browsers must only use HTTPS for this domain and all subdomains — even if user types http://</div>
+        <div class="qo" onclick="Q(this,false,9)">C) The SSL certificate expires in 63072000 days</div>
+        <div class="qo" onclick="Q(this,false,9)">D) Forces TLS 1.3 only</div>
+      </div>
+      <div class="qfb" id="qf9"></div>
+    </div>
+
+    <div class="lnav">
+      <button class="nb" onclick="go(8)">← Prev</button>
+      <button class="nb go" onclick="go(10)">Rate Limiting →</button>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       S10 — Rate Limiting
+  ════════════════════════════════════════════════ -->
+  <div class="sec" id="s10">
+    <div class="eyebrow">LESSON 11 — INTERMEDIATE</div>
+    <div class="headline">RATE<br>LIMITING</div>
+    <div class="intro">Protect your API from abuse, brute-force attacks, and DDoS. Nginx's rate limiting uses the token bucket algorithm — fast but fair.</div>
+
+    <div class="diag">
+      <div class="dlabel">TOKEN BUCKET ALGORITHM</div>
+      <pre style="color:#5a7a94;line-height:2.2;font-size:12px">
+  <span style="color:#00ff88">limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s</span>
+
+  Every IP has a "bucket" that fills at 10 tokens/second:
+  ┌─────────────────────────────────────────────────────┐
+  │  IP: 203.45.12.67  [ ●●●●●●●●●●●●●●●●●●●● ]  20   │  ← burst full
+  └─────────────────────────────────────────────────────┘
+  Request arrives → consume 1 token → OK ✅
+  Request arrives fast (burst=20) → tokens available → OK ✅
+  Requests keep coming (>20 burst, >10r/s sustained) → ❌ 429
+
+  <span style="color:#ffd166">nodelay</span>: serve burst immediately (don't queue)
+  without nodelay: queue burst requests (adds latency)
+      </pre>
+    </div>
+
+    <div class="editor">
+      <div class="ebar">
+        <div class="efile"><div class="edot"></div>/etc/nginx/nginx.conf + sites-available/human</div>
+        <div class="ebtns"><button class="ebtn run" onclick="runRateLimit()">▶ Simulate Attack</button></div>
+      </div>
+      <textarea class="carea" spellcheck="false" style="min-height:400px"># ── In http {} block (nginx.conf) ────────────────────────────────
+# Define rate limit zones
+# Format: limit_req_zone KEY zone=NAME:SIZE rate=RATE;
+
+limit_req_zone $binary_remote_addr zone=general:10m   rate=20r/s;
+limit_req_zone $binary_remote_addr zone=login:10m     rate=5r/m;   # 5/minute for login!
+limit_req_zone $binary_remote_addr zone=uploads:10m   rate=2r/s;
+
+# Also limit by API key if you have one:
+# limit_req_zone $http_x_api_key zone=by_api_key:10m rate=100r/s;
+
+# ── In server {} block ───────────────────────────────────────────
+server {
+    listen 443 ssl http2;
+    server_name yourdomain.com;
+
+    # General API rate limit
+    location /api/ {
+        limit_req zone=general burst=40 nodelay;
+        limit_req_status 429;
+        limit_req_log_level warn;
+
+        # Custom 429 response body
+        # error_page 429 /429.json;
+
+        proxy_pass http://localhost:9191;
+    }
+
+    # Strict limit for auth endpoints (brute force protection)
+    location /api/auth/ {
+        limit_req zone=login burst=3 nodelay;
+        limit_req_status 429;
+
+        proxy_pass http://localhost:9191;
+    }
+
+    # File upload limit
+    location /api/import/ {
+        limit_req zone=uploads burst=5;
+        client_max_body_size 50m;        # Also limit upload file size!
+        proxy_pass http://localhost:9191;
+    }
+}</textarea>
+    </div>
+    <div class="term" id="t10"><div class="tbar"><div class="td td1"></div><div class="td td2"></div><div class="td td3"></div><div class="tlabel">rate limit simulation</div></div><div class="tbody" id="o10"></div></div>
+
+    <div class="alert a-warn">⚠️ <span><code>limit_req_zone</code> MUST be in the <code>http {}</code> context (in <code>nginx.conf</code> or a file included from it). It cannot go inside a <code>server {}</code> or <code>location {}</code> block.</span></div>
+
+    <div class="quiz">
+      <div class="qq">🧠 <code>limit_req zone=login burst=3 nodelay</code> — a hacker sends 10 login attempts in 1 second. What happens?</div>
+      <div class="qopts">
+        <div class="qo" onclick="Q(this,false,10)">A) All 10 requests are served (rate limiting doesn't apply to bursts)</div>
+        <div class="qo" onclick="Q(this,true,10)">B) First 3 requests (burst) are served immediately; requests 4-10 get 429 Too Many Requests</div>
+        <div class="qo" onclick="Q(this,false,10)">C) All 10 requests are queued and served slowly</div>
+        <div class="qo" onclick="Q(this,false,10)">D) The IP is permanently banned</div>
+      </div>
+      <div class="qfb" id="qf10"></div>
+    </div>
+
+    <div class="lnav">
+      <button class="nb" onclick="go(9)">← Prev</button>
+      <button class="nb go" onclick="go(11)">Caching →</button>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       S11 — Caching
+  ════════════════════════════════════════════════ -->
+  <div class="sec" id="s11">
+    <div class="eyebrow">LESSON 12 — INTERMEDIATE</div>
+    <div class="headline">PROXY<br>CACHING</div>
+    <div class="intro">Nginx can cache responses from your backend, serving them instantly without hitting your Spring Boot app or Oracle database. This is the fastest possible response — from memory or disk cache.</div>
+
+    <div class="diag">
+      <div class="dlabel">CACHE FLOW</div>
+      <pre style="color:#5a7a94;line-height:2.3;font-size:12px">
+  Request #1  →  Nginx MISS  →  Spring Boot  →  Oracle DB  →  Response (cached)
+  Request #2  →  Nginx <span style="color:#00ff88">HIT</span>   →  Serve from cache (0ms backend time!) ⚡
+  Request #3  →  Nginx <span style="color:#00ff88">HIT</span>   →  Serve from cache ⚡
+  ...10 minutes later...
+  Request #N  →  Nginx EXPIRED → Spring Boot  →  Oracle DB  →  Response (re-cached)
+
+  Check cache status: curl -I http://yourdomain.com/api/reports
+  X-Cache-Status: <span style="color:#00ff88">HIT</span>   ← served from cache
+  X-Cache-Status: <span style="color:#ffd166">MISS</span>  ← went to backend
+  X-Cache-Status: BYPASS ← cache was bypassed
+      </pre>
+    </div>
+
+    <div class="editor">
+      <div class="ebar">
+        <div class="efile"><div class="edot"></div>nginx.conf + sites-available/human — caching</div>
+      </div>
+      <textarea class="carea" spellcheck="false" style="min-height:440px"># ── In http {} context (nginx.conf) ──────────────────────────────
+proxy_cache_path /var/cache/nginx/human
+    levels=1:2                             # 2-level directory structure
+    keys_zone=human_cache:10m              # 10MB in-memory key store (~80,000 keys)
+    max_size=1g                            # Max 1GB disk cache
+    inactive=60m                           # Remove if not accessed for 60min
+    use_temp_path=off;                     # Write directly to cache dir (faster)
+
+# ── In server {} block ───────────────────────────────────────────
+server {
+    listen 443 ssl http2;
+    server_name yourdomain.com;
+
+    # ── Cache reports and lookup data ────────────────────────────
+    location /api/reports/ {
+        proxy_cache human_cache;
+        proxy_cache_key "$host$request_uri";         # What makes cache unique
+        proxy_cache_valid 200 10m;                   # Cache 200 OK for 10 minutes
+        proxy_cache_valid 404 1m;                    # Cache 404 for 1 minute
+        proxy_cache_valid any 30s;                   # Cache anything else 30s
+        proxy_cache_use_stale error timeout updating; # Serve stale if backend fails!
+        proxy_cache_lock on;                         # One request rebuilds, others wait
+
+        # Show cache status in response header (for debugging)
+        add_header X-Cache-Status $upstream_cache_status;
+
+        proxy_pass http://localhost:9191;
+    }
+
+    # ── NEVER cache authentication or write operations ───────────
+    location /api/auth/ {
+        proxy_no_cache 1;
+        proxy_cache_bypass 1;
+        proxy_pass http://localhost:9191;
+    }
+
+    # ── Don't cache POST/PUT/DELETE ──────────────────────────────
+    location /api/ {
+        # Bypass cache for non-GET requests
+        proxy_cache_bypass $request_method;
+        proxy_no_cache $request_method;
+
+        proxy_cache human_cache;
+        proxy_cache_valid 200 5m;
+        proxy_pass http://localhost:9191;
+    }
+}
+
+# ── Create cache directory ───────────────────────────────────────
+# sudo mkdir -p /var/cache/nginx/human
+# sudo chown www-data:www-data /var/cache/nginx/human</textarea>
+    </div>
+
+    <div class="quiz">
+      <div class="qq">🧠 Why should you NEVER cache <code>/api/auth/login</code>?</div>
+      <div class="qopts">
+        <div class="qo" onclick="Q(this,false,11)">A) Login endpoints are too small to be worth caching</div>
+        <div class="qo" onclick="Q(this,false,11)">B) Nginx doesn't support caching POST requests efficiently</div>
+        <div class="qo" onclick="Q(this,true,11)">C) Caching login would allow user A's successful response (with their JWT token) to be served to user B, causing a critical security breach</div>
+        <div class="qo" onclick="Q(this,false,11)">D) Login requests always return different status codes</div>
+      </div>
+      <div class="qfb" id="qf11"></div>
+    </div>
+
+    <div class="lnav">
+      <button class="nb" onclick="go(10)">← Prev</button>
+      <button class="nb go" onclick="go(12)">Gzip & Compression →</button>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       S12 — Gzip
+  ════════════════════════════════════════════════ -->
+  <div class="sec" id="s12">
+    <div class="eyebrow">LESSON 13 — INTERMEDIATE</div>
+    <div class="headline">GZIP &<br>COMPRESSION</div>
+    <div class="intro">Compression reduces response sizes by 60-80% for JSON and text. For a mobile user on a slow connection, this is the single biggest performance win.</div>
+
+    <div class="editor">
+      <div class="ebar">
+        <div class="efile"><div class="edot"></div>nginx.conf — gzip configuration</div>
+        <div class="ebtns"><button class="ebtn run" onclick="runGzip()">▶ Show Savings</button></div>
+      </div>
+      <textarea class="carea" spellcheck="false" style="min-height:300px"># In http {} context
+gzip on;                              # Enable gzip compression
+gzip_vary on;                         # Add Vary: Accept-Encoding header
+gzip_proxied any;                     # Compress responses from proxied backends
+gzip_comp_level 6;                    # 1 (fastest) to 9 (best). 6 is sweet spot.
+gzip_min_length 1024;                 # Don't compress tiny responses (< 1KB)
+gzip_buffers 16 8k;
+
+# MIME types to compress
+gzip_types
+    text/plain
+    text/css
+    text/javascript
+    text/xml
+    text/x-component
+    application/json
+    application/javascript
+    application/xml
+    application/atom+xml
+    application/rss+xml
+    image/svg+xml
+    font/truetype
+    font/opentype
+    application/vnd.ms-fontobject;
+
+# Note: never add image/jpeg, image/png — already compressed!
+# Compressing already-compressed files wastes CPU with tiny gains</textarea>
+    </div>
+    <div class="term" id="t12"><div class="tbar"><div class="td td1"></div><div class="td td2"></div><div class="td td3"></div><div class="tlabel">compression savings</div></div><div class="tbody" id="o12"></div></div>
+
+    <div class="alert a-tip">💡 <span>Verify gzip is working: <code>curl -H "Accept-Encoding: gzip" -I https://yourdomain.com/api/employees</code> — look for <code>Content-Encoding: gzip</code> in the response headers.</span></div>
+
+    <div class="lnav">
+      <button class="nb" onclick="go(11)">← Prev</button>
+      <button class="nb go" onclick="go(13)">Logging & Debugging →</button>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       S13 — Logging & Debugging
+  ════════════════════════════════════════════════ -->
+  <div class="sec" id="s13">
+    <div class="eyebrow">LESSON 14 — ADVANCED</div>
+    <div class="headline">LOGGING &<br>DEBUGGING</div>
+    <div class="intro">Nginx logs are your best friend for debugging production issues. Custom log formats with response timing let you find slow endpoints, errors, and abuse patterns instantly.</div>
+
+    <div class="editor">
+      <div class="ebar">
+        <div class="efile"><div class="edot"></div>nginx.conf — custom log format</div>
+        <div class="ebtns"><button class="ebtn run" onclick="runLogs()">▶ Show Sample Logs</button></div>
+      </div>
+      <textarea class="carea" spellcheck="false" style="min-height:300px"># In http {} context — define a custom log format
+log_format detailed
+    '$remote_addr - $remote_user [$time_local] '
+    '"$request" $status $body_bytes_sent '
+    '"$http_referer" "$http_user_agent" '
+    'rt=$request_time '                    # Total response time (seconds)
+    'uct=$upstream_connect_time '          # Time to connect to backend
+    'uht=$upstream_header_time '           # Time until first response byte
+    'urt=$upstream_response_time '         # Backend total response time
+    'cs=$upstream_cache_status';           # Cache HIT/MISS/BYPASS
+
+# In server {} block
+server {
+    access_log /var/log/nginx/human-access.log detailed;
+    error_log  /var/log/nginx/human-error.log warn;
+}</textarea>
+    </div>
+    <div class="term" id="t13"><div class="tbar"><div class="td td1"></div><div class="td td2"></div><div class="td td3"></div><div class="tlabel">sample logs + analysis</div></div><div class="tbody" id="o13"></div></div>
+
+    <h3>Essential Log Analysis Commands</h3>
+    <div class="editor">
+      <div class="ebar">
+        <div class="efile"><div class="edot"></div>log analysis toolkit</div>
+      </div>
+      <textarea class="carea" spellcheck="false" style="min-height:300px"># ── REAL-TIME MONITORING ─────────────────────────────────────────
+tail -f /var/log/nginx/human-access.log             # Watch all requests
+tail -f /var/log/nginx/human-error.log              # Watch errors
+
+# ── FIND SLOW REQUESTS (>1 second) ───────────────────────────────
+awk '$NF > 1 {print}' /var/log/nginx/human-access.log
+
+# ── FIND ALL 5XX ERRORS ──────────────────────────────────────────
+grep ' 5[0-9][0-9] ' /var/log/nginx/human-access.log | tail -20
+
+# ── TOP 10 SLOWEST ENDPOINTS ──────────────────────────────────────
+awk '{print $NF, $7}' /var/log/nginx/human-access.log | sort -rn | head -10
+
+# ── REQUESTS PER MINUTE ───────────────────────────────────────────
+awk '{print $4}' /var/log/nginx/human-access.log \
+  | cut -d: -f1,2 | sort | uniq -c
+
+# ── TOP 10 CLIENT IPs (find who's hammering your API) ─────────────
+awk '{print $1}' /var/log/nginx/human-access.log | sort | uniq -c | sort -rn | head -10
+
+# ── STATUS CODE BREAKDOWN ─────────────────────────────────────────
+awk '{print $9}' /var/log/nginx/human-access.log | sort | uniq -c | sort -rn
+
+# ── TOP REQUESTED URLS ────────────────────────────────────────────
+awk '{print $7}' /var/log/nginx/human-access.log | sort | uniq -c | sort -rn | head -20
+
+# ── AVERAGE RESPONSE TIME BY ENDPOINT ────────────────────────────
+awk '{sum[$7]+=$NF; count[$7]++} END {for(u in sum) print sum[u]/count[u], u}' \
+  /var/log/nginx/human-access.log | sort -rn | head -10</textarea>
+    </div>
+
+    <div class="lnav">
+      <button class="nb" onclick="go(12)">← Prev</button>
+      <button class="nb go" onclick="go(14)">Security Hardening →</button>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       S14 — Security Hardening
+  ════════════════════════════════════════════════ -->
+  <div class="sec" id="s14">
+    <div class="eyebrow">LESSON 15 — ADVANCED</div>
+    <div class="headline">SECURITY<br>HARDENING</div>
+    <div class="intro">Default Nginx is functional but not hardened. Apply these security layers to protect against common web attacks, information leakage, and abuse.</div>
+
+    <div class="steps">
+      <div class="step"><div class="snum">1</div><div class="sbody"><div class="stitle">Hide Nginx version</div><div class="sdesc">Add <code>server_tokens off</code> to http context. Prevents attackers from knowing your exact Nginx version and targeting known CVEs.</div></div></div>
+      <div class="step"><div class="snum">2</div><div class="sbody"><div class="stitle">Limit HTTP methods</div><div class="sdesc">Block methods your API doesn't use. Most REST APIs only need GET, POST, PUT, DELETE, OPTIONS.</div></div></div>
+      <div class="step"><div class="snum">3</div><div class="sbody"><div class="stitle">Block bad user agents & scanners</div><div class="sdesc">Block known vulnerability scanners and bots with <code>map</code> directives.</div></div></div>
+      <div class="step"><div class="snum">4</div><div class="sbody"><div class="stitle">Limit request body size</div><div class="sdesc"><code>client_max_body_size 10m</code> prevents memory exhaustion from large uploads unless you explicitly allow them.</div></div></div>
+      <div class="step"><div class="snum">5</div><div class="sbody"><div class="stitle">Add security headers</div><div class="sdesc">HSTS, X-Frame-Options, X-Content-Type-Options, CSP — these are free security wins.</div></div></div>
+    </div>
+
+    <div class="editor">
+      <div class="ebar">
+        <div class="efile"><div class="edot"></div>security hardened config</div>
+      </div>
+      <textarea class="carea" spellcheck="false" style="min-height:480px"># ── GLOBAL SECURITY (in http {} block) ──────────────────────────
+server_tokens off;                          # Hide Nginx version
+client_max_body_size 10m;                   # Default max body size
+client_header_timeout 10s;
+client_body_timeout 10s;
+send_timeout 10s;
+
+# Block bad user agents (scanners, bots)
+map $http_user_agent $bad_bot {
+    default 0;
+    ~*malicious 1;
+    ~*nikto 1;
+    ~*sqlmap 1;
+    ~*nmap 1;
+    ~*masscan 1;
+    "" 1;                                   # Block empty user agent
+}
+
+# ── SERVER SECURITY ──────────────────────────────────────────────
+server {
+    listen 443 ssl http2;
+    server_name yourdomain.com;
+
+    # Block bad bots
+    if ($bad_bot) {
+        return 444;                         # 444 = close connection, no response
+    }
+
+    # Only allow needed HTTP methods
+    if ($request_method !~ ^(GET|HEAD|POST|PUT|DELETE|OPTIONS|PATCH)$) {
+        return 405 "Method Not Allowed";
+    }
+
+    # Security headers
+    add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
+    add_header X-Frame-Options "DENY" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Permissions-Policy "geolocation=(), microphone=(), camera=()" always;
+
+    # Content Security Policy (adjust for your app)
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'" always;
+
+    # Block common exploit paths
+    location ~* (\.php|\.asp|\.aspx|\.jsp|\.cgi)$ {
+        return 404;
+    }
+
+    # Block hidden files (.git, .env, etc.)
+    location ~ /\. {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+
+    # Rate limit + proxy
+    location /api/ {
+        limit_req zone=general burst=40 nodelay;
+        proxy_pass http://localhost:9191;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}</textarea>
+    </div>
+
+    <div class="alert a-danger">🚨 <span>The <code>location ~ /\.</code> block (blocking dotfiles) is critical — without it, a misconfiguration could expose your <code>.git</code> directory, leaking your entire source code, or <code>.env</code> files with passwords.</span></div>
+
+    <div class="lnav">
+      <button class="nb" onclick="go(13)">← Prev</button>
+      <button class="nb go" onclick="go(15)">Performance Tuning →</button>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       S15 — Performance Tuning
+  ════════════════════════════════════════════════ -->
+  <div class="sec" id="s15">
+    <div class="eyebrow">LESSON 16 — ADVANCED</div>
+    <div class="headline">PERFORMANCE<br>TUNING</div>
+    <div class="intro">Squeeze maximum performance out of Nginx with OS-level and application-level optimizations. These settings matter at scale.</div>
+
+    <div class="editor">
+      <div class="ebar">
+        <div class="efile"><div class="edot"></div>nginx.conf — production performance config</div>
+      </div>
+      <textarea class="carea" spellcheck="false" style="min-height:480px"># ── WORKER PROCESSES ────────────────────────────────────────────
+worker_processes auto;                      # Matches number of CPU cores
+worker_cpu_affinity auto;                   # Bind each worker to a CPU core
+worker_rlimit_nofile 65535;                 # Increase open file limit per worker
+
+# ── EVENTS ──────────────────────────────────────────────────────
+events {
+    worker_connections 4096;                # Max connections per worker
+    use epoll;                              # Linux: most efficient I/O model
+    multi_accept on;                        # Accept all pending connections at once
+}
+
+# ── HTTP PERFORMANCE ─────────────────────────────────────────────
+http {
+    # File serving
+    sendfile on;                            # Kernel-level file transfer (no user-space copy)
+    tcp_nopush on;                          # Send headers in one TCP packet
+    tcp_nodelay on;                         # Reduce latency for small packets
+
+    # Keep-alive connections (reuse TCP connections)
+    keepalive_timeout 65s;                  # Keep idle connections for 65s
+    keepalive_requests 1000;                # Max requests per keep-alive connection
+
+    # Upstream keep-alive
+    upstream human_app {
+        server localhost:9191;
+        keepalive 32;                       # Maintain 32 persistent connections to backend
+    }
+
+    # Buffer sizes
+    client_body_buffer_size 128k;
+    client_header_buffer_size 4k;
+    large_client_header_buffers 4 8k;
+    output_buffers 1 32k;
+    postpone_output 1460;
+
+    # Open file cache (avoid filesystem stat() calls on every request)
+    open_file_cache max=1000 inactive=20s;
+    open_file_cache_valid 30s;
+    open_file_cache_min_uses 2;
+    open_file_cache_errors on;
+
+    # Timeouts tuned for API server
+    client_header_timeout 10s;
+    client_body_timeout 30s;
+    send_timeout 30s;
+    reset_timedout_connection on;           # Free memory from timed-out connections
+
+    # Proxy timeouts
+    proxy_connect_timeout 10s;
+    proxy_send_timeout 30s;
+    proxy_read_timeout 120s;                # High for Spring Batch jobs
+}</textarea>
+    </div>
+
+    <h3>OS-Level Tuning (Linux)</h3>
+    <div class="editor">
+      <div class="ebar">
+        <div class="efile"><div class="edot"></div>/etc/sysctl.conf — kernel tuning for Nginx</div>
+      </div>
+      <textarea class="carea" spellcheck="false" style="min-height:200px"># Apply with: sudo sysctl -p
+
+# Increase TCP buffer sizes
+net.core.rmem_max = 16777216
+net.core.wmem_max = 16777216
+
+# Increase connection backlog
+net.core.somaxconn = 65535
+net.ipv4.tcp_max_syn_backlog = 65535
+
+# Reuse TIME_WAIT sockets faster
+net.ipv4.tcp_tw_reuse = 1
+net.ipv4.tcp_fin_timeout = 15
+
+# Increase file descriptor limit
+fs.file-max = 200000</textarea>
+    </div>
+
+    <div class="alert a-info">ℹ️ <span>On a modern server, properly tuned Nginx can handle <strong>100,000+ concurrent connections</strong> with &lt;1GB RAM. The default config handles ~10,000. These tunings unlock the full potential.</span></div>
+
+    <div class="lnav">
+      <button class="nb" onclick="go(14)">← Prev</button>
+      <button class="nb go" onclick="go(16)">Upstream & Health Checks →</button>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       S16 — Upstream & Health Checks
+  ════════════════════════════════════════════════ -->
+  <div class="sec" id="s16">
+    <div class="eyebrow">LESSON 17 — ADVANCED</div>
+    <div class="headline">UPSTREAM &<br>HEALTH CHECKS</div>
+    <div class="intro">Advanced upstream configuration with passive health checks, connection pooling, and failover. This is how production systems maintain 99.99% uptime.</div>
+
+    <div class="editor">
+      <div class="ebar">
+        <div class="efile"><div class="edot"></div>advanced upstream configuration</div>
+        <div class="ebtns"><button class="ebtn run" onclick="runUpstream()">▶ Simulate Failover</button></div>
+      </div>
+      <textarea class="carea" spellcheck="false" style="min-height:440px"># ── ADVANCED UPSTREAM CONFIGURATION ─────────────────────────────
+upstream human_cluster {
+    # Algorithm
+    least_conn;
+
+    # Primary servers
+    server 10.0.0.1:9191 weight=3 max_fails=3 fail_timeout=30s;
+    server 10.0.0.2:9191 weight=2 max_fails=3 fail_timeout=30s;
+
+    # Backup servers (only used when all primary servers fail)
+    server 10.0.0.3:9191 backup;
+
+    # Permanently down server (for maintenance)
+    # server 10.0.0.4:9191 down;
+
+    # Keepalive connection pool
+    keepalive 32;
+    keepalive_requests 100;
+    keepalive_timeout 60s;
+
+    # max_fails=3       → Mark server as down after 3 failures
+    # fail_timeout=30s  → Try server again after 30 seconds
+    # This is PASSIVE health checking — only detects failures on real requests
+}
+
+server {
+    listen 443 ssl http2;
+    server_name yourdomain.com;
+
+    location /api/ {
+        proxy_pass http://human_cluster;
+
+        # Required for upstream keepalive
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+
+        # Retry on specific errors
+        proxy_next_upstream error timeout http_502 http_503 http_504;
+        proxy_next_upstream_tries 3;           # Try up to 3 servers
+        proxy_next_upstream_timeout 10s;       # Total retry budget
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+
+# NOTE: Active health checks (/health endpoint polling) require
+# Nginx Plus (commercial). For free active health checks,
+# use nginx-upstream-check-module or handle at load balancer level.</textarea>
+    </div>
+    <div class="term" id="t16"><div class="tbar"><div class="td td1"></div><div class="td td2"></div><div class="td td3"></div><div class="tlabel">failover simulation</div></div><div class="tbody" id="o16"></div></div>
+
+    <div class="highlight-box">
+      <strong>proxy_next_upstream</strong> is the key to zero-downtime deployments. When a backend returns a 502/503 (e.g., during restart), Nginx automatically retries the request on the next healthy server — the client never sees the error.
+    </div>
+
+    <div class="lnav">
+      <button class="nb" onclick="go(15)">← Prev</button>
+      <button class="nb go" onclick="go(17)">Spring Boot Production →</button>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       S17 — Spring Boot Production
+  ════════════════════════════════════════════════ -->
+  <div class="sec" id="s17">
+    <div class="eyebrow">LESSON 18 — REAL WORLD</div>
+    <div class="headline">SPRING BOOT<br>"HUMAN" PROJECT</div>
+    <div class="intro">Complete production-ready Nginx configuration for your actual Spring Boot human project — combining every technique from this course into one hardened, performant, production config.</div>
+
+    <h3>📁 Server File Structure</h3>
+    <div class="diag">
+      <div class="dlabel">PRODUCTION SERVER LAYOUT</div>
+      <pre style="color:#5a7a94;line-height:2;font-size:12px">
+  <span style="color:#00ff88">/etc/nginx/</span>
+  ├── nginx.conf                     ← Global: workers, gzip, rate zones, cache path
+  ├── sites-available/
+  │   └── <span style="color:#4d9eff">human</span>                  ← Your complete config
+  └── sites-enabled/
+      └── human → ../sites-available/human
+
+  <span style="color:#00ff88">/var/cache/nginx/human/</span>            ← Response cache
+  <span style="color:#00ff88">/var/log/nginx/</span>
+  ├── human-access.log               ← All requests with timing
+  └── human-error.log                ← Errors only
+
+  <span style="color:#00ff88">/opt/human/</span>
+  ├── human.jar                      ← Spring Boot app
+  └── opentelemetry-javaagent.jar    ← OTel agent
+      </pre>
+    </div>
+
+    <div class="editor">
+      <div class="ebar">
+        <div class="efile"><div class="edot"></div>/etc/nginx/nginx.conf — global config for human project</div>
+      </div>
+      <textarea class="carea" spellcheck="false" style="min-height:340px">user www-data;
+worker_processes auto;
+worker_rlimit_nofile 65535;
+pid /run/nginx.pid;
+
+events {
+    worker_connections 4096;
+    use epoll;
+    multi_accept on;
+}
+
+http {
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+
+    # Security
+    server_tokens off;
+
+    # Performance
+    sendfile on;
+    tcp_nopush on;
+    tcp_nodelay on;
+    keepalive_timeout 65;
+    keepalive_requests 1000;
+
+    # Gzip
+    gzip on;
+    gzip_vary on;
+    gzip_proxied any;
+    gzip_comp_level 6;
+    gzip_min_length 1024;
+    gzip_types text/plain text/css application/json application/javascript text/xml;
+
+    # Rate limit zones
+    limit_req_zone $binary_remote_addr zone=human_api:10m   rate=30r/s;
+    limit_req_zone $binary_remote_addr zone=human_auth:10m  rate=5r/m;
+    limit_req_zone $binary_remote_addr zone=human_file:10m  rate=2r/s;
+
+    # Cache zone
+    proxy_cache_path /var/cache/nginx/human levels=1:2 keys_zone=human_cache:10m max_size=500m inactive=30m use_temp_path=off;
+
+    # Custom log format with timing
+    log_format timing '$remote_addr - [$time_local] "$request" $status $body_bytes_sent rt=$request_time urt=$upstream_response_time cs=$upstream_cache_status';
+
+    # Include site configs
+    include /etc/nginx/sites-enabled/*;
+}</textarea>
+    </div>
+
+    <div class="editor">
+      <div class="ebar">
+        <div class="efile"><div class="edot"></div>/etc/nginx/sites-available/human — COMPLETE PRODUCTION CONFIG</div>
+        <div class="ebtns"><button class="ebtn run" onclick="runHuman()">▶ Validate</button></div>
+      </div>
+      <textarea class="carea" id="c17" spellcheck="false" style="min-height:680px"># ── HTTP → HTTPS redirect ────────────────────────────────────────
+server {
+    listen 80;
+    listen [::]:80;
+    server_name yourdomain.com;
+    return 301 https://$host$request_uri;
+}
+
+# ── MAIN HTTPS SERVER ─────────────────────────────────────────────
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name yourdomain.com;
+
+    # ── SSL ────────────────────────────────────────────────────
+    ssl_certificate     /etc/letsencrypt/live/yourdomain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/yourdomain.com/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 10m;
+
+    # ── Security headers ───────────────────────────────────────
+    add_header Strict-Transport-Security "max-age=63072000; includeSubDomains" always;
+    add_header X-Frame-Options DENY always;
+    add_header X-Content-Type-Options nosniff always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+    # Block dotfiles (.git, .env)
+    location ~ /\. { deny all; access_log off; log_not_found off; }
+
+    # ── Logging ────────────────────────────────────────────────
+    access_log /var/log/nginx/human-access.log timing;
+    error_log  /var/log/nginx/human-error.log warn;
+
+    # Max upload size for Excel/PDF imports
+    client_max_body_size 100m;
+
+    # ── API — rate limited + proxied ───────────────────────────
+    location /api/ {
+        limit_req zone=human_api burst=60 nodelay;
+        limit_req_status 429;
+
+        proxy_pass http://localhost:9191;
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+
+        proxy_connect_timeout 10s;
+        proxy_read_timeout    120s;        # Long for batch jobs
+
+        # Cache GET requests to reporting endpoints
+        proxy_cache human_cache;
+        proxy_cache_methods GET;
+        proxy_cache_key "$host$uri$is_args$args";
+        proxy_cache_valid 200 5m;
+        proxy_cache_bypass $request_method;
+        proxy_no_cache $request_method;
+        add_header X-Cache-Status $upstream_cache_status;
+    }
+
+    # ── Auth — very strict rate limit ──────────────────────────
+    location /api/auth/ {
+        limit_req zone=human_auth burst=3 nodelay;
+        limit_req_status 429;
+
+        proxy_no_cache 1;
+        proxy_cache_bypass 1;
+
+        proxy_pass http://localhost:9191;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-Proto https;
+    }
+
+    # ── File uploads ────────────────────────────────────────────
+    location /api/import/ {
+        limit_req zone=human_file burst=5;
+        client_max_body_size 100m;
+        proxy_read_timeout 300s;           # Import can take time
+        proxy_pass http://localhost:9191;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    # ── Actuator — internal only ────────────────────────────────
+    location /actuator/ {
+        allow 127.0.0.1;
+        allow 10.0.0.0/8;
+        deny all;
+        proxy_pass http://localhost:9191;
+    }
+
+    # ── Swagger UI ──────────────────────────────────────────────
+    location /swagger-ui/ {
+        proxy_pass http://localhost:9191;
+        proxy_set_header Host $host;
+    }
+    location /v3/api-docs {
+        proxy_pass http://localhost:9191;
+        proxy_set_header Host $host;
+    }
+}</textarea>
+    </div>
+    <div class="term" id="t17"><div class="tbar"><div class="td td1"></div><div class="td td2"></div><div class="td td3"></div><div class="tlabel">config validation</div></div><div class="tbody" id="o17"></div></div>
+
+    <div class="lnav">
+      <button class="nb" onclick="go(16)">← Prev</button>
+      <button class="nb go" onclick="go(18)">Final Challenge →</button>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       S18 — Final Challenge
+  ════════════════════════════════════════════════ -->
+  <div class="sec" id="s18">
+    <div class="eyebrow">LESSON 19 — EXPERT CHALLENGE</div>
+    <div class="headline">FINAL<br>CHALLENGE</div>
+    <div class="intro">Write a complete, production-ready Nginx config from scratch. All 10 requirements must pass to earn the Expert badge.</div>
+
+    <div class="card" style="border-color:rgba(0,255,136,.3);margin-bottom:24px">
+      <div class="c-title" style="font-size:13px;margin-bottom:12px">📋 Requirements — All 10 Must Pass</div>
+      <div class="c-body" style="line-height:2.5">
+        1. HTTP → HTTPS permanent redirect (301)<br>
+        2. Listens on 443 with ssl and http2<br>
+        3. SSL certificate configured<br>
+        4. Rate limiting on /api/ endpoint<br>
+        5. Strict rate limiting on /api/auth/ (brute force protection)<br>
+        6. proxy_pass forwards to Spring Boot on port 9191<br>
+        7. X-Real-IP and X-Forwarded-Proto headers set<br>
+        8. /actuator/ endpoint blocked from public (allow + deny)<br>
+        9. Security header: Strict-Transport-Security<br>
+        10. Dotfiles blocked (location ~ /\.)
+      </div>
+    </div>
+
+    <div class="editor">
+      <div class="ebar">
+        <div class="efile"><div class="edot"></div>your complete nginx config</div>
+        <div class="ebtns">
+          <button class="ebtn rst" onclick="resetCode('c18','')">Clear</button>
+          <button class="ebtn run" onclick="validateChallenge()">▶ Check All 10 Requirements</button>
+        </div>
+      </div>
+      <textarea class="carea" id="c18" spellcheck="false" style="min-height:500px" placeholder="# Write your complete production Nginx config here.
+# Cover all 10 requirements listed above.
+# You have everything you need from this course!"></textarea>
+    </div>
+    <div class="term" id="t18"><div class="tbar"><div class="td td1"></div><div class="td td2"></div><div class="td td3"></div><div class="tlabel">challenge results</div></div><div class="tbody" id="o18"></div></div>
+
+    <div id="victory" style="display:none">
+      <div class="victory">
+        <div class="v-icon">⚡🏆</div>
+        <div class="v-title">NGINX EXPERT</div>
+        <div class="v-sub">You've mastered Nginx from zero to expert level.<br>You can now configure, secure, and optimize Nginx<br>for any production environment.</div>
+      </div>
+    </div>
+
+    <div class="lnav">
+      <button class="nb" onclick="go(17)">← Prev</button>
+      <button class="nb" style="opacity:.3;cursor:default">Course Complete ✓</button>
+    </div>
+  </div>
+
+  </div><!-- /page -->
+</main>
+</div><!-- /shell -->
+
+<script>
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+let cur=0, done=new Set([0]);
+const N=19;
+
+const bcNames=['introduction','install-architecture','config-structure','commands',
+  'static-file-server','reverse-proxy','location-blocks','variables',
+  'load-balancing','ssl-https','rate-limiting','caching','gzip',
+  'logging','security','performance','upstream','spring-boot-human','final-challenge'];
+
+const lvls=['lv-zero','lv-zero','lv-zero','lv-zero',
+  'lv-mid','lv-mid','lv-mid','lv-mid',
+  'lv-adv','lv-adv','lv-adv','lv-adv','lv-adv',
+  'lv-exp','lv-exp','lv-exp','lv-exp','lv-exp','lv-exp'];
+
+const lvNames=['ZERO','ZERO','ZERO','ZERO',
+  'BEGINNER','BEGINNER','BEGINNER','BEGINNER',
+  'ADVANCED','ADVANCED','ADVANCED','ADVANCED','ADVANCED',
+  'EXPERT','EXPERT','EXPERT','EXPERT','EXPERT','EXPERT'];
+
+// ═══════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════
+function go(i){
+  document.getElementById('s'+cur).classList.remove('active');
+  document.querySelectorAll('.nav-item')[cur].classList.remove('active');
+  cur=i; done.add(i);
+  document.getElementById('s'+i).classList.add('active');
+  const ni=document.querySelectorAll('.nav-item')[i];
+  ni.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach((el,idx)=>{if(done.has(idx))el.classList.add('done');});
+  document.getElementById('bcn').textContent=bcNames[i];
+  const chip=document.getElementById('lvchip');
+  chip.className='lv-pill '+lvls[i];
+  chip.textContent=lvNames[i];
+  updateProg();
+  window.scrollTo(0,0);
+}
+
+function updateProg(){
+  const p=Math.round((done.size/N)*100);
+  document.getElementById('pbar').style.width=p+'%';
+  document.getElementById('pct').textContent=p+'%';
+  document.getElementById('pxp').textContent=done.size+' / '+N+' lessons complete';
+}
+
+// ═══════════════════════════════════════════════
+// QUIZ
+// ═══════════════════════════════════════════════
+function Q(el,correct,idx){
+  el.parentElement.querySelectorAll('.qo').forEach(o=>o.style.pointerEvents='none');
+  const fb=document.getElementById('qf'+idx);
+  if(correct){
+    el.classList.add('ok');
+    fb.className='qfb show y';
+    fb.textContent='✅ Correct! Well done.';
+  } else {
+    el.classList.add('no');
+    fb.className='qfb show n';
+    fb.textContent='❌ Not quite — review the lesson content above.';
+    el.parentElement.querySelectorAll('.qo').forEach(o=>{
+      if(o.onclick&&o.onclick.toString().includes('true'))o.classList.add('ok');
+    });
+  }
+}
+
+// ═══════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════
+function resetCode(id,v){document.getElementById(id).value=v;}
+
+function showSol(id,v){document.getElementById(id).value=v;}
+
+function showTerm(id){document.getElementById(id).style.display='block';}
+
+function type(outId,lines,delay=60){
+  const out=document.getElementById(outId);
+  out.innerHTML='';
+  let i=0;
+  (function next(){
+    if(i<lines.length){
+      out.innerHTML+=lines[i]+'\n';
+      i++;out.scrollTop=out.scrollHeight;
+      setTimeout(next,delay+Math.random()*25);
+    }
+  })();
+}
+
+// ═══════════════════════════════════════════════
+// SOLUTIONS
+// ═══════════════════════════════════════════════
+const sol5=`server {
+    listen 80;
+    server_name yourdomain.com;
+
+    location / {
+        proxy_pass http://localhost:9191;
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        proxy_connect_timeout 30s;
+        proxy_read_timeout    120s;
+    }
+}`;
+
+// ═══════════════════════════════════════════════
+// SIMULATIONS
+// ═══════════════════════════════════════════════
+function runInstall(){
+  showTerm('t1');
+  type('o1',[
+    '<span class="tp">$</span> <span class="tc">sudo apt update && sudo apt install nginx -y</span>',
+    '<span class="to">Reading package lists... Done</span>',
+    '<span class="to">The following NEW packages will be installed: nginx nginx-common nginx-core</span>',
+    '<span class="ts">Setting up nginx (1.24.0-2ubuntu7) ...</span>',
+    '<span class="ts">Created symlink /etc/systemd/system/multi-user.target.wants/nginx.service</span>',
+    '<span class="tp">$</span> <span class="tc">nginx -v</span>',
+    '<span class="ti">nginx version: nginx/1.24.0 (Ubuntu)</span>',
+    '<span class="tp">$</span> <span class="tc">sudo systemctl status nginx</span>',
+    '<span class="ts">● nginx.service - A high performance web server and a reverse proxy server</span>',
+    '<span class="ts">   Active: active (running) since Thu 2026-03-05 10:00:00 UTC</span>',
+    '<span class="ts">✅ Nginx installed and running on port 80!</span>',
+  ]);
+}
+
+function runEnableSite(){
+  showTerm('t2b');
+  type('o2b',[
+    '<span class="tp">$</span> <span class="tc">sudo ln -s /etc/nginx/sites-available/human /etc/nginx/sites-enabled/</span>',
+    '<span class="tp">$</span> <span class="tc">sudo nginx -t</span>',
+    '<span class="ts">nginx: the configuration file /etc/nginx/nginx.conf syntax is ok</span>',
+    '<span class="ts">nginx: configuration file /etc/nginx/nginx.conf test is successful</span>',
+    '<span class="tp">$</span> <span class="tc">sudo systemctl reload nginx</span>',
+    '<span class="ts">✅ Site "human" enabled and Nginx reloaded with zero downtime!</span>',
+  ]);
+}
+
+function runCmds(){
+  showTerm('t3');
+  type('o3',[
+    '<span class="tp">$</span> <span class="tc">sudo nginx -t</span>',
+    '<span class="ts">nginx: the configuration file syntax is ok</span>',
+    '<span class="ts">nginx: configuration test is successful</span>',
+    '<span class="tp">$</span> <span class="tc">sudo systemctl reload nginx</span>',
+    '<span class="ts">✅ Reloaded — zero downtime, all connections preserved</span>',
+    '<span class="tp">$</span> <span class="tc">sudo systemctl status nginx</span>',
+    '<span class="ts">● nginx.service - Active: active (running)</span>',
+    '<span class="tp">$</span> <span class="tc">nginx -V 2>&1 | head -5</span>',
+    '<span class="ti">nginx version: nginx/1.24.0 (Ubuntu)</span>',
+    '<span class="ti">built with OpenSSL 3.0.11</span>',
+    '<span class="ti">TLS SNI support enabled</span>',
+    '<span class="tp">$</span> <span class="tc">curl -I http://localhost</span>',
+    '<span class="to">HTTP/1.1 200 OK</span>',
+    '<span class="to">Server: nginx</span>',
+    '<span class="to">Content-Type: text/html</span>',
+    '<span class="ts">✅ Nginx responding correctly!</span>',
+  ]);
+}
+
+function validateProxy(){
+  showTerm('t5');
+  const code=document.getElementById('c5').value;
+  const checks=[
+    [code.includes('listen 80'),'listen 80'],
+    [code.includes('server_name'),'server_name configured'],
+    [code.includes('proxy_pass')&&code.includes('9191'),'proxy_pass → localhost:9191'],
+    [code.includes('proxy_set_header Host'),'Host header forwarded'],
+    [code.includes('X-Real-IP'),'X-Real-IP header forwarded'],
+    [code.includes('proxy_connect_timeout'),'proxy_connect_timeout set'],
+    [code.includes('proxy_read_timeout'),'proxy_read_timeout set'],
+  ];
+  const lines=['<span class="ti">Validating reverse proxy config...</span>',''];
+  let p=0;
+  checks.forEach(([ok,msg])=>{
+    if(ok){lines.push('<span class="ts">✅ '+msg+'</span>');p++;}
+    else lines.push('<span class="te">❌ Missing: '+msg+'</span>');
+  });
+  lines.push('');
+  if(p===7)lines.push('<span class="ts">🎉 Perfect! All '+p+'/7 checks passed. Run: sudo nginx -t && sudo systemctl reload nginx</span>');
+  else lines.push('<span class="tw">Score: '+p+'/7 — fix missing items above.</span>');
+  type('o5',lines);
+}
+
+function runLocations(){
+  showTerm('t6');
+  type('o6',[
+    '<span class="ti">Testing location matching for your config...</span>','',
+    '<span class="to">GET /health</span>',
+    '<span class="ts">  → location = /health   (EXACT MATCH — highest priority) ✅</span>',
+    '<span class="to">GET /static/logo.png</span>',
+    '<span class="ts">  → location ^~ /static/ (PREFIX STOP — no regex checked) ✅</span>',
+    '<span class="to">GET /uploads/photo.JPG</span>',
+    '<span class="ts">  → location ~* \\.jpg$  (CASE-INSENSITIVE REGEX match) ✅</span>',
+    '<span class="to">GET /api/employees?page=1</span>',
+    '<span class="ts">  → location /api/        (PREFIX match, longer wins) ✅</span>',
+    '<span class="to">GET /actuator/health</span>',
+    '<span class="tw">  → location /actuator/   (PREFIX match) → 403 Forbidden if not internal IP</span>',
+    '<span class="to">GET /swagger-ui/index.html</span>',
+    '<span class="ts">  → location /swagger-ui/ (PREFIX match) ✅</span>',
+    '<span class="to">GET /anything-else</span>',
+    '<span class="ts">  → location /            (DEFAULT — catches everything) ✅</span>',
+    '',
+    '<span class="ts">✅ All location blocks matching correctly!</span>',
+  ],90);
+}
+
+function runLB(){
+  showTerm('t8');
+  const lines=['<span class="ti">Simulating 15 requests with least_conn algorithm...</span>',''];
+  const srvs=['10.0.0.1:9191 (weight=3)','10.0.0.1:9191 (weight=3)','10.0.0.1:9191 (weight=3)','10.0.0.2:9191 (weight=2)','10.0.0.2:9191 (weight=2)'];
+  const cols=['#00ff88','#00ff88','#00ff88','#4d9eff','#4d9eff'];
+  let si=0;
+  for(let i=1;i<=15;i++){
+    const s=si%srvs.length;
+    lines.push('<span class="to">Request #'+String(i).padStart(2,'0')+'  →  <span style="color:'+cols[s]+'">'+srvs[s]+'</span>  →  200 OK  ('+Math.floor(8+Math.random()*30)+'ms)</span>');
+    si++;
+  }
+  lines.push('');
+  lines.push('<span class="ts">✅ Traffic distributed: server 1 gets ~60%, server 2 gets ~40%</span>');
+  lines.push('<span class="ti">10.0.0.3:9191 (backup) — standing by, not receiving traffic</span>');
+  type('o8',lines,100);
+}
+
+function runSSL(){
+  showTerm('t9');
+  type('o9',[
+    '<span class="tp">$</span> <span class="tc">sudo apt install certbot python3-certbot-nginx -y</span>',
+    '<span class="ts">Setting up certbot...</span>',
+    '<span class="tp">$</span> <span class="tc">sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com</span>',
+    '<span class="to">Saving debug log to /var/log/letsencrypt/letsencrypt.log</span>',
+    '<span class="ti">Enter email address: admin@yourdomain.com</span>',
+    '<span class="ti">Please read the Terms of Service... (A)gree: A</span>',
+    '<span class="to">Requesting a certificate for yourdomain.com</span>',
+    '<span class="to">Performing the following challenges: http-01 challenge for yourdomain.com</span>',
+    '<span class="to">Waiting for verification...</span>',
+    '<span class="ts">Successfully received certificate.</span>',
+    '<span class="ts">Certificate is saved at: /etc/letsencrypt/live/yourdomain.com/fullchain.pem</span>',
+    '<span class="ts">Key is saved at: /etc/letsencrypt/live/yourdomain.com/privkey.pem</span>',
+    '<span class="ts">Certificate expires: 2026-06-03 (auto-renews 30 days before expiry)</span>',
+    '<span class="to">Deploying certificate to Nginx... Reloading nginx...</span>',
+    '<span class="ts">✅ HTTPS enabled! https://yourdomain.com is now live.</span>',
+    '<span class="tp">$</span> <span class="tc">sudo certbot renew --dry-run</span>',
+    '<span class="ts">Congratulations, all renewals succeeded!</span>',
+  ]);
+}
+
+function runRateLimit(){
+  showTerm('t10');
+  const lines=[
+    '<span class="ti">Simulating brute force attack: 30 requests in 2 seconds</span>',
+    '<span class="ti">Config: zone=general rate=30r/s burst=40 nodelay | zone=login rate=5/min burst=3</span>',
+    '',
+    '<span class="tg">── General API (/api/employees) ──</span>',
+  ];
+  for(let i=1;i<=8;i++)lines.push('<span class="to">Request #'+i+'  GET /api/employees  →  <span class="ts">200 OK</span>   (within rate)</span>');
+  lines.push('');
+  lines.push('<span class="tg">── Auth Brute Force (/api/auth/login) ──</span>');
+  for(let i=1;i<=10;i++){
+    if(i<=3)lines.push('<span class="to">Request #'+i+'  POST /api/auth/login  →  <span class="ts">200 OK</span>   (burst allows 3)</span>');
+    else lines.push('<span class="to">Request #'+i+'  POST /api/auth/login  →  <span class="te">429 Too Many Requests</span>  ⛔ BLOCKED</span>');
+  }
+  lines.push('');
+  lines.push('<span class="ts">✅ Rate limiter protecting auth endpoint! Brute force blocked after 3 attempts.</span>');
+  type('o10',lines,80);
+}
+
+function runGzip(){
+  showTerm('t12');
+  type('o12',[
+    '<span class="ti">Comparing response sizes with/without gzip...</span>','',
+    '<span class="to">GET /api/employees (500 records)</span>',
+    '<span class="to">  Without gzip: <span class="te">142,304 bytes</span>  (139 KB)</span>',
+    '<span class="ts">  With gzip:    <span class="ts">28,461 bytes</span>   (28 KB)  → <span class="ts">80% smaller!</span></span>',
+    '',
+    '<span class="to">GET /api/reports/monthly (large JSON)</span>',
+    '<span class="to">  Without gzip: <span class="te">891,234 bytes</span>  (870 KB)</span>',
+    '<span class="ts">  With gzip:    <span class="ts">134,891 bytes</span>  (132 KB) → <span class="ts">85% smaller!</span></span>',
+    '',
+    '<span class="to">GET /static/app.js (minified React bundle)</span>',
+    '<span class="to">  Without gzip: <span class="te">524,288 bytes</span>  (512 KB)</span>',
+    '<span class="ts">  With gzip:    <span class="ts">157,286 bytes</span>  (154 KB) → <span class="ts">70% smaller!</span></span>',
+    '',
+    '<span class="tp">$</span> <span class="tc">curl -H "Accept-Encoding: gzip" -I https://yourdomain.com/api/employees</span>',
+    '<span class="ts">HTTP/2 200</span>',
+    '<span class="ts">Content-Encoding: gzip</span>',
+    '<span class="ts">Vary: Accept-Encoding</span>',
+    '<span class="ts">✅ Gzip working! ~80% bandwidth reduction across all API responses.</span>',
+  ]);
+}
+
+function runLogs(){
+  showTerm('t13');
+  type('o13',[
+    '<span class="tp">$</span> <span class="tc">tail -f /var/log/nginx/human-access.log</span>','',
+    '<span class="to">103.12.45.67 - [05/Mar/2026:10:23:45] "GET /api/employees HTTP/2.0" 200 4521 rt=0.045 urt=0.043 cs=MISS</span>',
+    '<span class="ts">103.12.45.67 - [05/Mar/2026:10:23:46] "GET /api/employees HTTP/2.0" 200 4521 rt=0.001 urt=- cs=HIT</span>',
+    '<span class="to">103.12.45.67 - [05/Mar/2026:10:23:47] "POST /api/auth/login HTTP/2.0" 200 312 rt=0.123 urt=0.121 cs=-</span>',
+    '<span class="tw">198.51.100.2 - [05/Mar/2026:10:23:48] "GET /api/reports/annual HTTP/2.0" 200 98234 rt=2.891 urt=2.889 cs=MISS</span>',
+    '<span class="te">198.51.100.9 - [05/Mar/2026:10:23:49] "GET /api/unknown HTTP/2.0" 404 215 rt=0.012 urt=0.010 cs=MISS</span>',
+    '<span class="te">45.33.32.156 - [05/Mar/2026:10:23:50] "POST /api/auth/login HTTP/2.0" 429 0 rt=0.000 urt=- cs=-</span>',
+    '',
+    '<span class="tpu">── Analysis ──────────────────────────────────────────────────</span>',
+    '<span class="ts">Cache HIT: /api/employees served in 1ms (was 45ms) → 97% faster ⚡</span>',
+    '<span class="tw">⚠️  Slow request: /api/reports/annual took 2.891s — needs optimization!</span>',
+    '<span class="te">⛔ Rate limited: 45.33.32.156 brute-forcing login → blocked by 429</span>',
+    '<span class="ts">✅ Logs show cache, timing, and security events clearly.</span>',
+  ],90);
+}
+
+function runUpstream(){
+  showTerm('t16');
+  type('o16',[
+    '<span class="ti">Simulating: server 10.0.0.1 goes down mid-traffic...</span>','',
+    '<span class="to">Request #01  →  <span class="ts">10.0.0.1:9191  200 OK   (12ms)</span></span>',
+    '<span class="to">Request #02  →  <span class="ts">10.0.0.2:9191  200 OK   (15ms)</span></span>',
+    '<span class="to">Request #03  →  <span class="ts">10.0.0.1:9191  200 OK   (11ms)</span></span>',
+    '<span class="tw">Request #04  →  10.0.0.1:9191  TIMEOUT ⚠️  (fail 1/3)</span>',
+    '<span class="tw">Request #05  →  10.0.0.1:9191  TIMEOUT ⚠️  (fail 2/3)</span>',
+    '<span class="tw">Request #06  →  10.0.0.1:9191  TIMEOUT ⚠️  (fail 3/3 → MARKED DOWN)</span>',
+    '<span class="ti">10.0.0.1 marked as unavailable for 30 seconds</span>',
+    '',
+    '<span class="to">Request #07  →  <span class="ts">10.0.0.2:9191  200 OK   (14ms) ← automatic failover!</span></span>',
+    '<span class="to">Request #08  →  <span class="ts">10.0.0.2:9191  200 OK   (16ms)</span></span>',
+    '<span class="to">Request #09  →  <span class="ts">10.0.0.2:9191  200 OK   (13ms)</span></span>',
+    '',
+    '<span class="ti">30 seconds later — retrying 10.0.0.1...</span>',
+    '<span class="ts">Request #20  →  10.0.0.1:9191  200 OK   (12ms) ← server recovered!</span>',
+    '',
+    '<span class="ts">✅ Zero requests failed! proxy_next_upstream handled failover transparently.</span>',
+    '<span class="ts">Clients experienced zero downtime during server failure.</span>',
+  ],90);
+}
+
+function runHuman(){
+  showTerm('t17');
+  const code=document.getElementById('c17').value;
+  const checks=[
+    [code.includes('return 301'),'HTTP → HTTPS redirect'],
+    [code.includes('listen 443')&&code.includes('ssl'),'HTTPS listener'],
+    [code.includes('ssl_certificate'),'SSL certificate'],
+    [code.includes('limit_req'),'Rate limiting'],
+    [code.includes('/api/auth/')&&code.includes('limit_req'),'Auth rate limiting'],
+    [code.includes('proxy_pass')&&code.includes('9191'),'Proxy to Spring Boot :9191'],
+    [code.includes('X-Real-IP'),'X-Real-IP header'],
+    [code.includes('X-Forwarded-Proto'),'X-Forwarded-Proto header'],
+    [code.includes('/actuator/')&&code.includes('deny all'),'Actuator protected'],
+    [code.includes('Strict-Transport-Security'),'HSTS header'],
+    [code.includes('location ~ /\\.'),'Dotfiles blocked'],
+    [code.includes('/api/import/'),'File upload endpoint'],
+    [code.includes('proxy_read_timeout')&&parseInt(code.match(/proxy_read_timeout\s+(\d+)/)?.[1]||0)>=120,'Long timeout for batch jobs'],
+  ];
+  const lines=['<span class="tp">$</span> <span class="tc">sudo nginx -t</span>','<span class="ti">Checking production config...</span>',''];
+  let p=0;
+  checks.forEach(([ok,msg])=>{
+    if(ok){lines.push('<span class="ts">✅ '+msg+'</span>');p++;}
+    else lines.push('<span class="tw">⚠️  Missing: '+msg+'</span>');
+  });
+  lines.push('');
+  if(p>=10){
+    lines.push('<span class="ts">nginx: configuration test is successful ✅</span>');
+    lines.push('<span class="ts">🚀 Production config validated! Score: '+p+'/'+checks.length+'</span>');
+  } else {
+    lines.push('<span class="tw">Score: '+p+'/'+checks.length+' — add missing items for full production config.</span>');
+  }
+  type('o17',lines);
+}
+
+function validateChallenge(){
+  showTerm('t18');
+  const code=document.getElementById('c18').value;
+  const reqs=[
+    {ok:code.includes('return 301')&&code.includes('https'),label:'HTTP → HTTPS redirect (301)'},
+    {ok:code.includes('listen 443')&&code.includes('ssl')&&code.includes('http2'),label:'listen 443 ssl http2'},
+    {ok:code.includes('ssl_certificate'),label:'SSL certificate configured'},
+    {ok:code.includes('limit_req')&&code.includes('/api/'),label:'Rate limiting on /api/'},
+    {ok:code.includes('/api/auth/')&&code.includes('limit_req'),label:'Strict rate limit on /api/auth/'},
+    {ok:code.includes('proxy_pass')&&code.includes('9191'),label:'proxy_pass to port 9191'},
+    {ok:code.includes('X-Real-IP')&&code.includes('X-Forwarded-Proto'),label:'X-Real-IP and X-Forwarded-Proto headers'},
+    {ok:code.includes('/actuator/')&&code.includes('deny all'),label:'/actuator/ blocked from public'},
+    {ok:code.includes('Strict-Transport-Security'),label:'Strict-Transport-Security header'},
+    {ok:code.includes('location ~ /\\.'),label:'Dotfiles blocked (location ~ /\\.)'},
+  ];
+  const lines=['<span class="ti">🔍 Checking all 10 requirements...</span>',''];
+  let p=0;
+  reqs.forEach((r,i)=>{
+    if(r.ok){lines.push('<span class="ts">✅ ['+(i+1)+'] '+r.label+'</span>');p++;}
+    else lines.push('<span class="te">❌ ['+(i+1)+'] '+r.label+'</span>');
+  });
+  lines.push('');
+  if(p===10){
+    lines.push('<span class="tpu">🏆 ALL 10 REQUIREMENTS PASSED! You are an Nginx Expert!</span>');
+    setTimeout(()=>{
+      document.getElementById('victory').style.display='block';
+      done.add(18);updateProg();
+    },1500);
+  } else {
+    lines.push('<span class="tw">Score: '+p+'/10 — keep going! Review failing requirements.</span>');
+  }
+  type('o18',lines,90);
+}
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+updateProg();
+</script>
+</body>
+</html>

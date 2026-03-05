@@ -439,22 +439,33 @@ tr:hover td{background:var(--surface2)}
 
       <div class="diagram">
         <div class="diagram-label">DOCKER vs VIRTUAL MACHINE</div>
-        <pre style="color:#8b949e;line-height:2.2;font-size:12px">
-  <span style="color:#e3b341">Virtual Machine</span>                    <span style="color:#2f81f7">Docker Container</span>
+        <pre style="color:#8b949e;line-height:2.0;font-size:11.5px">
+  <span style="color:#2f81f7">🐳 DOCKER CONTAINERS</span>                           <span style="color:#e3b341">💻 VIRTUAL MACHINES</span>
 
-  ┌──────────────────────┐           ┌──────────────────────┐
-  │   App A  │   App B   │           │   App A  │   App B   │
-  ├──────────┼───────────┤           ├──────────┼───────────┤
-  │  Guest   │  Guest    │           │ Container│ Container │
-  │   OS     │   OS      │           │  (libs)  │  (libs)   │
-  ├──────────┴───────────┤           ├──────────┴───────────┤
-  │      Hypervisor      │           │     Docker Engine     │
-  ├──────────────────────┤           ├──────────────────────┤
-  │      Host OS         │           │      Host OS          │
-  ├──────────────────────┤           ├──────────────────────┤
-  │      Hardware        │           │      Hardware         │
-  └──────────────────────┘           └──────────────────────┘
-  Size: ~10GB  Start: ~60s           Size: ~200MB  Start: &lt;1s
+  ┌─────────┬─────────┬─────────┐             ┌────────────┬────────────┬────────────┐
+  │ <span style="color:#39d353">App 1</span>   │ <span style="color:#39d353">App 2</span>   │ <span style="color:#39d353">App 3</span>   │             │   <span style="color:#ff8c42">App 1</span>    │   <span style="color:#ff8c42">App 2</span>    │   <span style="color:#ff8c42">App 3</span>    │
+  ├─────────┼─────────┼─────────┤             ├────────────┼────────────┼────────────┤
+  │<span style="color:#4d9eff">Bins/libs</span>│<span style="color:#4d9eff">Bins/libs</span>│<span style="color:#4d9eff">Bins/libs</span>│             │ <span style="color:#4d9eff">Bins/libs</span>  │ <span style="color:#4d9eff">Bins/libs</span>  │ <span style="color:#4d9eff">Bins/libs</span>  │
+  ├─────────┴─────────┴─────────┤             ├────────────┼────────────┼────────────┤
+  │                             │             │  <span style="color:#c77dff">Guest OS</span>  │  <span style="color:#c77dff">Guest OS</span>  │  <span style="color:#c77dff">Guest OS</span>  │
+  │         <span style="color:#2f81f7">Docker Engine</span>       │             ├────────────┴────────────┴────────────┤
+  │                             │             │                                      │
+  ├─────────────────────────────┤             │            <span style="color:#ffd166">Hypervisor</span>                │
+  │                             │             │                                      │
+  │    <span style="color:#00d4aa">Operating System (Host)</span>  │             ├──────────────────────────────────────┤
+  │                             │             │                                      │
+  ├─────────────────────────────┤             │          <span style="color:#00d4aa">Physical Server</span>             │
+  │                             │             │                                      │
+  │    <span style="color:#8b949e">Physical Server or VM</span>    │
+  │                             │             │                                      │
+  └─────────────────────────────┘             └──────────────────────────────────────┘
+
+  <span style="color:#e3b341">✓ Utilization</span>  <span style="color:#e3b341">✓ Size (GB)</span>  <span style="color:#e3b341">✓ Boot</span>
+  Shared OS Kernel                              Each VM = Full OS + App
+
+  <span style="color:#39d353">Size: ~200MB per container</span>                     <span style="color:#ff4d6a">Size: ~10GB per VM</span>
+  <span style="color:#39d353">Start: &lt;1 second</span>                               <span style="color:#ff4d6a">Start: ~60 seconds</span>
+
         </pre>
       </div>
 
@@ -848,7 +859,7 @@ docker-compose*.yml</textarea>
   │  RUN gradle bootJar │──── JAR ────►│ COPY --from=builder │
   │  (includes gradle,  │              │ CMD java -jar       │
   │   source, tests...) │              │                     │
-  │  Size: ~800MB       │              │  Size: ~180MB  ✅   │
+  │  Size: ~800MB       │              │  Size: ~180MB  ✅    │
   └─────────────────────┘              └─────────────────────┘
         </pre>
       </div>
@@ -1004,7 +1015,7 @@ CMD ["nginx", "-g", "daemon off;"]</textarea>
   <span style="color:#39d353">none</span>                No network access (complete isolation)
   <span style="color:#bc8cff">overlay</span>             Multi-host networking (Docker Swarm)
 
-  ┌────────────────────────── Custom Bridge Network ────┐
+  ┌──────────────── Custom Bridge Network ──────────────┐
   │                                                     │
   │  ┌──────────────┐     ┌──────────────────────────┐  │
   │  │   human app  │────►│   oracle-db              │  │
@@ -1012,7 +1023,7 @@ CMD ["nginx", "-g", "daemon off;"]</textarea>
   │  └──────────────┘     └──────────────────────────┘  │
   │         │                                           │
   │  ┌──────▼───────┐     ┌──────────────────────────┐  │
-  │  │   redis      │     │  otel-collector           │  │
+  │  │   redis      │     │  otel-collector          │  │
   │  │  :6379       │     │  :4317                   │  │
   │  └──────────────┘     └──────────────────────────┘  │
   │                                                     │

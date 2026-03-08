@@ -1,339 +1,1030 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kubernetes Zero → Expert</title>
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <style>
-        :root{
-            --bg:#040810;--s1:#070d1a;--s2:#0a1225;--s3:#0d1830;--s4:#111e3a;
-            --bd:#152040;--bd2:#1a2a50;
-            --blue:#326ce5;--lblue:#5b8ff9;--sky:#00b8d9;
-            --green:#44d4a0;--lime:#a3e635;
-            --orange:#fb923c;--red:#f87171;
-            --yellow:#fde047;--purple:#a78bfa;
-            --txt:#c8d8f0;--muted:#3d5a80;
-            --code:#93c5fd;
-        }
-        *{margin:0;padding:0;box-sizing:border-box}
-        html{scroll-behavior:smooth}
-        body{
-            background:var(--bg);color:var(--txt);
-            font-family:'Share Tech Mono',monospace;
-            min-height:100vh;overflow-x:hidden;
-        }
-        body::before{
-            content:'';position:fixed;inset:0;
-            background:
-                    radial-gradient(ellipse 70% 50% at 10% 10%,rgba(50,108,229,.07) 0%,transparent 60%),
-                    radial-gradient(ellipse 60% 40% at 90% 90%,rgba(0,184,217,.05) 0%,transparent 55%),
-                    repeating-linear-gradient(0deg,transparent,transparent 60px,rgba(21,32,64,.4) 60px,rgba(21,32,64,.4) 61px),
-                    repeating-linear-gradient(90deg,transparent,transparent 60px,rgba(21,32,64,.4) 60px,rgba(21,32,64,.4) 61px);
-            pointer-events:none;z-index:0;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kubernetes Zero → Expert</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #080b1a;
+      --s1: #0c1028;
+      --s2: #101530;
+      --s3: #141a3a;
+      --s4: #1a2248;
+      --bd: #1e2d5a;
+      --bd2: #253566;
+      --blue: #4e7fff;
+      --lblue: #7aabff;
+      --sky: #00d4ff;
+      --green: #2eeea8;
+      --lime: #a3e635;
+      --orange: #ff9f54;
+      --red: #ff6b7a;
+      --yellow: #fde047;
+      --purple: #c084fc;
+      --txt: #eaf2ff;
+      --muted: #7fadd4;
+      --prose: #b8d0ea;
+      --code: #a5c8ff;
+    }
 
-        .wrap{display:flex;min-height:100vh;position:relative;z-index:1}
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box
+    }
 
-        /* ══ SIDEBAR ══ */
-        .sidebar{
-            width:274px;flex-shrink:0;
-            background:rgba(7,13,26,.97);
-            border-right:1px solid var(--bd);
-            position:fixed;top:0;left:0;bottom:0;
-            overflow-y:auto;z-index:200;
-            display:flex;flex-direction:column;
-        }
-        .sb-top{
-            padding:18px 16px 14px;
-            border-bottom:1px solid var(--bd);
-            background:rgba(7,13,26,.99);
-            position:sticky;top:0;z-index:10;
-        }
-        .brand{display:flex;align-items:center;gap:12px}
-        .b-icon{
-            width:46px;height:46px;border-radius:10px;
-            background:linear-gradient(135deg,var(--blue),var(--sky));
-            display:flex;align-items:center;justify-content:center;
-            font-size:24px;flex-shrink:0;
-            box-shadow:0 0 24px rgba(50,108,229,.35);
-        }
-        .b-name{
-            font-family:'Rajdhani',sans-serif;
-            font-size:22px;font-weight:700;
-            color:#fff;letter-spacing:2px;line-height:1;
-        }
-        .b-sub{font-size:9px;color:var(--muted);letter-spacing:3px;margin-top:3px}
+    html {
+      scroll-behavior: smooth;
+      text-rendering: optimizeLegibility;
+    }
 
-        .sg{padding:14px 16px 4px;font-size:9px;color:var(--muted);letter-spacing:3px;text-transform:uppercase}
-        .si{
-            display:flex;align-items:center;gap:10px;
-            padding:8px 12px;margin:1px 8px;
-            border-radius:6px;cursor:pointer;
-            font-size:11px;color:var(--muted);
-            border:1px solid transparent;
-            transition:all .15s;
-        }
-        .si:hover{background:var(--s2);color:var(--txt)}
-        .si.active{background:rgba(50,108,229,.12);color:var(--lblue);border-color:rgba(50,108,229,.3)}
-        .si.done::after{content:'✓';margin-left:auto;font-size:10px;color:var(--green);opacity:.7}
-        .sico{font-size:14px;width:20px;text-align:center;flex-shrink:0}
+    body {
+      background: linear-gradient(135deg, #060918 0%, #0c1135 40%, #0a0d25 70%, #060918 100%);
+      color: var(--txt);
+      font-family: 'Share Tech Mono', monospace;
+      min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
 
-        .sb-foot{
-            margin-top:auto;padding:14px 16px;
-            border-top:1px solid var(--bd);
-        }
-        .pl{display:flex;justify-content:space-between;font-size:9px;color:var(--muted);letter-spacing:2px;margin-bottom:6px}
-        .pt{height:3px;background:var(--bd2);border-radius:2px;overflow:hidden}
-        .pb{height:100%;background:linear-gradient(90deg,var(--blue),var(--sky));border-radius:2px;width:0%;transition:width .5s ease}
-        .px{font-size:10px;color:var(--lblue);margin-top:5px}
+    ::selection {
+      background: rgba(78, 127, 255, .35);
+      color: #fff
+    }
 
-        /* ══ MAIN ══ */
-        .main{margin-left:274px;flex:1;display:flex;flex-direction:column;min-width:0}
-        .topbar{
-            background:rgba(4,8,16,.9);backdrop-filter:blur(16px);
-            border-bottom:1px solid var(--bd);
-            padding:12px 36px;
-            display:flex;align-items:center;justify-content:space-between;
-            position:sticky;top:0;z-index:100;
-        }
-        .bc{font-size:11px;color:var(--muted)}
-        .bc em{color:var(--lblue);font-style:normal}
-        .chip{padding:4px 14px;border-radius:20px;font-size:9px;font-weight:700;letter-spacing:2px;font-family:'Rajdhani',sans-serif}
-        .lz{background:rgba(68,212,160,.1);color:var(--green)}
-        .lb{background:rgba(253,149,60,.1);color:var(--orange)}
-        .li{background:rgba(0,184,217,.1);color:var(--sky)}
-        .le{background:rgba(248,113,113,.1);color:var(--red)}
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 65% 55% at 15% 20%, rgba(78, 127, 255, .18) 0%, transparent 60%),
+        radial-gradient(ellipse 55% 45% at 85% 80%, rgba(0, 212, 255, .14) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 40% at 70% 10%, rgba(192, 132, 252, .12) 0%, transparent 50%),
+        radial-gradient(ellipse 40% 35% at 20% 85%, rgba(46, 238, 168, .09) 0%, transparent 45%),
+        repeating-linear-gradient(0deg, transparent, transparent 72px, rgba(78, 127, 255, .04) 72px, rgba(78, 127, 255, .04) 73px),
+        repeating-linear-gradient(90deg, transparent, transparent 72px, rgba(78, 127, 255, .04) 72px, rgba(78, 127, 255, .04) 73px);
+      pointer-events: none;
+      z-index: 0;
+      animation: auroraShift 18s ease-in-out infinite alternate;
+    }
 
-        .page{padding:38px 42px;max-width:980px}
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background:
+        radial-gradient(circle 300px at 80% 30%, rgba(0, 212, 255, .06) 0%, transparent 70%),
+        radial-gradient(circle 400px at 10% 65%, rgba(192, 132, 252, .07) 0%, transparent 70%),
+        radial-gradient(circle 250px at 55% 90%, rgba(78, 127, 255, .06) 0%, transparent 70%);
+      animation: orbDrift 24s ease-in-out infinite alternate;
+    }
 
-        /* ══ SECTIONS ══ */
-        .sec{display:none}
-        .sec.active{display:block;animation:up .3s ease}
-        @keyframes up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes auroraShift {
+      0% {
+        opacity: 1;
+        transform: scale(1)
+      }
 
-        .ey{font-size:9px;color:var(--blue);letter-spacing:4px;text-transform:uppercase;margin-bottom:10px}
-        .ht{
-            font-family:'Rajdhani',sans-serif;
-            font-size:50px;font-weight:700;
-            color:#fff;line-height:.95;letter-spacing:2px;margin-bottom:16px;
-        }
-        .intro{font-size:13px;color:var(--muted);line-height:1.85;max-width:640px;margin-bottom:32px}
+      50% {
+        opacity: .85;
+        transform: scale(1.03)
+      }
 
-        /* ══ CARDS ══ */
-        .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin:22px 0}
-        .card{
-            background:var(--s2);border:1px solid var(--bd);
-            border-radius:10px;padding:18px;
-            transition:border-color .2s,transform .15s;
-        }
-        .card:hover{border-color:var(--blue);transform:translateY(-2px)}
-        .ci{font-size:22px;margin-bottom:10px}
-        .ct{font-size:12px;font-weight:700;color:#fff;margin-bottom:5px;font-family:'Rajdhani',sans-serif;letter-spacing:.5px}
-        .cb{font-size:11px;color:var(--muted);line-height:1.65}
+      100% {
+        opacity: 1;
+        transform: scale(1)
+      }
+    }
 
-        /* ══ EDITOR ══ */
-        .editor{background:var(--s1);border:1px solid var(--bd);border-radius:10px;overflow:hidden;margin:22px 0}
-        .ebar{
-            background:var(--s2);padding:10px 16px;
-            display:flex;align-items:center;justify-content:space-between;
-            border-bottom:1px solid var(--bd);
-        }
-        .ef{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:8px}
-        .edot{width:7px;height:7px;border-radius:50%;background:var(--blue)}
-        .ebs{display:flex;gap:8px}
-        .eb{
-            padding:5px 14px;border-radius:5px;border:none;
-            cursor:pointer;font-family:'Share Tech Mono',monospace;
-            font-size:10px;font-weight:600;transition:all .15s;
-        }
-        .run{background:var(--green);color:#000}
-        .run:hover{filter:brightness(1.1);transform:translateY(-1px)}
-        .rst{background:var(--s3);color:var(--muted);border:1px solid var(--bd)}
-        .sol{background:rgba(50,108,229,.12);color:var(--lblue);border:1px solid rgba(50,108,229,.25)}
+    @keyframes orbDrift {
+      0% {
+        transform: translate(0, 0)
+      }
 
-        .ca{
-            width:100%;min-height:200px;background:transparent;border:none;outline:none;
-            color:var(--code);font-family:'Share Tech Mono',monospace;
-            font-size:12.5px;line-height:1.9;padding:18px 20px;
-            resize:vertical;tab-size:2;caret-color:var(--blue);
-        }
-        .ca::placeholder{color:var(--muted);opacity:.4}
+      100% {
+        transform: translate(30px, -20px)
+      }
+    }
 
-        /* ══ TERMINAL ══ */
-        .term{
-            background:#02040c;border:1px solid var(--bd);
-            border-radius:10px;overflow:hidden;margin:14px 0;display:none;
-        }
-        .tbar{
-            background:var(--s2);padding:9px 14px;
-            display:flex;align-items:center;gap:6px;
-            border-bottom:1px solid var(--bd);
-        }
-        .td{width:10px;height:10px;border-radius:50%}
-        .td1{background:#ff5f57}.td2{background:#febc2e}.td3{background:#28c840}
-        .tlb{font-size:10px;color:var(--muted);margin-left:8px}
-        .tbody{
-            padding:14px 18px;font-family:'Share Tech Mono',monospace;
-            font-size:12px;line-height:2;min-height:80px;max-height:420px;overflow-y:auto;
-        }
-        .tp{color:var(--green)}.tc{color:var(--txt)}.to{color:#3d5a80}
-        .ts{color:#44d4a0}.te{color:var(--red)}.tw{color:var(--yellow)}
-        .ti{color:var(--lblue)}.tpu{color:var(--purple)}.tsk{color:var(--sky)}
-        .tor{color:var(--orange)}
+    .wrap {
+      display: flex;
+      min-height: 100vh;
+      position: relative;
+      z-index: 1
+    }
 
-        /* ══ DIAGRAM ══ */
-        .diag{
-            background:var(--s1);border:1px solid var(--bd);
-            border-radius:10px;padding:22px;margin:22px 0;overflow-x:auto;
-        }
-        .dlb{font-size:9px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px}
+    /* ══ SIDEBAR ══ */
+    .sidebar {
+      width: 274px;
+      flex-shrink: 0;
+      background: rgba(8, 12, 32, .88);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-right: 1px solid rgba(78, 127, 255, .2);
+      box-shadow: 4px 0 32px rgba(0, 0, 0, .4);
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      overflow-y: auto;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+    }
 
-        /* ══ QUIZ ══ */
-        .quiz{background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:22px;margin:26px 0}
-        .qq{font-size:14px;font-weight:700;color:#fff;margin-bottom:18px;line-height:1.5;font-family:'Rajdhani',sans-serif}
-        .qopts{display:flex;flex-direction:column;gap:9px}
-        .qo{
-            padding:12px 16px;border-radius:7px;border:1px solid var(--bd);
-            cursor:pointer;font-size:12px;color:var(--txt);
-            background:var(--s3);transition:all .15s;
-        }
-        .qo:hover{border-color:var(--blue);color:var(--lblue)}
-        .qo.ok{border-color:var(--green)!important;background:rgba(68,212,160,.06);color:var(--green)!important;pointer-events:none}
-        .qo.no{border-color:var(--red)!important;background:rgba(248,113,113,.06);color:var(--red)!important;pointer-events:none}
-        .qfb{margin-top:14px;padding:12px 16px;border-radius:7px;font-size:11px;display:none;line-height:1.7}
-        .qfb.show{display:block}
-        .qfb.y{background:rgba(68,212,160,.06);border:1px solid rgba(68,212,160,.2);color:var(--green)}
-        .qfb.n{background:rgba(248,113,113,.06);border:1px solid rgba(248,113,113,.2);color:var(--red)}
+    .sb-top {
+      padding: 18px 16px 14px;
+      border-bottom: 1px solid rgba(78, 127, 255, .15);
+      background: rgba(6, 10, 28, .95);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
 
-        /* ══ ALERTS ══ */
-        .alert{display:flex;align-items:flex-start;gap:12px;padding:13px 16px;border-radius:8px;font-size:12px;line-height:1.75;margin:16px 0}
-        .at{background:rgba(68,212,160,.06);border:1px solid rgba(68,212,160,.18);color:#86efcf}
-        .aw{background:rgba(253,224,71,.06);border:1px solid rgba(253,224,71,.18);color:var(--yellow)}
-        .ai{background:rgba(0,184,217,.06);border:1px solid rgba(0,184,217,.18);color:#67e8f9}
-        .ad{background:rgba(248,113,113,.06);border:1px solid rgba(248,113,113,.18);color:var(--red)}
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px
+    }
 
-        /* ══ TABLE ══ */
-        table{width:100%;border-collapse:collapse;margin:16px 0;font-size:12px}
-        th{background:var(--s3);color:var(--sky);padding:10px 14px;text-align:left;font-weight:700;border:1px solid var(--bd);font-family:'Rajdhani',sans-serif;letter-spacing:.5px}
-        td{padding:10px 14px;border:1px solid var(--bd);color:var(--txt);vertical-align:top;line-height:1.6}
-        tr:hover td{background:var(--s2)}
+    .b-icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--blue), var(--sky));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+      box-shadow: 0 0 24px rgba(50, 108, 229, .35);
+    }
 
-        /* ══ STEPS ══ */
-        .steps{margin:20px 0}
-        .step{display:flex;gap:16px;padding:16px 0;border-bottom:1px solid var(--bd)}
-        .step:last-child{border-bottom:none}
-        .sn{
-            width:30px;height:30px;border-radius:50%;flex-shrink:0;
-            background:rgba(50,108,229,.1);border:1px solid rgba(50,108,229,.3);
-            color:var(--lblue);font-size:11px;font-weight:700;
-            display:flex;align-items:center;justify-content:center;
-        }
-        .st{font-size:13px;font-weight:700;color:#fff;margin-bottom:5px;font-family:'Rajdhani',sans-serif}
-        .sd{font-size:12px;color:var(--muted);line-height:1.75}
+    .b-name {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 2px;
+      line-height: 1;
+    }
 
-        /* ══ NAV ══ */
-        .lnav{display:flex;justify-content:space-between;align-items:center;margin-top:52px;padding-top:26px;border-top:1px solid var(--bd)}
-        .nb{
-            padding:10px 24px;border-radius:7px;border:1px solid var(--bd);
-            background:var(--s2);color:var(--txt);cursor:pointer;
-            font-family:'Share Tech Mono',monospace;font-size:11px;font-weight:700;
-            display:flex;align-items:center;gap:8px;transition:all .15s;
-        }
-        .nb:hover{border-color:var(--blue);color:var(--lblue)}
-        .nb:disabled{opacity:.3;cursor:default}
-        .nb.go{background:var(--blue);color:#fff;border-color:var(--blue)}
-        .nb.go:hover{background:var(--lblue)}
+    .b-sub {
+      font-size: 9px;
+      color: var(--muted);
+      letter-spacing: 3px;
+      margin-top: 3px
+    }
 
-        code{background:rgba(50,108,229,.1);color:#93c5fd;padding:1px 7px;border-radius:4px;font-size:11px}
-        h3{font-size:14px;font-weight:700;color:#fff;margin:26px 0 10px;font-family:'Rajdhani',sans-serif;letter-spacing:.5px}
-        p{font-size:13px;color:var(--muted);line-height:1.85;margin-bottom:10px}
-        strong{color:var(--txt)}
+    .sg {
+      padding: 14px 16px 4px;
+      font-size: 9px;
+      color: var(--muted);
+      letter-spacing: 3px;
+      text-transform: uppercase
+    }
 
-        .victory{
-            text-align:center;
-            background:linear-gradient(135deg,rgba(50,108,229,.1),rgba(0,184,217,.08));
-            border:1px solid rgba(50,108,229,.3);border-radius:16px;padding:52px 32px;margin:32px 0;
-        }
-        .vi{font-size:60px;margin-bottom:18px}
-        .vt{font-family:'Rajdhani',sans-serif;font-size:48px;font-weight:700;color:var(--lblue);margin-bottom:10px;letter-spacing:3px}
-        .vs{font-size:13px;color:var(--muted);line-height:1.8}
+    .si {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      margin: 1px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      color: var(--muted);
+      border: 1px solid transparent;
+      transition: all .15s;
+    }
 
-        ::-webkit-scrollbar{width:5px}
-        ::-webkit-scrollbar-track{background:var(--s1)}
-        ::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:3px}
-    </style>
+    .si:hover {
+      background: var(--s2);
+      color: var(--txt)
+    }
+
+    .si.active {
+      background: rgba(50, 108, 229, .12);
+      color: var(--lblue);
+      border-color: rgba(50, 108, 229, .3)
+    }
+
+    .si.done::after {
+      content: '✓';
+      margin-left: auto;
+      font-size: 10px;
+      color: var(--green);
+      opacity: .7
+    }
+
+    .sico {
+      font-size: 14px;
+      width: 20px;
+      text-align: center;
+      flex-shrink: 0
+    }
+
+    .sb-foot {
+      margin-top: auto;
+      padding: 14px 16px;
+      border-top: 1px solid var(--bd);
+    }
+
+    .pl {
+      display: flex;
+      justify-content: space-between;
+      font-size: 9px;
+      color: var(--muted);
+      letter-spacing: 2px;
+      margin-bottom: 6px
+    }
+
+    .pt {
+      height: 3px;
+      background: var(--bd2);
+      border-radius: 2px;
+      overflow: hidden
+    }
+
+    .pb {
+      height: 100%;
+      background: linear-gradient(90deg, var(--blue), var(--sky));
+      border-radius: 2px;
+      width: 0%;
+      transition: width .5s ease
+    }
+
+    .px {
+      font-size: 10px;
+      color: var(--lblue);
+      margin-top: 5px
+    }
+
+    /* ══ MAIN ══ */
+    .main {
+      margin-left: 274px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0
+    }
+
+    .topbar {
+      background: rgba(6, 10, 28, .75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(78, 127, 255, .15);
+      box-shadow: 0 2px 24px rgba(0, 0, 0, .3);
+      padding: 12px 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .bc {
+      font-size: 12px;
+      color: var(--muted)
+    }
+
+    .bc em {
+      color: var(--lblue);
+      font-style: normal
+    }
+
+    .chip {
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      font-family: 'Rajdhani', sans-serif
+    }
+
+    .lz {
+      background: rgba(68, 212, 160, .1);
+      color: var(--green)
+    }
+
+    .lb {
+      background: rgba(253, 149, 60, .1);
+      color: var(--orange)
+    }
+
+    .li {
+      background: rgba(0, 184, 217, .1);
+      color: var(--sky)
+    }
+
+    .le {
+      background: rgba(248, 113, 113, .1);
+      color: var(--red)
+    }
+
+    .page {
+      padding: 38px 42px;
+      max-width: 980px
+    }
+
+    /* ══ SECTIONS ══ */
+    .sec {
+      display: none
+    }
+
+    .sec.active {
+      display: block;
+      animation: up .3s ease
+    }
+
+    @keyframes up {
+      from {
+        opacity: 0;
+        transform: translateY(10px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    .ey {
+      font-size: 9px;
+      color: var(--blue);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin-bottom: 10px
+    }
+
+    .ht {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 50px;
+      font-weight: 700;
+      color: #fff;
+      line-height: .95;
+      letter-spacing: 2px;
+      margin-bottom: 16px;
+    }
+
+    .intro {
+      font-size: 14px;
+      color: var(--prose);
+      line-height: 2;
+      max-width: 640px;
+      margin-bottom: 32px
+    }
+
+    /* ══ CARDS ══ */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 14px;
+      margin: 22px 0
+    }
+
+    .card {
+      background: rgba(16, 21, 48, .7);
+      border: 1px solid rgba(78, 127, 255, .15);
+      backdrop-filter: blur(8px);
+      border-radius: 10px;
+      padding: 18px;
+      transition: border-color .2s, transform .15s, box-shadow .2s;
+    }
+
+    .card:hover {
+      border-color: rgba(78, 127, 255, .5);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(78, 127, 255, .12)
+    }
+
+    .ci {
+      font-size: 22px;
+      margin-bottom: 10px
+    }
+
+    .ct {
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 5px;
+      font-family: 'Rajdhani', sans-serif;
+      letter-spacing: .5px
+    }
+
+    .cb {
+      font-size: 12px;
+      color: var(--prose);
+      line-height: 1.75
+    }
+
+    /* ══ EDITOR ══ */
+    .editor {
+      background: rgba(8, 12, 30, .85);
+      border: 1px solid rgba(78, 127, 255, .18);
+      backdrop-filter: blur(8px);
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 22px 0;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, .35)
+    }
+
+    .ebar {
+      background: var(--s2);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--bd);
+    }
+
+    .ef {
+      font-size: 11px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .edot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--blue)
+    }
+
+    .ebs {
+      display: flex;
+      gap: 8px
+    }
+
+    .eb {
+      padding: 5px 14px;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      font-weight: 600;
+      transition: all .15s;
+    }
+
+    .run {
+      background: var(--green);
+      color: #000
+    }
+
+    .run:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px)
+    }
+
+    .rst {
+      background: var(--s3);
+      color: var(--muted);
+      border: 1px solid var(--bd)
+    }
+
+    .sol {
+      background: rgba(50, 108, 229, .12);
+      color: var(--lblue);
+      border: 1px solid rgba(50, 108, 229, .25)
+    }
+
+    .ca {
+      width: 100%;
+      min-height: 200px;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--code);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12.5px;
+      line-height: 1.9;
+      padding: 18px 20px;
+      resize: vertical;
+      tab-size: 2;
+      caret-color: var(--blue);
+    }
+
+    .ca::placeholder {
+      color: var(--muted);
+      opacity: .4
+    }
+
+    /* ══ TERMINAL ══ */
+    .term {
+      background: rgba(4, 6, 18, .92);
+      border: 1px solid rgba(78, 127, 255, .15);
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 14px 0;
+      display: none;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, .4);
+    }
+
+    .tbar {
+      background: var(--s2);
+      padding: 9px 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border-bottom: 1px solid var(--bd);
+    }
+
+    .td {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%
+    }
+
+    .td1 {
+      background: #ff5f57
+    }
+
+    .td2 {
+      background: #febc2e
+    }
+
+    .td3 {
+      background: #28c840
+    }
+
+    .tlb {
+      font-size: 10px;
+      color: var(--muted);
+      margin-left: 8px
+    }
+
+    .tbody {
+      padding: 14px 18px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      line-height: 2;
+      min-height: 80px;
+      max-height: 420px;
+      overflow-y: auto;
+    }
+
+    .tp {
+      color: var(--green)
+    }
+
+    .tc {
+      color: var(--txt)
+    }
+
+    .to {
+      color: #3d5a80
+    }
+
+    .ts {
+      color: #44d4a0
+    }
+
+    .te {
+      color: var(--red)
+    }
+
+    .tw {
+      color: var(--yellow)
+    }
+
+    .ti {
+      color: var(--lblue)
+    }
+
+    .tpu {
+      color: var(--purple)
+    }
+
+    .tsk {
+      color: var(--sky)
+    }
+
+    .tor {
+      color: var(--orange)
+    }
+
+    /* ══ DIAGRAM ══ */
+    .diag {
+      background: rgba(10, 14, 36, .8);
+      border: 1px solid rgba(78, 127, 255, .15);
+      backdrop-filter: blur(8px);
+      border-radius: 10px;
+      padding: 22px;
+      margin: 22px 0;
+      overflow-x: auto;
+      box-shadow: inset 0 1px 0 rgba(78, 127, 255, .1);
+    }
+
+    .dlb {
+      font-size: 9px;
+      color: var(--muted);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 14px
+    }
+
+    /* ══ QUIZ ══ */
+    .quiz {
+      background: rgba(16, 21, 48, .7);
+      border: 1px solid rgba(78, 127, 255, .18);
+      backdrop-filter: blur(8px);
+      border-radius: 10px;
+      padding: 22px;
+      margin: 26px 0;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, .3)
+    }
+
+    .qq {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 18px;
+      line-height: 1.5;
+      font-family: 'Rajdhani', sans-serif
+    }
+
+    .qopts {
+      display: flex;
+      flex-direction: column;
+      gap: 9px
+    }
+
+    .qo {
+      padding: 12px 16px;
+      border-radius: 7px;
+      border: 1px solid rgba(78, 127, 255, .15);
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--txt);
+      background: rgba(20, 26, 58, .7);
+      transition: all .15s;
+    }
+
+    .qo:hover {
+      border-color: var(--blue);
+      color: var(--lblue)
+    }
+
+    .qo.ok {
+      border-color: var(--green) !important;
+      background: rgba(68, 212, 160, .06);
+      color: var(--green) !important;
+      pointer-events: none
+    }
+
+    .qo.no {
+      border-color: var(--red) !important;
+      background: rgba(248, 113, 113, .06);
+      color: var(--red) !important;
+      pointer-events: none
+    }
+
+    .qfb {
+      margin-top: 14px;
+      padding: 13px 16px;
+      border-radius: 7px;
+      font-size: 13px;
+      display: none;
+      line-height: 1.8
+    }
+
+    .qfb.show {
+      display: block
+    }
+
+    .qfb.y {
+      background: rgba(68, 212, 160, .06);
+      border: 1px solid rgba(68, 212, 160, .2);
+      color: var(--green)
+    }
+
+    .qfb.n {
+      background: rgba(248, 113, 113, .06);
+      border: 1px solid rgba(248, 113, 113, .2);
+      color: var(--red)
+    }
+
+    /* ══ ALERTS ══ */
+    .alert {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 13px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.75;
+      margin: 16px 0
+    }
+
+    .at {
+      background: rgba(68, 212, 160, .06);
+      border: 1px solid rgba(68, 212, 160, .18);
+      color: #86efcf
+    }
+
+    .aw {
+      background: rgba(253, 224, 71, .06);
+      border: 1px solid rgba(253, 224, 71, .18);
+      color: var(--yellow)
+    }
+
+    .ai {
+      background: rgba(0, 184, 217, .06);
+      border: 1px solid rgba(0, 184, 217, .18);
+      color: #67e8f9
+    }
+
+    .ad {
+      background: rgba(248, 113, 113, .06);
+      border: 1px solid rgba(248, 113, 113, .18);
+      color: var(--red)
+    }
+
+    /* ══ TABLE ══ */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 13px
+    }
+
+    th {
+      background: var(--s3);
+      color: var(--sky);
+      padding: 11px 14px;
+      text-align: left;
+      font-weight: 700;
+      border: 1px solid var(--bd);
+      font-family: 'Rajdhani', sans-serif;
+      letter-spacing: .5px
+    }
+
+    td {
+      padding: 11px 14px;
+      border: 1px solid var(--bd);
+      color: var(--prose);
+      vertical-align: top;
+      line-height: 1.75
+    }
+
+    tr:hover td {
+      background: rgba(78, 127, 255, .05)
+    }
+
+    /* ══ STEPS ══ */
+    .steps {
+      margin: 20px 0
+    }
+
+    .step {
+      display: flex;
+      gap: 16px;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--bd)
+    }
+
+    .step:last-child {
+      border-bottom: none
+    }
+
+    .sn {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      background: rgba(50, 108, 229, .1);
+      border: 1px solid rgba(50, 108, 229, .3);
+      color: var(--lblue);
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .st {
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 5px;
+      font-family: 'Rajdhani', sans-serif
+    }
+
+    .sd {
+      font-size: 13px;
+      color: var(--prose);
+      line-height: 1.85
+    }
+
+    /* ══ NAV ══ */
+    .lnav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 52px;
+      padding-top: 26px;
+      border-top: 1px solid var(--bd)
+    }
+
+    .nb {
+      padding: 10px 24px;
+      border-radius: 7px;
+      border: 1px solid var(--bd);
+      background: var(--s2);
+      color: var(--txt);
+      cursor: pointer;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all .15s;
+    }
+
+    .nb:hover {
+      border-color: var(--blue);
+      color: var(--lblue)
+    }
+
+    .nb:disabled {
+      opacity: .3;
+      cursor: default
+    }
+
+    .nb.go {
+      background: var(--blue);
+      color: #fff;
+      border-color: var(--blue)
+    }
+
+    .nb.go:hover {
+      background: var(--lblue)
+    }
+
+    code {
+      background: rgba(78, 127, 255, .15);
+      color: #b8d8ff;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px
+    }
+
+    h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      margin: 28px 0 12px;
+      font-family: 'Rajdhani', sans-serif;
+      letter-spacing: .5px;
+      border-left: 3px solid var(--blue);
+      padding-left: 10px
+    }
+
+    p {
+      font-size: 14px;
+      color: var(--prose);
+      line-height: 2;
+      margin-bottom: 12px
+    }
+
+    strong {
+      color: var(--txt)
+    }
+
+    .victory {
+      text-align: center;
+      background: linear-gradient(135deg, rgba(78, 127, 255, .15), rgba(0, 212, 255, .1), rgba(192, 132, 252, .1));
+      border: 1px solid rgba(78, 127, 255, .35);
+      border-radius: 16px;
+      padding: 52px 32px;
+      margin: 32px 0;
+      box-shadow: 0 0 60px rgba(78, 127, 255, .15), inset 0 1px 0 rgba(255, 255, 255, .05);
+    }
+
+    .vi {
+      font-size: 60px;
+      margin-bottom: 18px
+    }
+
+    .vt {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 48px;
+      font-weight: 700;
+      color: var(--lblue);
+      margin-bottom: 10px;
+      letter-spacing: 3px
+    }
+
+    .vs {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.8
+    }
+
+    ::-webkit-scrollbar {
+      width: 5px
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--s1)
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--bd2);
+      border-radius: 3px
+    }
+  </style>
 </head>
+
 <body>
-<div class="wrap">
+  <div class="wrap">
 
     <!-- ══════════ SIDEBAR ══════════ -->
     <nav class="sidebar">
-        <div class="sb-top">
-            <div class="brand">
-                <div class="b-icon">☸️</div>
-                <div>
-                    <div class="b-name">KUBERNETES</div>
-                    <div class="b-sub">Zero → Expert</div>
-                </div>
-            </div>
+      <div class="sb-top">
+        <div class="brand">
+          <div class="b-icon">☸️</div>
+          <div>
+            <div class="b-name">KUBERNETES</div>
+            <div class="b-sub">Zero → Expert</div>
+          </div>
         </div>
+      </div>
 
-        <div class="sg">Zero — Foundations</div>
-        <div class="si active" onclick="go(0)"><span class="sico">🧠</span>What is Kubernetes?</div>
-        <div class="si" onclick="go(1)"><span class="sico">🏗️</span>Architecture Deep Dive</div>
-        <div class="si" onclick="go(2)"><span class="sico">⚙️</span>Install & kubectl</div>
+      <div class="sg">Zero — Foundations</div>
+      <div class="si active" onclick="go(0)"><span class="sico">🧠</span>What is Kubernetes?</div>
+      <div class="si" onclick="go(1)"><span class="sico">🏗️</span>Architecture Deep Dive</div>
+      <div class="si" onclick="go(2)"><span class="sico">⚙️</span>Install & kubectl</div>
 
-        <div class="sg">Beginner — Core Objects</div>
-        <div class="si" onclick="go(3)"><span class="sico">📦</span>Pods</div>
-        <div class="si" onclick="go(4)"><span class="sico">🔁</span>Deployments</div>
-        <div class="si" onclick="go(5)"><span class="sico">🌐</span>Services</div>
-        <div class="si" onclick="go(6)"><span class="sico">🗺️</span>Namespaces</div>
-        <div class="si" onclick="go(7)"><span class="sico">⚡</span>Essential kubectl Commands</div>
+      <div class="sg">Beginner — Core Objects</div>
+      <div class="si" onclick="go(3)"><span class="sico">📦</span>Pods</div>
+      <div class="si" onclick="go(4)"><span class="sico">🔁</span>Deployments</div>
+      <div class="si" onclick="go(5)"><span class="sico">🌐</span>Services</div>
+      <div class="si" onclick="go(6)"><span class="sico">🗺️</span>Namespaces</div>
+      <div class="si" onclick="go(7)"><span class="sico">⚡</span>Essential kubectl Commands</div>
 
-        <div class="sg">Intermediate — Configuration</div>
-        <div class="si" onclick="go(8)"><span class="sico">🔐</span>ConfigMaps & Secrets</div>
-        <div class="si" onclick="go(9)"><span class="sico">💾</span>Volumes & PersistentVolumes</div>
-        <div class="si" onclick="go(10)"><span class="sico">🔀</span>Ingress & Load Balancing</div>
-        <div class="si" onclick="go(11)"><span class="sico">📈</span>Resource Limits & HPA</div>
+      <div class="sg">Intermediate — Configuration</div>
+      <div class="si" onclick="go(8)"><span class="sico">🔐</span>ConfigMaps & Secrets</div>
+      <div class="si" onclick="go(9)"><span class="sico">💾</span>Volumes & PersistentVolumes</div>
+      <div class="si" onclick="go(10)"><span class="sico">🔀</span>Ingress & Load Balancing</div>
+      <div class="si" onclick="go(11)"><span class="sico">📈</span>Resource Limits & HPA</div>
 
-        <div class="sg">Advanced — Production</div>
-        <div class="si" onclick="go(12)"><span class="sico">🛡️</span>RBAC & Security</div>
-        <div class="si" onclick="go(13)"><span class="sico">🔄</span>StatefulSets & DaemonSets</div>
-        <div class="si" onclick="go(14)"><span class="sico">📊</span>Monitoring & Logging</div>
-        <div class="si" onclick="go(15)"><span class="sico">🚀</span>Helm Package Manager</div>
-        <div class="si" onclick="go(16)"><span class="sico">☕</span>Deploy Spring Boot "Demo App"</div>
-        <div class="si" onclick="go(17)"><span class="sico">🏆</span>Final Challenge</div>
+      <div class="sg">Advanced — Production</div>
+      <div class="si" onclick="go(12)"><span class="sico">🛡️</span>RBAC & Security</div>
+      <div class="si" onclick="go(13)"><span class="sico">🔄</span>StatefulSets & DaemonSets</div>
+      <div class="si" onclick="go(14)"><span class="sico">📊</span>Monitoring & Logging</div>
+      <div class="si" onclick="go(15)"><span class="sico">🚀</span>Helm Package Manager</div>
+      <div class="si" onclick="go(16)"><span class="sico">☕</span>Deploy Spring Boot "Demo App"</div>
+      <div class="si" onclick="go(17)"><span class="sico">🏆</span>Final Challenge</div>
 
-        <div class="sb-foot">
-            <div class="pl"><span>PROGRESS</span><span id="pct">0%</span></div>
-            <div class="pt"><div class="pb" id="pbar"></div></div>
-            <div class="px" id="pxp">0 / 18 lessons</div>
+      <div class="sb-foot">
+        <div class="pl"><span>PROGRESS</span><span id="pct">0%</span></div>
+        <div class="pt">
+          <div class="pb" id="pbar"></div>
         </div>
+        <div class="px" id="pxp">0 / 18 lessons</div>
+      </div>
     </nav>
 
     <!-- ══════════ MAIN ══════════ -->
     <main class="main">
-        <div class="topbar">
-            <div class="bc">
-                <a href="index.html" style="color: var(--muted); text-decoration: none; transition: color 0.2s;">🏠 home /</a>   kubernetes / <em id="bcn">introduction</em>
-            </div>
-            <div class="chip lz" id="lvchip">ZERO</div>
+      <div class="topbar">
+        <div class="bc">
+          <a href="index.html" style="color: var(--muted); text-decoration: none; transition: color 0.2s;">🏠 home /</a>
+          kubernetes / <em id="bcn">introduction</em>
         </div>
+        <div class="chip lz" id="lvchip">ZERO</div>
+      </div>
 
-        <div class="page">
+      <div class="page">
 
-            <!-- ══════════════════════════════
+        <!-- ══════════════════════════════
                  S0 — What is Kubernetes
             ══════════════════════════════ -->
-            <div class="sec active" id="s0">
-                <div class="ey">LESSON 01 — INTRODUCTION</div>
-                <div class="ht">WHAT IS<br>KUBERNETES?</div>
-                <div class="intro">Kubernetes (K8s) is an open-source container orchestration system. It automates deploying, scaling, and managing containerized applications across a cluster of machines. Born at Google in 2014, it now runs the majority of the world's cloud infrastructure.</div>
+        <div class="sec active" id="s0">
+          <div class="ey">LESSON 01 — INTRODUCTION</div>
+          <div class="ht">WHAT IS<br>KUBERNETES?</div>
+          <div class="intro">Kubernetes (K8s) is an open-source container orchestration system. It automates deploying,
+            scaling, and managing containerized applications across a cluster of machines. Born at Google in 2014, it
+            now runs the majority of the world's cloud infrastructure.</div>
 
-                <div class="diag">
-                    <div class="dlb">THE PROBLEM KUBERNETES SOLVES</div>
-                    <pre style="color:#3d5a80;line-height:2.3;font-size:12px">
+          <div class="diag">
+            <div class="dlb">THE PROBLEM KUBERNETES SOLVES</div>
+            <pre style="color:#6a8fb8;line-height:2.3;font-size:13px">
   <span style="color:#f87171">Without Kubernetes (Docker alone):</span>
   Server 1: docker run demo-app:v1  (running)
   Server 2: docker run demo-app:v1  (running)
@@ -350,52 +1041,110 @@
   K8s handles: scheduling, restarts, rolling updates, scaling, self-healing
   You sleep peacefully. ☕
       </pre>
-                </div>
+          </div>
 
-                <div class="cards">
-                    <div class="card"><div class="ci">🔄</div><div class="ct">Self-Healing</div><div class="cb">Container crashes? K8s restarts it automatically. Node dies? Pods migrate to healthy nodes.</div></div>
-                    <div class="card"><div class="ci">📈</div><div class="ct">Auto-Scaling</div><div class="cb">CPU high? K8s adds more pods automatically. Traffic drops? Scales back down.</div></div>
-                    <div class="card"><div class="ci">🔀</div><div class="ct">Rolling Updates</div><div class="cb">Deploy new version with zero downtime. Automatic rollback if health checks fail.</div></div>
-                    <div class="card"><div class="ci">⚖️</div><div class="ct">Load Balancing</div><div class="cb">Distributes traffic across all healthy pods. Built-in service discovery.</div></div>
-                    <div class="card"><div class="ci">💾</div><div class="ct">Storage Management</div><div class="cb">Automatically provisions and mounts storage for stateful apps like databases.</div></div>
-                    <div class="card"><div class="ci">🌍</div><div class="ct">Multi-cloud</div><div class="cb">Same YAML files work on AWS, GCP, Azure, on-premise. No vendor lock-in.</div></div>
-                </div>
-
-                <h3>Docker vs Kubernetes — When do you need K8s?</h3>
-                <table>
-                    <tr><th>Scenario</th><th>Docker Compose</th><th>Kubernetes</th></tr>
-                    <tr><td>1–2 servers, small team</td><td>✅ Perfect</td><td>Overkill</td></tr>
-                    <tr><td>Multiple servers, HA needed</td><td>Struggle</td><td>✅ Built for this</td></tr>
-                    <tr><td>Auto-scaling on traffic</td><td>Manual</td><td>✅ Automatic</td></tr>
-                    <tr><td>Zero-downtime deploys</td><td>Complex</td><td>✅ Built-in</td></tr>
-                    <tr><td>Multi-team, many microservices</td><td>Hard</td><td>✅ Designed for it</td></tr>
-                    <tr><td>Cloud-native production</td><td>Limited</td><td>✅ Industry standard</td></tr>
-                </table>
-
-                <div class="quiz">
-                    <div class="qq">🧠 Your Spring Boot app is running on 5 servers with Docker. Server 3 crashes at 3am. What does Kubernetes do that Docker alone cannot?</div>
-                    <div class="qopts">
-                        <div class="qo" onclick="Q(this,false,0)">A) Sends you an email alert</div>
-                        <div class="qo" onclick="Q(this,true,0)">B) Automatically detects the failed node, reschedules those pods onto healthy nodes, and maintains the desired replica count — all with zero demo-app intervention</div>
-                        <div class="qo" onclick="Q(this,false,0)">C) Restarts the crashed server</div>
-                        <div class="qo" onclick="Q(this,false,0)">D) Scales to 6 servers to compensate</div>
-                    </div>
-                    <div class="qfb" id="qf0"></div>
-                </div>
-                <div class="lnav"><button class="nb" disabled>← Prev</button><button class="nb go" onclick="go(1)">Architecture →</button></div>
+          <div class="cards">
+            <div class="card">
+              <div class="ci">🔄</div>
+              <div class="ct">Self-Healing</div>
+              <div class="cb">Container crashes? K8s restarts it automatically. Node dies? Pods migrate to healthy
+                nodes.</div>
             </div>
+            <div class="card">
+              <div class="ci">📈</div>
+              <div class="ct">Auto-Scaling</div>
+              <div class="cb">CPU high? K8s adds more pods automatically. Traffic drops? Scales back down.</div>
+            </div>
+            <div class="card">
+              <div class="ci">🔀</div>
+              <div class="ct">Rolling Updates</div>
+              <div class="cb">Deploy new version with zero downtime. Automatic rollback if health checks fail.</div>
+            </div>
+            <div class="card">
+              <div class="ci">⚖️</div>
+              <div class="ct">Load Balancing</div>
+              <div class="cb">Distributes traffic across all healthy pods. Built-in service discovery.</div>
+            </div>
+            <div class="card">
+              <div class="ci">💾</div>
+              <div class="ct">Storage Management</div>
+              <div class="cb">Automatically provisions and mounts storage for stateful apps like databases.</div>
+            </div>
+            <div class="card">
+              <div class="ci">🌍</div>
+              <div class="ct">Multi-cloud</div>
+              <div class="cb">Same YAML files work on AWS, GCP, Azure, on-premise. No vendor lock-in.</div>
+            </div>
+          </div>
 
-            <!-- ══════════════════════════════
+          <h3>Docker vs Kubernetes — When do you need K8s?</h3>
+          <table>
+            <tr>
+              <th>Scenario</th>
+              <th>Docker Compose</th>
+              <th>Kubernetes</th>
+            </tr>
+            <tr>
+              <td>1–2 servers, small team</td>
+              <td>✅ Perfect</td>
+              <td>Overkill</td>
+            </tr>
+            <tr>
+              <td>Multiple servers, HA needed</td>
+              <td>Struggle</td>
+              <td>✅ Built for this</td>
+            </tr>
+            <tr>
+              <td>Auto-scaling on traffic</td>
+              <td>Manual</td>
+              <td>✅ Automatic</td>
+            </tr>
+            <tr>
+              <td>Zero-downtime deploys</td>
+              <td>Complex</td>
+              <td>✅ Built-in</td>
+            </tr>
+            <tr>
+              <td>Multi-team, many microservices</td>
+              <td>Hard</td>
+              <td>✅ Designed for it</td>
+            </tr>
+            <tr>
+              <td>Cloud-native production</td>
+              <td>Limited</td>
+              <td>✅ Industry standard</td>
+            </tr>
+          </table>
+
+          <div class="quiz">
+            <div class="qq">🧠 Your Spring Boot app is running on 5 servers with Docker. Server 3 crashes at 3am. What
+              does Kubernetes do that Docker alone cannot?</div>
+            <div class="qopts">
+              <div class="qo" onclick="Q(this,false,0)">A) Sends you an email alert</div>
+              <div class="qo" onclick="Q(this,true,0)">B) Automatically detects the failed node, reschedules those pods
+                onto healthy nodes, and maintains the desired replica count — all with zero demo-app intervention</div>
+              <div class="qo" onclick="Q(this,false,0)">C) Restarts the crashed server</div>
+              <div class="qo" onclick="Q(this,false,0)">D) Scales to 6 servers to compensate</div>
+            </div>
+            <div class="qfb" id="qf0"></div>
+          </div>
+          <div class="lnav"><button class="nb" disabled>← Prev</button><button class="nb go"
+              onclick="go(1)">Architecture →</button></div>
+        </div>
+
+        <!-- ══════════════════════════════
                  S1 — Architecture
             ══════════════════════════════ -->
-            <div class="sec" id="s1">
-                <div class="ey">LESSON 02 — ARCHITECTURE</div>
-                <div class="ht">ARCHITECTURE<br>DEEP DIVE</div>
-                <div class="intro">A Kubernetes cluster has two types of machines: the <strong>Control Plane</strong> (brain) and <strong>Worker Nodes</strong> (muscle). Understanding each component is essential for troubleshooting.</div>
+        <div class="sec" id="s1">
+          <div class="ey">LESSON 02 — ARCHITECTURE</div>
+          <div class="ht">ARCHITECTURE<br>DEEP DIVE</div>
+          <div class="intro">A Kubernetes cluster has two types of machines: the <strong>Control Plane</strong> (brain)
+            and <strong>Worker Nodes</strong> (muscle). Understanding each component is essential for troubleshooting.
+          </div>
 
-                <div class="diag">
-                    <div class="dlb">KUBERNETES CLUSTER ARCHITECTURE</div>
-                    <pre style="color:#3d5a80;line-height:2.2;font-size:12px">
+          <div class="diag">
+            <div class="dlb">KUBERNETES CLUSTER ARCHITECTURE</div>
+            <pre style="color:#6a8fb8;line-height:2.2;font-size:13px">
   ┌──────────────────────── CONTROL PLANE (Master) ─────────────────────────┐
   │                                                                          │
   │  ┌───────────────┐  ┌───────────────┐  ┌────────────┐  ┌─────────────┐ │
@@ -420,43 +1169,80 @@
   │  [Pod][Pod]    │   │  [Pod][Pod]    │   │  [Pod][Pod]    │
   └────────────────┘   └────────────────┘   └────────────────┘
       </pre>
-                </div>
+          </div>
 
-                <table>
-                    <tr><th>Component</th><th>Role</th><th>Analogy</th></tr>
-                    <tr><td><strong>API Server</strong></td><td>Single entry point for all K8s operations. Validates and processes all REST requests.</td><td>Reception desk — everything goes through here</td></tr>
-                    <tr><td><strong>etcd</strong></td><td>Distributed key-value store. The entire cluster state lives here. If etcd dies, cluster is blind.</td><td>The company database — source of truth</td></tr>
-                    <tr><td><strong>Scheduler</strong></td><td>Watches for new pods with no node assigned. Picks best node based on resource requirements.</td><td>HR assigning employees to desks</td></tr>
-                    <tr><td><strong>Controller Manager</strong></td><td>Runs loops checking desired state vs actual state. Creates/deletes pods to match desired replicas.</td><td>Manager ensuring headcount is correct</td></tr>
-                    <tr><td><strong>kubelet</strong></td><td>Agent on every worker node. Talks to API server. Starts/stops containers via container runtime.</td><td>Floor supervisor on each worker node</td></tr>
-                    <tr><td><strong>kube-proxy</strong></td><td>Maintains network rules on each node for Service routing.</td><td>Network traffic cop</td></tr>
-                </table>
+          <table>
+            <tr>
+              <th>Component</th>
+              <th>Role</th>
+              <th>Analogy</th>
+            </tr>
+            <tr>
+              <td><strong>API Server</strong></td>
+              <td>Single entry point for all K8s operations. Validates and processes all REST requests.</td>
+              <td>Reception desk — everything goes through here</td>
+            </tr>
+            <tr>
+              <td><strong>etcd</strong></td>
+              <td>Distributed key-value store. The entire cluster state lives here. If etcd dies, cluster is blind.</td>
+              <td>The company database — source of truth</td>
+            </tr>
+            <tr>
+              <td><strong>Scheduler</strong></td>
+              <td>Watches for new pods with no node assigned. Picks best node based on resource requirements.</td>
+              <td>HR assigning employees to desks</td>
+            </tr>
+            <tr>
+              <td><strong>Controller Manager</strong></td>
+              <td>Runs loops checking desired state vs actual state. Creates/deletes pods to match desired replicas.
+              </td>
+              <td>Manager ensuring headcount is correct</td>
+            </tr>
+            <tr>
+              <td><strong>kubelet</strong></td>
+              <td>Agent on every worker node. Talks to API server. Starts/stops containers via container runtime.</td>
+              <td>Floor supervisor on each worker node</td>
+            </tr>
+            <tr>
+              <td><strong>kube-proxy</strong></td>
+              <td>Maintains network rules on each node for Service routing.</td>
+              <td>Network traffic cop</td>
+            </tr>
+          </table>
 
-                <div class="quiz">
-                    <div class="qq">🧠 You run <code>kubectl apply -f deployment.yaml</code>. What is the FIRST component that receives this request?</div>
-                    <div class="qopts">
-                        <div class="qo" onclick="Q(this,false,1)">A) etcd — it stores the config first</div>
-                        <div class="qo" onclick="Q(this,true,1)">B) API Server — all kubectl commands hit the API Server's REST endpoint first. It then validates and writes to etcd.</div>
-                        <div class="qo" onclick="Q(this,false,1)">C) Scheduler — it needs to find a node immediately</div>
-                        <div class="qo" onclick="Q(this,false,1)">D) kubelet — it runs on the target node</div>
-                    </div>
-                    <div class="qfb" id="qf1"></div>
-                </div>
-                <div class="lnav"><button class="nb" onclick="go(0)">← Prev</button><button class="nb go" onclick="go(2)">Install & kubectl →</button></div>
+          <div class="quiz">
+            <div class="qq">🧠 You run <code>kubectl apply -f deployment.yaml</code>. What is the FIRST component that
+              receives this request?</div>
+            <div class="qopts">
+              <div class="qo" onclick="Q(this,false,1)">A) etcd — it stores the config first</div>
+              <div class="qo" onclick="Q(this,true,1)">B) API Server — all kubectl commands hit the API Server's REST
+                endpoint first. It then validates and writes to etcd.</div>
+              <div class="qo" onclick="Q(this,false,1)">C) Scheduler — it needs to find a node immediately</div>
+              <div class="qo" onclick="Q(this,false,1)">D) kubelet — it runs on the target node</div>
             </div>
+            <div class="qfb" id="qf1"></div>
+          </div>
+          <div class="lnav"><button class="nb" onclick="go(0)">← Prev</button><button class="nb go"
+              onclick="go(2)">Install & kubectl →</button></div>
+        </div>
 
-            <!-- ══════════════════════════════
+        <!-- ══════════════════════════════
                  S2 — Install & kubectl
             ══════════════════════════════ -->
-            <div class="sec" id="s2">
-                <div class="ey">LESSON 03 — SETUP</div>
-                <div class="ht">INSTALL &<br>KUBECTL</div>
-                <div class="intro">For local learning use <strong>Minikube</strong> (single-node cluster on your machine). For production, use <strong>kubeadm</strong> or a managed service like GKE, EKS, or AKS.</div>
+        <div class="sec" id="s2">
+          <div class="ey">LESSON 03 — SETUP</div>
+          <div class="ht">INSTALL &<br>KUBECTL</div>
+          <div class="intro">For local learning use <strong>Minikube</strong> (single-node cluster on your machine). For
+            production, use <strong>kubeadm</strong> or a managed service like GKE, EKS, or AKS.</div>
 
-                <div class="editor">
-                    <div class="ebar"><div class="ef"><div class="edot"></div>terminal — install kubectl + minikube (Ubuntu)</div>
-                        <div class="ebs"><button class="eb run" onclick="runInstall()">▶ RUN</button></div></div>
-                    <textarea class="ca" spellcheck="false">## ── Install kubectl ────────────────────────────────────────────
+          <div class="editor">
+            <div class="ebar">
+              <div class="ef">
+                <div class="edot"></div>terminal — install kubectl + minikube (Ubuntu)
+              </div>
+              <div class="ebs"><button class="eb run" onclick="runInstall()">▶ RUN</button></div>
+            </div>
+            <textarea class="ca" spellcheck="false">## ── Install kubectl ────────────────────────────────────────────
 curl -LO "https://dl.k8s.io/release/$(curl -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
 chmod +x kubectl
 sudo mv kubectl /usr/local/bin/
@@ -472,13 +1258,25 @@ minikube start --driver=docker --cpus=2 --memory=4096
 ## ── Verify cluster is running ───────────────────────────────────
 kubectl cluster-info
 kubectl get nodes</textarea>
-                </div>
-                <div class="term" id="t2"><div class="tbar"><div class="td td1"></div><div class="td td2"></div><div class="td td3"></div><div class="tlb">output</div></div><div class="tbody" id="o2"></div></div>
+          </div>
+          <div class="term" id="t2">
+            <div class="tbar">
+              <div class="td td1"></div>
+              <div class="td td2"></div>
+              <div class="td td3"></div>
+              <div class="tlb">output</div>
+            </div>
+            <div class="tbody" id="o2"></div>
+          </div>
 
-                <h3>kubectl Configuration</h3>
-                <div class="editor">
-                    <div class="ebar"><div class="ef"><div class="edot"></div>kubeconfig — ~/.kube/config</div></div>
-                    <textarea class="ca" spellcheck="false" style="min-height:200px">## kubectl reads cluster connection info from ~/.kube/config
+          <h3>kubectl Configuration</h3>
+          <div class="editor">
+            <div class="ebar">
+              <div class="ef">
+                <div class="edot"></div>kubeconfig — ~/.kube/config
+              </div>
+            </div>
+            <textarea class="ca" spellcheck="false" style="min-height:200px">## kubectl reads cluster connection info from ~/.kube/config
 
 ## ── Context Commands ────────────────────────────────────────────
 kubectl config get-contexts          # List all clusters
@@ -489,23 +1287,28 @@ kubectl config use-context prod-gke  # Switch to production (be careful!)
 ## ── Useful alias ─────────────────────────────────────────────────
 alias k=kubectl                      # type 'k' instead of 'kubectl'
 echo 'alias k=kubectl' >> ~/.bashrc</textarea>
-                </div>
+          </div>
 
-                <div class="alert aw">⚠️ <span>Always check <code>kubectl config current-context</code> before running any destructive commands. Accidentally running on production instead of dev is a classic (and costly) mistake.</span></div>
-                <div class="lnav"><button class="nb" onclick="go(1)">← Prev</button><button class="nb go" onclick="go(3)">Pods →</button></div>
-            </div>
+          <div class="alert aw">⚠️ <span>Always check <code>kubectl config current-context</code> before running any
+              destructive commands. Accidentally running on production instead of dev is a classic (and costly)
+              mistake.</span></div>
+          <div class="lnav"><button class="nb" onclick="go(1)">← Prev</button><button class="nb go" onclick="go(3)">Pods
+              →</button></div>
+        </div>
 
-            <!-- ══════════════════════════════
+        <!-- ══════════════════════════════
                  S3 — Pods
             ══════════════════════════════ -->
-            <div class="sec" id="s3">
-                <div class="ey">LESSON 04 — CORE OBJECTS</div>
-                <div class="ht">PODS</div>
-                <div class="intro">A <strong>Pod</strong> is the smallest deployable unit in Kubernetes. It wraps one or more containers that share the same network and storage. Think of it as a "wrapper" around your Docker container.</div>
+        <div class="sec" id="s3">
+          <div class="ey">LESSON 04 — CORE OBJECTS</div>
+          <div class="ht">PODS</div>
+          <div class="intro">A <strong>Pod</strong> is the smallest deployable unit in Kubernetes. It wraps one or more
+            containers that share the same network and storage. Think of it as a "wrapper" around your Docker container.
+          </div>
 
-                <div class="diag">
-                    <div class="dlb">POD ANATOMY</div>
-                    <pre style="color:#3d5a80;line-height:2.2;font-size:12px">
+          <div class="diag">
+            <div class="dlb">POD ANATOMY</div>
+            <pre style="color:#6a8fb8;line-height:2.2;font-size:13px">
   ┌─────────────────── Pod ──────────────────────────────┐
   │                                                      │
   │  ┌───────────────────────┐  ┌─────────────────────┐  │
@@ -521,16 +1324,20 @@ echo 'alias k=kubectl' >> ~/.bashrc</textarea>
   └──────────────────────────────────────────────────────┘
   Pods are EPHEMERAL — never assume a Pod's IP is stable!
       </pre>
-                </div>
+          </div>
 
-                <div class="editor">
-                    <div class="ebar"><div class="ef"><div class="edot"></div>pod.yaml — write your first Pod manifest</div>
-                        <div class="ebs">
-                            <button class="eb rst" onclick="resetC('c3','')">Clear</button>
-                            <button class="eb sol" onclick="showSol('c3',sol3)">Solution</button>
-                            <button class="eb run" onclick="validatePod()">▶ Validate</button>
-                        </div></div>
-                    <textarea class="ca" id="c3" spellcheck="false" placeholder="# Write a Pod manifest that:
+          <div class="editor">
+            <div class="ebar">
+              <div class="ef">
+                <div class="edot"></div>pod.yaml — write your first Pod manifest
+              </div>
+              <div class="ebs">
+                <button class="eb rst" onclick="resetC('c3','')">Clear</button>
+                <button class="eb sol" onclick="showSol('c3',sol3)">Solution</button>
+                <button class="eb run" onclick="validatePod()">▶ Validate</button>
+              </div>
+            </div>
+            <textarea class="ca" id="c3" spellcheck="false" placeholder="# Write a Pod manifest that:
 # 1. apiVersion: v1
 # 2. kind: Pod
 # 3. metadata.name: demo-app-pod
@@ -538,47 +1345,87 @@ echo 'alias k=kubectl' >> ~/.bashrc</textarea>
 # 5. spec.containers[0].name: demo-app
 # 6. spec.containers[0].image: ghcr.io/org/demo-app:latest
 # 7. spec.containers[0].ports[0].containerPort: 9191"></textarea>
-                </div>
-                <div class="term" id="t3"><div class="tbar"><div class="td td1"></div><div class="td td2"></div><div class="td td3"></div><div class="tlb">validation</div></div><div class="tbody" id="o3"></div></div>
-
-                <h3>Pod Lifecycle</h3>
-                <table>
-                    <tr><th>Phase</th><th>Meaning</th></tr>
-                    <tr><td><code>Pending</code></td><td>Pod accepted by K8s but not yet scheduled or container images downloading</td></tr>
-                    <tr><td><code>Running</code></td><td>Pod bound to a node, all containers started</td></tr>
-                    <tr><td><code>Succeeded</code></td><td>All containers exited with code 0 (batch jobs)</td></tr>
-                    <tr><td><code>Failed</code></td><td>At least one container exited non-zero</td></tr>
-                    <tr><td><code>CrashLoopBackOff</code></td><td>Container keeps crashing — K8s waits before restarting (exponential backoff)</td></tr>
-                    <tr><td><code>ImagePullBackOff</code></td><td>Cannot pull the container image (wrong name, auth needed)</td></tr>
-                </table>
-
-                <div class="alert ai">ℹ️ <span><strong>Never</strong> run bare Pods in production. Use Deployments instead. If a Pod dies (node failure, crash), K8s does NOT restart it unless it's managed by a controller like a Deployment.</span></div>
-
-                <div class="quiz">
-                    <div class="qq">🧠 Two containers in the same Pod want to communicate with each other. What address do they use?</div>
-                    <div class="qopts">
-                        <div class="qo" onclick="Q(this,false,3)">A) Their individual Pod IPs (e.g. 10.244.1.5 and 10.244.1.6)</div>
-                        <div class="qo" onclick="Q(this,true,3)">B) localhost — containers in the same Pod share the same network namespace and communicate on 127.0.0.1</div>
-                        <div class="qo" onclick="Q(this,false,3)">C) The Kubernetes Service ClusterIP</div>
-                        <div class="qo" onclick="Q(this,false,3)">D) The node's IP address</div>
-                    </div>
-                    <div class="qfb" id="qf3"></div>
-                </div>
-                <div class="lnav"><button class="nb" onclick="go(2)">← Prev</button><button class="nb go" onclick="go(4)">Deployments →</button></div>
+          </div>
+          <div class="term" id="t3">
+            <div class="tbar">
+              <div class="td td1"></div>
+              <div class="td td2"></div>
+              <div class="td td3"></div>
+              <div class="tlb">validation</div>
             </div>
+            <div class="tbody" id="o3"></div>
+          </div>
 
-            <!-- ══════════════════════════════
+          <h3>Pod Lifecycle</h3>
+          <table>
+            <tr>
+              <th>Phase</th>
+              <th>Meaning</th>
+            </tr>
+            <tr>
+              <td><code>Pending</code></td>
+              <td>Pod accepted by K8s but not yet scheduled or container images downloading</td>
+            </tr>
+            <tr>
+              <td><code>Running</code></td>
+              <td>Pod bound to a node, all containers started</td>
+            </tr>
+            <tr>
+              <td><code>Succeeded</code></td>
+              <td>All containers exited with code 0 (batch jobs)</td>
+            </tr>
+            <tr>
+              <td><code>Failed</code></td>
+              <td>At least one container exited non-zero</td>
+            </tr>
+            <tr>
+              <td><code>CrashLoopBackOff</code></td>
+              <td>Container keeps crashing — K8s waits before restarting (exponential backoff)</td>
+            </tr>
+            <tr>
+              <td><code>ImagePullBackOff</code></td>
+              <td>Cannot pull the container image (wrong name, auth needed)</td>
+            </tr>
+          </table>
+
+          <div class="alert ai">ℹ️ <span><strong>Never</strong> run bare Pods in production. Use Deployments instead. If
+              a Pod dies (node failure, crash), K8s does NOT restart it unless it's managed by a controller like a
+              Deployment.</span></div>
+
+          <div class="quiz">
+            <div class="qq">🧠 Two containers in the same Pod want to communicate with each other. What address do they
+              use?</div>
+            <div class="qopts">
+              <div class="qo" onclick="Q(this,false,3)">A) Their individual Pod IPs (e.g. 10.244.1.5 and 10.244.1.6)
+              </div>
+              <div class="qo" onclick="Q(this,true,3)">B) localhost — containers in the same Pod share the same network
+                namespace and communicate on 127.0.0.1</div>
+              <div class="qo" onclick="Q(this,false,3)">C) The Kubernetes Service ClusterIP</div>
+              <div class="qo" onclick="Q(this,false,3)">D) The node's IP address</div>
+            </div>
+            <div class="qfb" id="qf3"></div>
+          </div>
+          <div class="lnav"><button class="nb" onclick="go(2)">← Prev</button><button class="nb go"
+              onclick="go(4)">Deployments →</button></div>
+        </div>
+
+        <!-- ══════════════════════════════
                  S4 — Deployments
             ══════════════════════════════ -->
-            <div class="sec" id="s4">
-                <div class="ey">LESSON 05 — CORE OBJECTS</div>
-                <div class="ht">DEPLOYMENTS</div>
-                <div class="intro">A <strong>Deployment</strong> is the standard way to run apps in Kubernetes. It manages a ReplicaSet which manages Pods. You declare the desired state; K8s ensures reality matches.</div>
+        <div class="sec" id="s4">
+          <div class="ey">LESSON 05 — CORE OBJECTS</div>
+          <div class="ht">DEPLOYMENTS</div>
+          <div class="intro">A <strong>Deployment</strong> is the standard way to run apps in Kubernetes. It manages a
+            ReplicaSet which manages Pods. You declare the desired state; K8s ensures reality matches.</div>
 
-                <div class="editor">
-                    <div class="ebar"><div class="ef"><div class="edot"></div>deployment.yaml — complete annotated example</div>
-                        <div class="ebs"><button class="eb run" onclick="runDeploy()">▶ Apply & Watch</button></div></div>
-                    <textarea class="ca" spellcheck="false" style="min-height:560px">apiVersion: apps/v1
+          <div class="editor">
+            <div class="ebar">
+              <div class="ef">
+                <div class="edot"></div>deployment.yaml — complete annotated example
+              </div>
+              <div class="ebs"><button class="eb run" onclick="runDeploy()">▶ Apply & Watch</button></div>
+            </div>
+            <textarea class="ca" spellcheck="false" style="min-height:560px">apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: demo-app
@@ -649,43 +1496,74 @@ spec:
             initialDelaySeconds: 60
             periodSeconds: 20
             failureThreshold: 3</textarea>
-                </div>
-                <div class="term" id="t4"><div class="tbar"><div class="td td1"></div><div class="td td2"></div><div class="td td3"></div><div class="tlb">deployment output</div></div><div class="tbody" id="o4"></div></div>
-
-                <h3>Readiness vs Liveness Probes</h3>
-                <table>
-                    <tr><th>Probe</th><th>Purpose</th><th>Failure action</th></tr>
-                    <tr><td><strong>readinessProbe</strong></td><td>Is the app ready to serve traffic? (Spring Boot still warming up?)</td><td>Remove Pod from Service load balancer — no traffic sent</td></tr>
-                    <tr><td><strong>livenessProbe</strong></td><td>Is the app still alive? (deadlocked? OOM?)</td><td>Kill and restart the container</td></tr>
-                    <tr><td><strong>startupProbe</strong></td><td>Has the app finished starting? (for slow starters)</td><td>Kill and restart — disables liveness during startup</td></tr>
-                </table>
-
-                <div class="alert at">💡 <span>Spring Boot Actuator provides the perfect probe endpoints out of the box. Add <code>management.health.livenessState.enabled=true</code> and <code>management.health.readinessState.enabled=true</code> to your <code>application.properties</code>.</span></div>
-
-                <div class="quiz">
-                    <div class="qq">🧠 Your demo-app app takes 45 seconds to start (Spring Boot loading Oracle schemas). The livenessProbe keeps killing it at 30 seconds. How do you fix this?</div>
-                    <div class="qopts">
-                        <div class="qo" onclick="Q(this,false,4)">A) Increase replicas so another pod is always available</div>
-                        <div class="qo" onclick="Q(this,true,4)">B) Add a startupProbe with a high failureThreshold (e.g. 12 × 10s = 120s). While startupProbe is checking, livenessProbe is disabled.</div>
-                        <div class="qo" onclick="Q(this,false,4)">C) Remove the livenessProbe entirely</div>
-                        <div class="qo" onclick="Q(this,false,4)">D) Set initialDelaySeconds to 45 on the livenessProbe</div>
-                    </div>
-                    <div class="qfb" id="qf4"></div>
-                </div>
-                <div class="lnav"><button class="nb" onclick="go(3)">← Prev</button><button class="nb go" onclick="go(5)">Services →</button></div>
+          </div>
+          <div class="term" id="t4">
+            <div class="tbar">
+              <div class="td td1"></div>
+              <div class="td td2"></div>
+              <div class="td td3"></div>
+              <div class="tlb">deployment output</div>
             </div>
+            <div class="tbody" id="o4"></div>
+          </div>
 
-            <!-- ══════════════════════════════
+          <h3>Readiness vs Liveness Probes</h3>
+          <table>
+            <tr>
+              <th>Probe</th>
+              <th>Purpose</th>
+              <th>Failure action</th>
+            </tr>
+            <tr>
+              <td><strong>readinessProbe</strong></td>
+              <td>Is the app ready to serve traffic? (Spring Boot still warming up?)</td>
+              <td>Remove Pod from Service load balancer — no traffic sent</td>
+            </tr>
+            <tr>
+              <td><strong>livenessProbe</strong></td>
+              <td>Is the app still alive? (deadlocked? OOM?)</td>
+              <td>Kill and restart the container</td>
+            </tr>
+            <tr>
+              <td><strong>startupProbe</strong></td>
+              <td>Has the app finished starting? (for slow starters)</td>
+              <td>Kill and restart — disables liveness during startup</td>
+            </tr>
+          </table>
+
+          <div class="alert at">💡 <span>Spring Boot Actuator provides the perfect probe endpoints out of the box. Add
+              <code>management.health.livenessState.enabled=true</code> and
+              <code>management.health.readinessState.enabled=true</code> to your
+              <code>application.properties</code>.</span></div>
+
+          <div class="quiz">
+            <div class="qq">🧠 Your demo-app app takes 45 seconds to start (Spring Boot loading Oracle schemas). The
+              livenessProbe keeps killing it at 30 seconds. How do you fix this?</div>
+            <div class="qopts">
+              <div class="qo" onclick="Q(this,false,4)">A) Increase replicas so another pod is always available</div>
+              <div class="qo" onclick="Q(this,true,4)">B) Add a startupProbe with a high failureThreshold (e.g. 12 × 10s
+                = 120s). While startupProbe is checking, livenessProbe is disabled.</div>
+              <div class="qo" onclick="Q(this,false,4)">C) Remove the livenessProbe entirely</div>
+              <div class="qo" onclick="Q(this,false,4)">D) Set initialDelaySeconds to 45 on the livenessProbe</div>
+            </div>
+            <div class="qfb" id="qf4"></div>
+          </div>
+          <div class="lnav"><button class="nb" onclick="go(3)">← Prev</button><button class="nb go"
+              onclick="go(5)">Services →</button></div>
+        </div>
+
+        <!-- ══════════════════════════════
                  S5 — Services
             ══════════════════════════════ -->
-            <div class="sec" id="s5">
-                <div class="ey">LESSON 06 — CORE OBJECTS</div>
-                <div class="ht">SERVICES</div>
-                <div class="intro">Pods die and get new IPs constantly. A <strong>Service</strong> gives you a stable DNS name and IP that load-balances to matching Pods — regardless of how many come and go.</div>
+        <div class="sec" id="s5">
+          <div class="ey">LESSON 06 — CORE OBJECTS</div>
+          <div class="ht">SERVICES</div>
+          <div class="intro">Pods die and get new IPs constantly. A <strong>Service</strong> gives you a stable DNS name
+            and IP that load-balances to matching Pods — regardless of how many come and go.</div>
 
-                <div class="diag">
-                    <div class="dlb">4 SERVICE TYPES</div>
-                    <pre style="color:#3d5a80;line-height:2.3;font-size:12px">
+          <div class="diag">
+            <div class="dlb">4 SERVICE TYPES</div>
+            <pre style="color:#6a8fb8;line-height:2.3;font-size:13px">
   <span style="color:#5b8ff9">ClusterIP</span> (default)
   Stable internal IP. Only accessible WITHIN the cluster.
   Use for: app → database, app → app communication
@@ -704,11 +1582,15 @@ spec:
   Maps service to external DNS (e.g. your Oracle DB on another server)
   Use for: pointing to resources outside K8s
       </pre>
-                </div>
+          </div>
 
-                <div class="editor">
-                    <div class="ebar"><div class="ef"><div class="edot"></div>service.yaml — all 3 main types</div></div>
-                    <textarea class="ca" spellcheck="false" style="min-height:460px">## ── ClusterIP (internal only) ───────────────────────────────────
+          <div class="editor">
+            <div class="ebar">
+              <div class="ef">
+                <div class="edot"></div>service.yaml — all 3 main types
+              </div>
+            </div>
+            <textarea class="ca" spellcheck="false" style="min-height:460px">## ── ClusterIP (internal only) ───────────────────────────────────
 apiVersion: v1
 kind: Service
 metadata:
@@ -756,33 +1638,41 @@ spec:
   type: ExternalName
   externalName: oracle-db.yourdomain.com  # DNS of external Oracle
   # Now apps use: jdbc:oracle:thin:@//oracle-external:1521/pimshuman</textarea>
-                </div>
+          </div>
 
-                <div class="quiz">
-                    <div class="qq">🧠 Your demo-app app needs to connect to Redis running in the same cluster. Which Service type should Redis use?</div>
-                    <div class="qopts">
-                        <div class="qo" onclick="Q(this,true,5)">A) ClusterIP — Redis only needs to be accessible within the cluster. No external exposure needed, keeping it secure.</div>
-                        <div class="qo" onclick="Q(this,false,5)">B) LoadBalancer — for better performance</div>
-                        <div class="qo" onclick="Q(this,false,5)">C) NodePort — for easier access</div>
-                        <div class="qo" onclick="Q(this,false,5)">D) ExternalName — Redis is external</div>
-                    </div>
-                    <div class="qfb" id="qf5"></div>
-                </div>
-                <div class="lnav"><button class="nb" onclick="go(4)">← Prev</button><button class="nb go" onclick="go(6)">Namespaces →</button></div>
+          <div class="quiz">
+            <div class="qq">🧠 Your demo-app app needs to connect to Redis running in the same cluster. Which Service
+              type should Redis use?</div>
+            <div class="qopts">
+              <div class="qo" onclick="Q(this,true,5)">A) ClusterIP — Redis only needs to be accessible within the
+                cluster. No external exposure needed, keeping it secure.</div>
+              <div class="qo" onclick="Q(this,false,5)">B) LoadBalancer — for better performance</div>
+              <div class="qo" onclick="Q(this,false,5)">C) NodePort — for easier access</div>
+              <div class="qo" onclick="Q(this,false,5)">D) ExternalName — Redis is external</div>
             </div>
+            <div class="qfb" id="qf5"></div>
+          </div>
+          <div class="lnav"><button class="nb" onclick="go(4)">← Prev</button><button class="nb go"
+              onclick="go(6)">Namespaces →</button></div>
+        </div>
 
-            <!-- ══════════════════════════════
+        <!-- ══════════════════════════════
                  S6 — Namespaces
             ══════════════════════════════ -->
-            <div class="sec" id="s6">
-                <div class="ey">LESSON 07 — ORGANIZATION</div>
-                <div class="ht">NAMESPACES</div>
-                <div class="intro"><strong>Namespaces</strong> are virtual clusters within a physical cluster. They isolate resources between teams, environments, or applications. Think of them as folders on a filesystem.</div>
+        <div class="sec" id="s6">
+          <div class="ey">LESSON 07 — ORGANIZATION</div>
+          <div class="ht">NAMESPACES</div>
+          <div class="intro"><strong>Namespaces</strong> are virtual clusters within a physical cluster. They isolate
+            resources between teams, environments, or applications. Think of them as folders on a filesystem.</div>
 
-                <div class="editor">
-                    <div class="ebar"><div class="ef"><div class="edot"></div>namespace setup — pims project</div>
-                        <div class="ebs"><button class="eb run" onclick="runNS()">▶ Simulate</button></div></div>
-                    <textarea class="ca" spellcheck="false" style="min-height:320px">## ── Create Namespaces ───────────────────────────────────────────
+          <div class="editor">
+            <div class="ebar">
+              <div class="ef">
+                <div class="edot"></div>namespace setup — pims project
+              </div>
+              <div class="ebs"><button class="eb run" onclick="runNS()">▶ Simulate</button></div>
+            </div>
+            <textarea class="ca" spellcheck="false" style="min-height:320px">## ── Create Namespaces ───────────────────────────────────────────
 kubectl create namespace pims-dev
 kubectl create namespace pims-staging
 kubectl create namespace pims-prod
@@ -813,24 +1703,37 @@ kubectl get namespaces
 # kube-system   → K8s system components (DNS, dashboard, etc)
 # kube-public   → publicly accessible data
 # kube-node-lease → node heartbeat data</textarea>
-                </div>
-                <div class="term" id="t6"><div class="tbar"><div class="td td1"></div><div class="td td2"></div><div class="td td3"></div><div class="tlb">output</div></div><div class="tbody" id="o6"></div></div>
-
-                <div class="lnav"><button class="nb" onclick="go(5)">← Prev</button><button class="nb go" onclick="go(7)">kubectl Commands →</button></div>
+          </div>
+          <div class="term" id="t6">
+            <div class="tbar">
+              <div class="td td1"></div>
+              <div class="td td2"></div>
+              <div class="td td3"></div>
+              <div class="tlb">output</div>
             </div>
+            <div class="tbody" id="o6"></div>
+          </div>
 
-            <!-- ══════════════════════════════
+          <div class="lnav"><button class="nb" onclick="go(5)">← Prev</button><button class="nb go"
+              onclick="go(7)">kubectl Commands →</button></div>
+        </div>
+
+        <!-- ══════════════════════════════
                  S7 — Essential Commands
             ══════════════════════════════ -->
-            <div class="sec" id="s7">
-                <div class="ey">LESSON 08 — COMMANDS</div>
-                <div class="ht">ESSENTIAL<br>KUBECTL COMMANDS</div>
-                <div class="intro">Master these commands and you can operate 90% of Kubernetes day-to-day tasks.</div>
+        <div class="sec" id="s7">
+          <div class="ey">LESSON 08 — COMMANDS</div>
+          <div class="ht">ESSENTIAL<br>KUBECTL COMMANDS</div>
+          <div class="intro">Master these commands and you can operate 90% of Kubernetes day-to-day tasks.</div>
 
-                <div class="editor">
-                    <div class="ebar"><div class="ef"><div class="edot"></div>kubectl command reference</div>
-                        <div class="ebs"><button class="eb run" onclick="runCmds()">▶ Simulate</button></div></div>
-                    <textarea class="ca" spellcheck="false" style="min-height:600px">## ── GET (inspect resources) ─────────────────────────────────────
+          <div class="editor">
+            <div class="ebar">
+              <div class="ef">
+                <div class="edot"></div>kubectl command reference
+              </div>
+              <div class="ebs"><button class="eb run" onclick="runCmds()">▶ Simulate</button></div>
+            </div>
+            <textarea class="ca" spellcheck="false" style="min-height:600px">## ── GET (inspect resources) ─────────────────────────────────────
 kubectl get pods                           # List pods in current namespace
 kubectl get pods -n pims-prod              # List pods in specific namespace
 kubectl get pods -A                        # ALL namespaces
@@ -883,33 +1786,50 @@ kubectl get deploy    # deploy = deployments
 kubectl get ns        # ns = namespaces
 kubectl get cm        # cm = configmaps
 kubectl get pvc       # pvc = persistentvolumeclaims</textarea>
-                </div>
-                <div class="term" id="t7"><div class="tbar"><div class="td td1"></div><div class="td td2"></div><div class="td td3"></div><div class="tlb">simulation</div></div><div class="tbody" id="o7"></div></div>
-
-                <div class="quiz">
-                    <div class="qq">🧠 A Pod is in <code>CrashLoopBackOff</code> and keeps restarting. The logs from the current container are empty. How do you see WHY it crashed?</div>
-                    <div class="qopts">
-                        <div class="qo" onclick="Q(this,false,7)">A) kubectl describe pod — the crash reason is there</div>
-                        <div class="qo" onclick="Q(this,true,7)">B) kubectl logs pod-name --previous — shows logs from the PREVIOUS container instance before the crash</div>
-                        <div class="qo" onclick="Q(this,false,7)">C) kubectl get events</div>
-                        <div class="qo" onclick="Q(this,false,7)">D) Check node system logs</div>
-                    </div>
-                    <div class="qfb" id="qf7"></div>
-                </div>
-                <div class="lnav"><button class="nb" onclick="go(6)">← Prev</button><button class="nb go" onclick="go(8)">ConfigMaps & Secrets →</button></div>
+          </div>
+          <div class="term" id="t7">
+            <div class="tbar">
+              <div class="td td1"></div>
+              <div class="td td2"></div>
+              <div class="td td3"></div>
+              <div class="tlb">simulation</div>
             </div>
+            <div class="tbody" id="o7"></div>
+          </div>
 
-            <!-- ══════════════════════════════
+          <div class="quiz">
+            <div class="qq">🧠 A Pod is in <code>CrashLoopBackOff</code> and keeps restarting. The logs from the current
+              container are empty. How do you see WHY it crashed?</div>
+            <div class="qopts">
+              <div class="qo" onclick="Q(this,false,7)">A) kubectl describe pod — the crash reason is there</div>
+              <div class="qo" onclick="Q(this,true,7)">B) kubectl logs pod-name --previous — shows logs from the
+                PREVIOUS container instance before the crash</div>
+              <div class="qo" onclick="Q(this,false,7)">C) kubectl get events</div>
+              <div class="qo" onclick="Q(this,false,7)">D) Check node system logs</div>
+            </div>
+            <div class="qfb" id="qf7"></div>
+          </div>
+          <div class="lnav"><button class="nb" onclick="go(6)">← Prev</button><button class="nb go"
+              onclick="go(8)">ConfigMaps & Secrets →</button></div>
+        </div>
+
+        <!-- ══════════════════════════════
                  S8 — ConfigMaps & Secrets
             ══════════════════════════════ -->
-            <div class="sec" id="s8">
-                <div class="ey">LESSON 09 — CONFIGURATION</div>
-                <div class="ht">CONFIGMAPS<br>& SECRETS</div>
-                <div class="intro"><strong>ConfigMaps</strong> store non-sensitive config. <strong>Secrets</strong> store sensitive data (passwords, tokens) encoded in base64. Both are injected into pods as env vars or mounted as files.</div>
+        <div class="sec" id="s8">
+          <div class="ey">LESSON 09 — CONFIGURATION</div>
+          <div class="ht">CONFIGMAPS<br>& SECRETS</div>
+          <div class="intro"><strong>ConfigMaps</strong> store non-sensitive config. <strong>Secrets</strong> store
+            sensitive data (passwords, tokens) encoded in base64. Both are injected into pods as env vars or mounted as
+            files.</div>
 
-                <div class="editor">
-                    <div class="ebar"><div class="ef"><div class="edot"></div>configmap.yaml + secret.yaml</div></div>
-                    <textarea class="ca" spellcheck="false" style="min-height:520px">## ── ConfigMap (non-sensitive config) ───────────────────────────
+          <div class="editor">
+            <div class="ebar">
+              <div class="ef">
+                <div class="edot"></div>configmap.yaml + secret.yaml
+              </div>
+            </div>
+            <textarea class="ca" spellcheck="false" style="min-height:520px">## ── ConfigMap (non-sensitive config) ───────────────────────────
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -965,24 +1885,29 @@ spec:
     - name: config-volume
       configMap:
         name: demo-app-config        # Mounts application.properties as a file</textarea>
-                </div>
+          </div>
 
-                <div class="alert ad">🚨 <span>Kubernetes Secrets are only <strong>base64 encoded</strong>, not encrypted! Anyone with cluster access can decode them. For production, use <strong>External Secrets Operator</strong> with HashiCorp Vault, AWS Secrets Manager, or seal secrets with <strong>SealedSecrets</strong>.</span></div>
+          <div class="alert ad">🚨 <span>Kubernetes Secrets are only <strong>base64 encoded</strong>, not encrypted!
+              Anyone with cluster access can decode them. For production, use <strong>External Secrets Operator</strong>
+              with HashiCorp Vault, AWS Secrets Manager, or seal secrets with <strong>SealedSecrets</strong>.</span>
+          </div>
 
-                <div class="lnav"><button class="nb" onclick="go(7)">← Prev</button><button class="nb go" onclick="go(9)">Volumes →</button></div>
-            </div>
+          <div class="lnav"><button class="nb" onclick="go(7)">← Prev</button><button class="nb go"
+              onclick="go(9)">Volumes →</button></div>
+        </div>
 
-            <!-- ══════════════════════════════
+        <!-- ══════════════════════════════
                  S9 — Volumes
             ══════════════════════════════ -->
-            <div class="sec" id="s9">
-                <div class="ey">LESSON 10 — STORAGE</div>
-                <div class="ht">VOLUMES &<br>PERSISTENT STORAGE</div>
-                <div class="intro">Containers are ephemeral — data dies with them. Kubernetes Volumes, PersistentVolumes, and PersistentVolumeClaims give your apps durable storage.</div>
+        <div class="sec" id="s9">
+          <div class="ey">LESSON 10 — STORAGE</div>
+          <div class="ht">VOLUMES &<br>PERSISTENT STORAGE</div>
+          <div class="intro">Containers are ephemeral — data dies with them. Kubernetes Volumes, PersistentVolumes, and
+            PersistentVolumeClaims give your apps durable storage.</div>
 
-                <div class="diag">
-                    <div class="dlb">STORAGE HIERARCHY</div>
-                    <pre style="color:#3d5a80;line-height:2.3;font-size:12px">
+          <div class="diag">
+            <div class="dlb">STORAGE HIERARCHY</div>
+            <pre style="color:#6a8fb8;line-height:2.3;font-size:13px">
   <span style="color:#5b8ff9">StorageClass</span>  →  defines HOW storage is provisioned (SSD, HDD, cloud type)
        ↓  auto-provisions
   <span style="color:#44d4a0">PersistentVolume (PV)</span>  →  actual storage resource (like a hard drive)
@@ -997,11 +1922,15 @@ spec:
   PVC = Lease agreement (claiming that apartment)
   Pod = Tenant moving in
       </pre>
-                </div>
+          </div>
 
-                <div class="editor">
-                    <div class="ebar"><div class="ef"><div class="edot"></div>persistent-volume-claim.yaml</div></div>
-                    <textarea class="ca" spellcheck="false" style="min-height:420px">## ── PersistentVolumeClaim (app requests storage) ────────────────
+          <div class="editor">
+            <div class="ebar">
+              <div class="ef">
+                <div class="edot"></div>persistent-volume-claim.yaml
+              </div>
+            </div>
+            <textarea class="ca" spellcheck="false" style="min-height:420px">## ── PersistentVolumeClaim (app requests storage) ────────────────
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -1046,22 +1975,24 @@ spec:
 # kubectl get pvc -n pims-prod
 # NAME             STATUS   VOLUME             CAPACITY   ACCESS MODES
 # demo-app-logs-pvc   Bound    pvc-abc123         10Gi       RWO</textarea>
-                </div>
+          </div>
 
-                <div class="lnav"><button class="nb" onclick="go(8)">← Prev</button><button class="nb go" onclick="go(10)">Ingress →</button></div>
-            </div>
+          <div class="lnav"><button class="nb" onclick="go(8)">← Prev</button><button class="nb go"
+              onclick="go(10)">Ingress →</button></div>
+        </div>
 
-            <!-- ══════════════════════════════
+        <!-- ══════════════════════════════
                  S10 — Ingress
             ══════════════════════════════ -->
-            <div class="sec" id="s10">
-                <div class="ey">LESSON 11 — NETWORKING</div>
-                <div class="ht">INGRESS &<br>LOAD BALANCING</div>
-                <div class="intro"><strong>Ingress</strong> is a K8s-native HTTP router. It routes external traffic to different Services based on hostname or path — like Nginx but managed by Kubernetes.</div>
+        <div class="sec" id="s10">
+          <div class="ey">LESSON 11 — NETWORKING</div>
+          <div class="ht">INGRESS &<br>LOAD BALANCING</div>
+          <div class="intro"><strong>Ingress</strong> is a K8s-native HTTP router. It routes external traffic to
+            different Services based on hostname or path — like Nginx but managed by Kubernetes.</div>
 
-                <div class="diag">
-                    <div class="dlb">INGRESS ROUTING</div>
-                    <pre style="color:#3d5a80;line-height:2.3;font-size:12px">
+          <div class="diag">
+            <div class="dlb">INGRESS ROUTING</div>
+            <pre style="color:#6a8fb8;line-height:2.3;font-size:13px">
   Internet
      │
      ▼
@@ -1074,11 +2005,15 @@ spec:
 
   Each Service then load-balances to its Pods automatically.
       </pre>
-                </div>
+          </div>
 
-                <div class="editor">
-                    <div class="ebar"><div class="ef"><div class="edot"></div>ingress.yaml — production routing</div></div>
-                    <textarea class="ca" spellcheck="false" style="min-height:460px">## ── Install Nginx Ingress Controller first ──────────────────────
+          <div class="editor">
+            <div class="ebar">
+              <div class="ef">
+                <div class="edot"></div>ingress.yaml — production routing
+              </div>
+            </div>
+            <textarea class="ca" spellcheck="false" style="min-height:460px">## ── Install Nginx Ingress Controller first ──────────────────────
 # kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
 
 ---
@@ -1133,23 +2068,29 @@ spec:
 # Add annotation to Ingress:
 # cert-manager.io/cluster-issuer: "letsencrypt-prod"
 # cert-manager handles certificate creation and renewal automatically!</textarea>
-                </div>
+          </div>
 
-                <div class="lnav"><button class="nb" onclick="go(9)">← Prev</button><button class="nb go" onclick="go(11)">Resource Limits & HPA →</button></div>
-            </div>
+          <div class="lnav"><button class="nb" onclick="go(9)">← Prev</button><button class="nb go"
+              onclick="go(11)">Resource Limits & HPA →</button></div>
+        </div>
 
-            <!-- ══════════════════════════════
+        <!-- ══════════════════════════════
                  S11 — Resource Limits & HPA
             ══════════════════════════════ -->
-            <div class="sec" id="s11">
-                <div class="ey">LESSON 12 — SCALING</div>
-                <div class="ht">RESOURCE LIMITS<br>& AUTO-SCALING</div>
-                <div class="intro">Tell Kubernetes how much CPU/memory your app needs. The <strong>HPA (Horizontal Pod Autoscaler)</strong> automatically scales replicas up/down based on CPU, memory, or custom metrics.</div>
+        <div class="sec" id="s11">
+          <div class="ey">LESSON 12 — SCALING</div>
+          <div class="ht">RESOURCE LIMITS<br>& AUTO-SCALING</div>
+          <div class="intro">Tell Kubernetes how much CPU/memory your app needs. The <strong>HPA (Horizontal Pod
+              Autoscaler)</strong> automatically scales replicas up/down based on CPU, memory, or custom metrics.</div>
 
-                <div class="editor">
-                    <div class="ebar"><div class="ef"><div class="edot"></div>hpa.yaml — autoscaling</div>
-                        <div class="ebs"><button class="eb run" onclick="runHPA()">▶ Simulate Scale</button></div></div>
-                    <textarea class="ca" spellcheck="false" style="min-height:380px">## ── Horizontal Pod Autoscaler ────────────────────────────────────
+          <div class="editor">
+            <div class="ebar">
+              <div class="ef">
+                <div class="edot"></div>hpa.yaml — autoscaling
+              </div>
+              <div class="ebs"><button class="eb run" onclick="runHPA()">▶ Simulate Scale</button></div>
+            </div>
+            <textarea class="ca" spellcheck="false" style="min-height:380px">## ── Horizontal Pod Autoscaler ────────────────────────────────────
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
@@ -1198,25 +2139,41 @@ spec:
 # kubectl get hpa -n pims-prod
 # NAME        REFERENCE          TARGETS          MINPODS   MAXPODS   REPLICAS
 # demo-app-hpa   Deployment/demo-app   45%/70%          2         10        3</textarea>
-                </div>
-                <div class="term" id="t11"><div class="tbar"><div class="td td1"></div><div class="td td2"></div><div class="td td3"></div><div class="tlb">autoscaling simulation</div></div><div class="tbody" id="o11"></div></div>
-
-                <div class="alert ai">ℹ️ <span><strong>Requests vs Limits:</strong> <code>requests</code> = guaranteed resources (used for scheduling). <code>limits</code> = hard cap. If CPU exceeds limit, it's throttled. If memory exceeds limit, the container is OOM-killed and restarted.</span></div>
-
-                <div class="lnav"><button class="nb" onclick="go(10)">← Prev</button><button class="nb go" onclick="go(12)">RBAC & Security →</button></div>
+          </div>
+          <div class="term" id="t11">
+            <div class="tbar">
+              <div class="td td1"></div>
+              <div class="td td2"></div>
+              <div class="td td3"></div>
+              <div class="tlb">autoscaling simulation</div>
             </div>
+            <div class="tbody" id="o11"></div>
+          </div>
 
-            <!-- ══════════════════════════════
+          <div class="alert ai">ℹ️ <span><strong>Requests vs Limits:</strong> <code>requests</code> = guaranteed
+              resources (used for scheduling). <code>limits</code> = hard cap. If CPU exceeds limit, it's throttled. If
+              memory exceeds limit, the container is OOM-killed and restarted.</span></div>
+
+          <div class="lnav"><button class="nb" onclick="go(10)">← Prev</button><button class="nb go"
+              onclick="go(12)">RBAC & Security →</button></div>
+        </div>
+
+        <!-- ══════════════════════════════
                  S12 — RBAC
             ══════════════════════════════ -->
-            <div class="sec" id="s12">
-                <div class="ey">LESSON 13 — SECURITY</div>
-                <div class="ht">RBAC &<br>SECURITY</div>
-                <div class="intro"><strong>RBAC (Role-Based Access Control)</strong> controls WHO can do WHAT on which resources. It's how you prevent developers from accidentally deleting production databases.</div>
+        <div class="sec" id="s12">
+          <div class="ey">LESSON 13 — SECURITY</div>
+          <div class="ht">RBAC &<br>SECURITY</div>
+          <div class="intro"><strong>RBAC (Role-Based Access Control)</strong> controls WHO can do WHAT on which
+            resources. It's how you prevent developers from accidentally deleting production databases.</div>
 
-                <div class="editor">
-                    <div class="ebar"><div class="ef"><div class="edot"></div>rbac.yaml — role definitions</div></div>
-                    <textarea class="ca" spellcheck="false" style="min-height:520px">## ── Role (namespace-scoped) ─────────────────────────────────────
+          <div class="editor">
+            <div class="ebar">
+              <div class="ef">
+                <div class="edot"></div>rbac.yaml — role definitions
+              </div>
+            </div>
+            <textarea class="ca" spellcheck="false" style="min-height:520px">## ── Role (namespace-scoped) ─────────────────────────────────────
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
@@ -1274,41 +2231,73 @@ roleRef:
 ## ── Check permissions ────────────────────────────────────────────
 # kubectl auth can-i delete pods -n pims-prod
 # kubectl auth can-i delete pods -n pims-prod --as developer</textarea>
-                </div>
+          </div>
 
-                <div class="quiz">
-                    <div class="qq">🧠 A developer needs to view pod logs in production but MUST NOT be able to delete or modify anything. Which RBAC verbs do you give them?</div>
-                    <div class="qopts">
-                        <div class="qo" onclick="Q(this,false,12)">A) ["get", "list", "watch", "create", "update"]</div>
-                        <div class="qo" onclick="Q(this,true,12)">B) ["get", "list", "watch"] on pods and pods/log — read-only verbs only. Never include create, update, patch, delete.</div>
-                        <div class="qo" onclick="Q(this,false,12)">C) ["*"] with resource restrictions</div>
-                        <div class="qo" onclick="Q(this,false,12)">D) Give them cluster-admin and trust them</div>
-                    </div>
-                    <div class="qfb" id="qf12"></div>
-                </div>
-                <div class="lnav"><button class="nb" onclick="go(11)">← Prev</button><button class="nb go" onclick="go(13)">StatefulSets →</button></div>
+          <div class="quiz">
+            <div class="qq">🧠 A developer needs to view pod logs in production but MUST NOT be able to delete or modify
+              anything. Which RBAC verbs do you give them?</div>
+            <div class="qopts">
+              <div class="qo" onclick="Q(this,false,12)">A) ["get", "list", "watch", "create", "update"]</div>
+              <div class="qo" onclick="Q(this,true,12)">B) ["get", "list", "watch"] on pods and pods/log — read-only
+                verbs only. Never include create, update, patch, delete.</div>
+              <div class="qo" onclick="Q(this,false,12)">C) ["*"] with resource restrictions</div>
+              <div class="qo" onclick="Q(this,false,12)">D) Give them cluster-admin and trust them</div>
             </div>
+            <div class="qfb" id="qf12"></div>
+          </div>
+          <div class="lnav"><button class="nb" onclick="go(11)">← Prev</button><button class="nb go"
+              onclick="go(13)">StatefulSets →</button></div>
+        </div>
 
-            <!-- ══════════════════════════════
+        <!-- ══════════════════════════════
                  S13 — StatefulSets & DaemonSets
             ══════════════════════════════ -->
-            <div class="sec" id="s13">
-                <div class="ey">LESSON 14 — ADVANCED OBJECTS</div>
-                <div class="ht">STATEFULSETS &<br>DAEMONSETS</div>
-                <div class="intro">Beyond Deployments — specialized controllers for stateful apps like databases and node-level daemons.</div>
+        <div class="sec" id="s13">
+          <div class="ey">LESSON 14 — ADVANCED OBJECTS</div>
+          <div class="ht">STATEFULSETS &<br>DAEMONSETS</div>
+          <div class="intro">Beyond Deployments — specialized controllers for stateful apps like databases and
+            node-level daemons.</div>
 
-                <table>
-                    <tr><th>Controller</th><th>Use case</th><th>Key difference from Deployment</th></tr>
-                    <tr><td><strong>Deployment</strong></td><td>Stateless apps (Spring Boot, Nginx)</td><td>Pods are interchangeable, random names</td></tr>
-                    <tr><td><strong>StatefulSet</strong></td><td>Stateful apps (databases, Kafka, Redis)</td><td>Stable pod names (db-0, db-1), stable storage, ordered start/stop</td></tr>
-                    <tr><td><strong>DaemonSet</strong></td><td>Node-level agents (log collectors, monitoring)</td><td>Runs exactly ONE pod per node. New node added → pod auto-scheduled</td></tr>
-                    <tr><td><strong>Job</strong></td><td>One-time tasks (DB migrations, batch reports)</td><td>Runs to completion then stops</td></tr>
-                    <tr><td><strong>CronJob</strong></td><td>Scheduled tasks (nightly payroll, cleanup)</td><td>Like Linux cron, runs Jobs on schedule</td></tr>
-                </table>
+          <table>
+            <tr>
+              <th>Controller</th>
+              <th>Use case</th>
+              <th>Key difference from Deployment</th>
+            </tr>
+            <tr>
+              <td><strong>Deployment</strong></td>
+              <td>Stateless apps (Spring Boot, Nginx)</td>
+              <td>Pods are interchangeable, random names</td>
+            </tr>
+            <tr>
+              <td><strong>StatefulSet</strong></td>
+              <td>Stateful apps (databases, Kafka, Redis)</td>
+              <td>Stable pod names (db-0, db-1), stable storage, ordered start/stop</td>
+            </tr>
+            <tr>
+              <td><strong>DaemonSet</strong></td>
+              <td>Node-level agents (log collectors, monitoring)</td>
+              <td>Runs exactly ONE pod per node. New node added → pod auto-scheduled</td>
+            </tr>
+            <tr>
+              <td><strong>Job</strong></td>
+              <td>One-time tasks (DB migrations, batch reports)</td>
+              <td>Runs to completion then stops</td>
+            </tr>
+            <tr>
+              <td><strong>CronJob</strong></td>
+              <td>Scheduled tasks (nightly payroll, cleanup)</td>
+              <td>Like Linux cron, runs Jobs on schedule</td>
+            </tr>
+          </table>
 
-                <div class="editor">
-                    <div class="ebar"><div class="ef"><div class="edot"></div>cronjob.yaml — nightly payroll batch (real world example)</div></div>
-                    <textarea class="ca" spellcheck="false" style="min-height:280px">## ── CronJob for nightly Spring Batch payroll job ────────────────
+          <div class="editor">
+            <div class="ebar">
+              <div class="ef">
+                <div class="edot"></div>cronjob.yaml — nightly payroll batch (real world example)
+              </div>
+            </div>
+            <textarea class="ca" spellcheck="false" style="min-height:280px">## ── CronJob for nightly Spring Batch payroll job ────────────────
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -1340,30 +2329,56 @@ spec:
 ## ── Trigger manually (test run) ─────────────────────────────────
 # kubectl create job payroll-manual --from=cronjob/payroll-nightly -n pims-prod
 # kubectl logs -l job-name=payroll-manual -n pims-prod</textarea>
-                </div>
+          </div>
 
-                <div class="lnav"><button class="nb" onclick="go(12)">← Prev</button><button class="nb go" onclick="go(14)">Monitoring →</button></div>
-            </div>
+          <div class="lnav"><button class="nb" onclick="go(12)">← Prev</button><button class="nb go"
+              onclick="go(14)">Monitoring →</button></div>
+        </div>
 
-            <!-- ══════════════════════════════
+        <!-- ══════════════════════════════
                  S14 — Monitoring
             ══════════════════════════════ -->
-            <div class="sec" id="s14">
-                <div class="ey">LESSON 15 — OBSERVABILITY</div>
-                <div class="ht">MONITORING<br>& LOGGING</div>
-                <div class="intro">Kubernetes adds complexity to observability. The standard production stack is <strong>Prometheus + Grafana</strong> for metrics and <strong>EFK/Loki</strong> for logs.</div>
+        <div class="sec" id="s14">
+          <div class="ey">LESSON 15 — OBSERVABILITY</div>
+          <div class="ht">MONITORING<br>& LOGGING</div>
+          <div class="intro">Kubernetes adds complexity to observability. The standard production stack is
+            <strong>Prometheus + Grafana</strong> for metrics and <strong>EFK/Loki</strong> for logs.
+          </div>
 
-                <div class="cards">
-                    <div class="card"><div class="ci">📊</div><div class="ct">Prometheus</div><div class="cb">Scrapes metrics from all pods. Stores time-series data. Fires alerts via Alertmanager.</div></div>
-                    <div class="card"><div class="ci">📈</div><div class="ct">Grafana</div><div class="cb">Visualizes Prometheus data. Pre-built K8s dashboards. Shows pod CPU, memory, requests/sec.</div></div>
-                    <div class="card"><div class="ci">📋</div><div class="ct">Loki</div><div class="cb">Like Prometheus but for logs. Aggregates logs from all pods. Query with LogQL.</div></div>
-                    <div class="card"><div class="ci">🔍</div><div class="ct">Jaeger</div><div class="cb">Distributed tracing across microservices. Find which service is slow. Pairs with OTel.</div></div>
-                </div>
+          <div class="cards">
+            <div class="card">
+              <div class="ci">📊</div>
+              <div class="ct">Prometheus</div>
+              <div class="cb">Scrapes metrics from all pods. Stores time-series data. Fires alerts via Alertmanager.
+              </div>
+            </div>
+            <div class="card">
+              <div class="ci">📈</div>
+              <div class="ct">Grafana</div>
+              <div class="cb">Visualizes Prometheus data. Pre-built K8s dashboards. Shows pod CPU, memory, requests/sec.
+              </div>
+            </div>
+            <div class="card">
+              <div class="ci">📋</div>
+              <div class="ct">Loki</div>
+              <div class="cb">Like Prometheus but for logs. Aggregates logs from all pods. Query with LogQL.</div>
+            </div>
+            <div class="card">
+              <div class="ci">🔍</div>
+              <div class="ct">Jaeger</div>
+              <div class="cb">Distributed tracing across microservices. Find which service is slow. Pairs with OTel.
+              </div>
+            </div>
+          </div>
 
-                <div class="editor">
-                    <div class="ebar"><div class="ef"><div class="edot"></div>essential monitoring commands</div>
-                        <div class="ebs"><button class="eb run" onclick="runMonitor()">▶ Simulate</button></div></div>
-                    <textarea class="ca" spellcheck="false" style="min-height:300px">## ── Resource Usage (requires metrics-server) ────────────────────
+          <div class="editor">
+            <div class="ebar">
+              <div class="ef">
+                <div class="edot"></div>essential monitoring commands
+              </div>
+              <div class="ebs"><button class="eb run" onclick="runMonitor()">▶ Simulate</button></div>
+            </div>
+            <textarea class="ca" spellcheck="false" style="min-height:300px">## ── Resource Usage (requires metrics-server) ────────────────────
 kubectl top pods -n pims-prod              # CPU/memory per pod
 kubectl top nodes                          # CPU/memory per node
 
@@ -1386,24 +2401,40 @@ kubectl port-forward svc/monitoring-grafana 3000:80 -n monitoring
 
 # Prometheus scrapes /actuator/prometheus automatically
 # via ServiceMonitor CRD (part of kube-prometheus-stack)</textarea>
-                </div>
-                <div class="term" id="t14"><div class="tbar"><div class="td td1"></div><div class="td td2"></div><div class="td td3"></div><div class="tlb">output</div></div><div class="tbody" id="o14"></div></div>
-
-                <div class="lnav"><button class="nb" onclick="go(13)">← Prev</button><button class="nb go" onclick="go(15)">Helm →</button></div>
+          </div>
+          <div class="term" id="t14">
+            <div class="tbar">
+              <div class="td td1"></div>
+              <div class="td td2"></div>
+              <div class="td td3"></div>
+              <div class="tlb">output</div>
             </div>
+            <div class="tbody" id="o14"></div>
+          </div>
 
-            <!-- ══════════════════════════════
+          <div class="lnav"><button class="nb" onclick="go(13)">← Prev</button><button class="nb go"
+              onclick="go(15)">Helm →</button></div>
+        </div>
+
+        <!-- ══════════════════════════════
                  S15 — Helm
             ══════════════════════════════ -->
-            <div class="sec" id="s15">
-                <div class="ey">LESSON 16 — PACKAGE MANAGER</div>
-                <div class="ht">HELM<br>PACKAGE MANAGER</div>
-                <div class="intro"><strong>Helm</strong> is the package manager for Kubernetes — like apt/npm but for K8s. A <strong>Chart</strong> is a bundle of YAML templates. It makes deploying complex apps (and your own apps) reusable and configurable.</div>
+        <div class="sec" id="s15">
+          <div class="ey">LESSON 16 — PACKAGE MANAGER</div>
+          <div class="ht">HELM<br>PACKAGE MANAGER</div>
+          <div class="intro"><strong>Helm</strong> is the package manager for Kubernetes — like apt/npm but for K8s. A
+            <strong>Chart</strong> is a bundle of YAML templates. It makes deploying complex apps (and your own apps)
+            reusable and configurable.
+          </div>
 
-                <div class="editor">
-                    <div class="ebar"><div class="ef"><div class="edot"></div>helm commands + chart structure</div>
-                        <div class="ebs"><button class="eb run" onclick="runHelm()">▶ Simulate</button></div></div>
-                    <textarea class="ca" spellcheck="false" style="min-height:420px">## ── Install Helm ────────────────────────────────────────────────
+          <div class="editor">
+            <div class="ebar">
+              <div class="ef">
+                <div class="edot"></div>helm commands + chart structure
+              </div>
+              <div class="ebs"><button class="eb run" onclick="runHelm()">▶ Simulate</button></div>
+            </div>
+            <textarea class="ca" spellcheck="false" style="min-height:420px">## ── Install Helm ────────────────────────────────────────────────
 curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 
 ## ── Core Commands ────────────────────────────────────────────────
@@ -1437,23 +2468,33 @@ helm create demo-app-chart
 ## ── Deploy with different environments ───────────────────────────
 helm install demo-app ./demo-app-chart -f values-dev.yaml     # DEV
 helm install demo-app ./demo-app-chart -f values-prod.yaml    # PROD (different replicas, limits)</textarea>
-                </div>
-                <div class="term" id="t15"><div class="tbar"><div class="td td1"></div><div class="td td2"></div><div class="td td3"></div><div class="tlb">helm output</div></div><div class="tbody" id="o15"></div></div>
-
-                <div class="lnav"><button class="nb" onclick="go(14)">← Prev</button><button class="nb go" onclick="go(16)">Spring Boot Deploy →</button></div>
+          </div>
+          <div class="term" id="t15">
+            <div class="tbar">
+              <div class="td td1"></div>
+              <div class="td td2"></div>
+              <div class="td td3"></div>
+              <div class="tlb">helm output</div>
             </div>
+            <div class="tbody" id="o15"></div>
+          </div>
 
-            <!-- ══════════════════════════════
+          <div class="lnav"><button class="nb" onclick="go(14)">← Prev</button><button class="nb go"
+              onclick="go(16)">Spring Boot Deploy →</button></div>
+        </div>
+
+        <!-- ══════════════════════════════
                  S16 — Spring Boot human
             ══════════════════════════════ -->
-            <div class="sec" id="s16">
-                <div class="ey">LESSON 17 — REAL WORLD</div>
-                <div class="ht">DEPLOY SPRING BOOT "DEMO APP" TO K8S</div>
-                <div class="intro">Complete, production-ready Kubernetes manifests for your actual Spring Boot demo-app project — combining everything from this course.</div>
+        <div class="sec" id="s16">
+          <div class="ey">LESSON 17 — REAL WORLD</div>
+          <div class="ht">DEPLOY SPRING BOOT "DEMO APP" TO K8S</div>
+          <div class="intro">Complete, production-ready Kubernetes manifests for your actual Spring Boot demo-app
+            project — combining everything from this course.</div>
 
-                <div class="diag">
-                    <div class="dlb">YOUR HUMAN PROJECT IN KUBERNETES</div>
-                    <pre style="color:#3d5a80;line-height:2.2;font-size:12px">
+          <div class="diag">
+            <div class="dlb">YOUR HUMAN PROJECT IN KUBERNETES</div>
+            <pre style="color:#6a8fb8;line-height:2.2;font-size:13px">
   <span style="color:#5b8ff9">Namespace: pims-prod</span>
 
   Internet → <span style="color:#44d4a0">Ingress</span> (yourdomain.com) → <span style="color:#44d4a0">Service: human</span> → <span style="color:#44d4a0">Deployment: human</span>
@@ -1470,12 +2511,16 @@ helm install demo-app ./demo-app-chart -f values-prod.yaml    # PROD (different 
   <span style="color:#a78bfa">HPA: demo-app-hpa</span>           (2-10 replicas, scale on CPU 70%)
   <span style="color:#a78bfa">CronJob: payroll-nightly</span> (runs Spring Batch at 1am)
       </pre>
-                </div>
+          </div>
 
-                <div class="editor">
-                    <div class="ebar"><div class="ef"><div class="edot"></div>k8s/demo-app-deployment.yaml — COMPLETE PRODUCTION MANIFEST</div>
-                        <div class="ebs"><button class="eb run" onclick="runHuman()">▶ Simulate Deploy</button></div></div>
-                    <textarea class="ca" spellcheck="false" style="min-height:700px">## ── Namespace ────────────────────────────────────────────────────
+          <div class="editor">
+            <div class="ebar">
+              <div class="ef">
+                <div class="edot"></div>k8s/demo-app-deployment.yaml — COMPLETE PRODUCTION MANIFEST
+              </div>
+              <div class="ebs"><button class="eb run" onclick="runHuman()">▶ Simulate Deploy</button></div>
+            </div>
+            <textarea class="ca" spellcheck="false" style="min-height:700px">## ── Namespace ────────────────────────────────────────────────────
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -1650,13 +2695,25 @@ spec:
         target:
           type: Utilization
           averageUtilization: 70</textarea>
-                </div>
-                <div class="term" id="t16"><div class="tbar"><div class="td td1"></div><div class="td td2"></div><div class="td td3"></div><div class="tlb">deployment simulation</div></div><div class="tbody" id="o16"></div></div>
+          </div>
+          <div class="term" id="t16">
+            <div class="tbar">
+              <div class="td td1"></div>
+              <div class="td td2"></div>
+              <div class="td td3"></div>
+              <div class="tlb">deployment simulation</div>
+            </div>
+            <div class="tbody" id="o16"></div>
+          </div>
 
-                <h3>Deploy with one command</h3>
-                <div class="editor">
-                    <div class="ebar"><div class="ef"><div class="edot"></div>deploy.sh</div></div>
-                    <textarea class="ca" spellcheck="false" style="min-height:180px">## Apply ALL manifests in the k8s/ directory
+          <h3>Deploy with one command</h3>
+          <div class="editor">
+            <div class="ebar">
+              <div class="ef">
+                <div class="edot"></div>deploy.sh
+              </div>
+            </div>
+            <textarea class="ca" spellcheck="false" style="min-height:180px">## Apply ALL manifests in the k8s/ directory
 kubectl apply -f k8s/ -n pims-prod
 
 ## Watch rollout
@@ -1667,111 +2724,129 @@ kubectl get all -n pims-prod
 
 ## Watch pods start up
 kubectl get pods -n pims-prod -w</textarea>
-                </div>
+          </div>
 
-                <div class="lnav"><button class="nb" onclick="go(15)">← Prev</button><button class="nb go" onclick="go(17)">Final Challenge →</button></div>
-            </div>
+          <div class="lnav"><button class="nb" onclick="go(15)">← Prev</button><button class="nb go"
+              onclick="go(17)">Final Challenge →</button></div>
+        </div>
 
-            <!-- ══════════════════════════════
+        <!-- ══════════════════════════════
                  S17 — Final Challenge
             ══════════════════════════════ -->
-            <div class="sec" id="s17">
-                <div class="ey">LESSON 18 — EXPERT CHALLENGE</div>
-                <div class="ht">FINAL<br>CHALLENGE</div>
-                <div class="intro">Write a complete Kubernetes deployment from scratch. All 10 requirements must pass to earn the K8s Expert badge.</div>
+        <div class="sec" id="s17">
+          <div class="ey">LESSON 18 — EXPERT CHALLENGE</div>
+          <div class="ht">FINAL<br>CHALLENGE</div>
+          <div class="intro">Write a complete Kubernetes deployment from scratch. All 10 requirements must pass to earn
+            the K8s Expert badge.</div>
 
-                <div class="card" style="border-color:rgba(50,108,229,.4);margin-bottom:24px">
-                    <div class="ct" style="font-size:13px;margin-bottom:12px">📋 Requirements — All 10 Must Pass</div>
-                    <div class="cb" style="line-height:2.6">
-                        1. Namespace defined (kind: Namespace)<br>
-                        2. Deployment with at least 2 replicas<br>
-                        3. Container image specified<br>
-                        4. Resource requests AND limits defined<br>
-                        5. readinessProbe configured<br>
-                        6. livenessProbe configured<br>
-                        7. Service of type ClusterIP or LoadBalancer<br>
-                        8. ConfigMap used (envFrom or env.valueFrom)<br>
-                        9. Secret used (secretKeyRef)<br>
-                        10. HorizontalPodAutoscaler defined
-                    </div>
-                </div>
+          <div class="card" style="border-color:rgba(50,108,229,.4);margin-bottom:24px">
+            <div class="ct" style="font-size:13px;margin-bottom:12px">📋 Requirements — All 10 Must Pass</div>
+            <div class="cb" style="line-height:2.6">
+              1. Namespace defined (kind: Namespace)<br>
+              2. Deployment with at least 2 replicas<br>
+              3. Container image specified<br>
+              4. Resource requests AND limits defined<br>
+              5. readinessProbe configured<br>
+              6. livenessProbe configured<br>
+              7. Service of type ClusterIP or LoadBalancer<br>
+              8. ConfigMap used (envFrom or env.valueFrom)<br>
+              9. Secret used (secretKeyRef)<br>
+              10. HorizontalPodAutoscaler defined
+            </div>
+          </div>
 
-                <div class="editor">
-                    <div class="ebar"><div class="ef"><div class="edot"></div>your complete Kubernetes manifests</div>
-                        <div class="ebs">
-                            <button class="eb rst" onclick="resetC('c17','')">Clear</button>
-                            <button class="eb run" onclick="validateChallenge()">▶ Check All 10 Requirements</button>
-                        </div></div>
-                    <textarea class="ca" id="c17" spellcheck="false" style="min-height:500px" placeholder="# Write your complete Kubernetes manifests here.
+          <div class="editor">
+            <div class="ebar">
+              <div class="ef">
+                <div class="edot"></div>your complete Kubernetes manifests
+              </div>
+              <div class="ebs">
+                <button class="eb rst" onclick="resetC('c17','')">Clear</button>
+                <button class="eb run" onclick="validateChallenge()">▶ Check All 10 Requirements</button>
+              </div>
+            </div>
+            <textarea class="ca" id="c17" spellcheck="false" style="min-height:500px" placeholder="# Write your complete Kubernetes manifests here.
 # Use --- to separate multiple resources.
 # Cover all 10 requirements!
 
 apiVersion: v1
 kind: Namespace
 ..."></textarea>
-                </div>
-                <div class="term" id="t17"><div class="tbar"><div class="td td1"></div><div class="td td2"></div><div class="td td3"></div><div class="tlb">challenge results</div></div><div class="tbody" id="o17"></div></div>
-
-                <div id="victory" style="display:none">
-                    <div class="victory">
-                        <div class="vi">☸️🏆</div>
-                        <div class="vt">K8S EXPERT</div>
-                        <div class="vs">You have mastered Kubernetes from zero to expert.<br>You can now deploy, scale, secure, and manage<br>containerized applications at production scale.</div>
-                    </div>
-                </div>
-
-                <div class="lnav"><button class="nb" onclick="go(16)">← Prev</button><button class="nb" style="opacity:.3;cursor:default">Course Complete 🎉</button></div>
+          </div>
+          <div class="term" id="t17">
+            <div class="tbar">
+              <div class="td td1"></div>
+              <div class="td td2"></div>
+              <div class="td td3"></div>
+              <div class="tlb">challenge results</div>
             </div>
+            <div class="tbody" id="o17"></div>
+          </div>
 
-        </div><!-- /page -->
+          <div id="victory" style="display:none">
+            <div class="victory">
+              <div class="vi">☸️🏆</div>
+              <div class="vt">K8S EXPERT</div>
+              <div class="vs">You have mastered Kubernetes from zero to expert.<br>You can now deploy, scale, secure,
+                and manage<br>containerized applications at production scale.</div>
+            </div>
+          </div>
+
+          <div class="lnav"><button class="nb" onclick="go(16)">← Prev</button><button class="nb"
+              style="opacity:.3;cursor:default">Course Complete 🎉</button></div>
+        </div>
+
+      </div><!-- /page -->
     </main>
-</div>
+  </div>
 
-<script>
-    let cur=0,done=new Set([0]);
-    const N=18;
-    const bcs=['introduction','architecture','install-kubectl','pods','deployments','services',
-        'namespaces','kubectl-commands','configmaps-secrets','volumes','ingress',
-        'resource-limits-hpa','rbac-security','statefulsets-daemonsets','monitoring',
-        'helm','spring-boot-human','final-challenge'];
-    const lvs=['lz','lz','lz','lb','lb','lb','lb','lb','li','li','li','li','le','le','le','le','le','le'];
-    const lvn=['ZERO','ZERO','ZERO','BEGINNER','BEGINNER','BEGINNER','BEGINNER','BEGINNER',
-        'INTER','INTER','INTER','INTER','EXPERT','EXPERT','EXPERT','EXPERT','EXPERT','EXPERT'];
+  <script>
+    let cur = 0, done = new Set([0]);
+    const N = 18;
+    const bcs = ['introduction', 'architecture', 'install-kubectl', 'pods', 'deployments', 'services',
+      'namespaces', 'kubectl-commands', 'configmaps-secrets', 'volumes', 'ingress',
+      'resource-limits-hpa', 'rbac-security', 'statefulsets-daemonsets', 'monitoring',
+      'helm', 'spring-boot-human', 'final-challenge'];
+    const lvs = ['lz', 'lz', 'lz', 'lb', 'lb', 'lb', 'lb', 'lb', 'li', 'li', 'li', 'li', 'le', 'le', 'le', 'le', 'le', 'le'];
+    const lvn = ['ZERO', 'ZERO', 'ZERO', 'BEGINNER', 'BEGINNER', 'BEGINNER', 'BEGINNER', 'BEGINNER',
+      'INTER', 'INTER', 'INTER', 'INTER', 'EXPERT', 'EXPERT', 'EXPERT', 'EXPERT', 'EXPERT', 'EXPERT'];
 
-    function go(i){
-        document.getElementById('s'+cur).classList.remove('active');
-        document.querySelectorAll('.si')[cur].classList.remove('active');
-        cur=i;done.add(i);
-        document.getElementById('s'+i).classList.add('active');
-        document.querySelectorAll('.si')[i].classList.add('active');
-        document.querySelectorAll('.si').forEach((el,idx)=>{if(done.has(idx))el.classList.add('done')});
-        document.getElementById('bcn').textContent=bcs[i];
-        const c=document.getElementById('lvchip');
-        c.className='chip '+lvs[i];c.textContent=lvn[i];
-        updateProg();window.scrollTo(0,0);
+    function go(i) {
+      document.getElementById('s' + cur).classList.remove('active');
+      document.querySelectorAll('.si')[cur].classList.remove('active');
+      cur = i; done.add(i);
+      document.getElementById('s' + i).classList.add('active');
+      document.querySelectorAll('.si')[i].classList.add('active');
+      document.querySelectorAll('.si').forEach((el, idx) => { if (done.has(idx)) el.classList.add('done') });
+      document.getElementById('bcn').textContent = bcs[i];
+      const c = document.getElementById('lvchip');
+      c.className = 'chip ' + lvs[i]; c.textContent = lvn[i];
+      updateProg(); window.scrollTo(0, 0);
     }
-    function updateProg(){
-        const p=Math.round((done.size/N)*100);
-        document.getElementById('pbar').style.width=p+'%';
-        document.getElementById('pct').textContent=p+'%';
-        document.getElementById('pxp').textContent=done.size+' / '+N+' lessons';
+    function updateProg() {
+      const p = Math.round((done.size / N) * 100);
+      document.getElementById('pbar').style.width = p + '%';
+      document.getElementById('pct').textContent = p + '%';
+      document.getElementById('pxp').textContent = done.size + ' / ' + N + ' lessons';
     }
-    function Q(el,correct,idx){
-        el.parentElement.querySelectorAll('.qo').forEach(o=>o.style.pointerEvents='none');
-        const fb=document.getElementById('qf'+idx);
-        if(correct){el.classList.add('ok');fb.className='qfb show y';fb.textContent='✅ Correct! Well done.';}
-        else{el.classList.add('no');fb.className='qfb show n';fb.textContent='❌ Not quite — review the lesson above.';
-            el.parentElement.querySelectorAll('.qo').forEach(o=>{if(o.onclick&&o.onclick.toString().includes('true'))o.classList.add('ok')});}
+    function Q(el, correct, idx) {
+      el.parentElement.querySelectorAll('.qo').forEach(o => o.style.pointerEvents = 'none');
+      const fb = document.getElementById('qf' + idx);
+      if (correct) { el.classList.add('ok'); fb.className = 'qfb show y'; fb.textContent = '✅ Correct! Well done.'; }
+      else {
+        el.classList.add('no'); fb.className = 'qfb show n'; fb.textContent = '❌ Not quite — review the lesson above.';
+        el.parentElement.querySelectorAll('.qo').forEach(o => { if (o.onclick && o.onclick.toString().includes('true')) o.classList.add('ok') });
+      }
     }
-    function showTerm(id){document.getElementById(id).style.display='block'}
-    function type(id,lines,delay=65){
-        const o=document.getElementById(id);o.innerHTML='';let i=0;
-        (function n(){if(i<lines.length){o.innerHTML+=lines[i]+'\n';i++;o.scrollTop=o.scrollHeight;setTimeout(n,delay+Math.random()*25);}})();
+    function showTerm(id) { document.getElementById(id).style.display = 'block' }
+    function type(id, lines, delay = 65) {
+      const o = document.getElementById(id); o.innerHTML = ''; let i = 0;
+      (function n() { if (i < lines.length) { o.innerHTML += lines[i] + '\n'; i++; o.scrollTop = o.scrollHeight; setTimeout(n, delay + Math.random() * 25); } })();
     }
-    function resetC(id,v){document.getElementById(id).value=v}
-    function showSol(id,v){document.getElementById(id).value=v}
+    function resetC(id, v) { document.getElementById(id).value = v }
+    function showSol(id, v) { document.getElementById(id).value = v }
 
-    const sol3=`apiVersion: v1
+    const sol3 = `apiVersion: v1
 kind: Pod
 metadata:
   name: demo-app-pod
@@ -1784,234 +2859,235 @@ spec:
       ports:
         - containerPort: 9191`;
 
-    function validatePod(){
-        showTerm('t3');
-        const code=document.getElementById('c3').value;
-        const checks=[
-            [code.includes('apiVersion: v1'),'apiVersion: v1'],
-            [code.includes('kind: Pod'),'kind: Pod'],
-            [code.includes('name: demo-app-pod'),'metadata.name: demo-app-pod'],
-            [code.includes('app: demo-app'),'label app: demo-app'],
-            [code.includes('name: demo-app')&&!code.includes('name: demo-app-pod'),'container name: demo-app'],
-            [code.includes('image:')&&code.includes('human'),'container image set'],
-            [code.includes('containerPort: 9191'),'containerPort: 9191'],
-        ];
-        const lines=['<span class="tsk">Validating Pod manifest...</span>',''];
-        let p=0;
-        checks.forEach(([ok,msg])=>{if(ok){lines.push('<span class="ts">✅ '+msg+'</span>');p++;}else lines.push('<span class="te">❌ Missing: '+msg+'</span>');});
-        lines.push('');
-        if(p===7)lines.push('<span class="ts">🎉 Perfect Pod manifest! kubectl apply -f pod.yaml to deploy.</span>');
-        else lines.push('<span class="tw">Score: '+p+'/7 — fix missing fields above.</span>');
-        type('o3',lines);
+    function validatePod() {
+      showTerm('t3');
+      const code = document.getElementById('c3').value;
+      const checks = [
+        [code.includes('apiVersion: v1'), 'apiVersion: v1'],
+        [code.includes('kind: Pod'), 'kind: Pod'],
+        [code.includes('name: demo-app-pod'), 'metadata.name: demo-app-pod'],
+        [code.includes('app: demo-app'), 'label app: demo-app'],
+        [code.includes('name: demo-app') && !code.includes('name: demo-app-pod'), 'container name: demo-app'],
+        [code.includes('image:') && code.includes('human'), 'container image set'],
+        [code.includes('containerPort: 9191'), 'containerPort: 9191'],
+      ];
+      const lines = ['<span class="tsk">Validating Pod manifest...</span>', ''];
+      let p = 0;
+      checks.forEach(([ok, msg]) => { if (ok) { lines.push('<span class="ts">✅ ' + msg + '</span>'); p++; } else lines.push('<span class="te">❌ Missing: ' + msg + '</span>'); });
+      lines.push('');
+      if (p === 7) lines.push('<span class="ts">🎉 Perfect Pod manifest! kubectl apply -f pod.yaml to deploy.</span>');
+      else lines.push('<span class="tw">Score: ' + p + '/7 — fix missing fields above.</span>');
+      type('o3', lines);
     }
 
-    function runInstall(){
-        showTerm('t2');
-        type('o2',[
-            '<span class="tp">$</span> <span class="tc">kubectl version --client</span>',
-            '<span class="ti">Client Version: v1.29.0</span>',
-            '<span class="tp">$</span> <span class="tc">minikube start --driver=docker --cpus=2 --memory=4096</span>',
-            '<span class="to">😄  minikube v1.32.0 on Ubuntu 22.04</span>',
-            '<span class="to">✨  Using the docker driver based on user configuration</span>',
-            '<span class="to">🎉  minikube 1.32.0 is available! Download it: https://minikube.sigs.k8s.io</span>',
-            '<span class="to">🔥  Creating docker container (CPUs=2, Memory=4096MB) ...</span>',
-            '<span class="to">🐳  Preparing Kubernetes v1.28.3 on Docker 24.0.7 ...</span>',
-            '<span class="to">🔎  Verifying Kubernetes components...</span>',
-            '<span class="ts">🏄  Done! kubectl is now configured to use "minikube"</span>',
-            '<span class="tp">$</span> <span class="tc">kubectl get nodes</span>',
-            '<span class="ti">NAME       STATUS   ROLES           AGE   VERSION</span>',
-            '<span class="ts">minikube   Ready    control-plane   30s   v1.28.3</span>',
-            '<span class="ts">✅ Kubernetes cluster ready!</span>',
-        ]);
+    function runInstall() {
+      showTerm('t2');
+      type('o2', [
+        '<span class="tp">$</span> <span class="tc">kubectl version --client</span>',
+        '<span class="ti">Client Version: v1.29.0</span>',
+        '<span class="tp">$</span> <span class="tc">minikube start --driver=docker --cpus=2 --memory=4096</span>',
+        '<span class="to">😄  minikube v1.32.0 on Ubuntu 22.04</span>',
+        '<span class="to">✨  Using the docker driver based on user configuration</span>',
+        '<span class="to">🎉  minikube 1.32.0 is available! Download it: https://minikube.sigs.k8s.io</span>',
+        '<span class="to">🔥  Creating docker container (CPUs=2, Memory=4096MB) ...</span>',
+        '<span class="to">🐳  Preparing Kubernetes v1.28.3 on Docker 24.0.7 ...</span>',
+        '<span class="to">🔎  Verifying Kubernetes components...</span>',
+        '<span class="ts">🏄  Done! kubectl is now configured to use "minikube"</span>',
+        '<span class="tp">$</span> <span class="tc">kubectl get nodes</span>',
+        '<span class="ti">NAME       STATUS   ROLES           AGE   VERSION</span>',
+        '<span class="ts">minikube   Ready    control-plane   30s   v1.28.3</span>',
+        '<span class="ts">✅ Kubernetes cluster ready!</span>',
+      ]);
     }
 
-    function runDeploy(){
-        showTerm('t4');
-        type('o4',[
-            '<span class="tp">$</span> <span class="tc">kubectl apply -f deployment.yaml -n pims-prod</span>',
-            '<span class="ts">deployment.apps/demo-app created</span>',
-            '<span class="tp">$</span> <span class="tc">kubectl rollout status deployment/demo-app -n pims-prod</span>',
-            '<span class="to">Waiting for deployment "human" rollout to finish: 0 of 3 updated replicas are available...</span>',
-            '<span class="to">Waiting for deployment "human" rollout to finish: 1 of 3 updated replicas are available...</span>',
-            '<span class="to">Waiting for deployment "human" rollout to finish: 2 of 3 updated replicas are available...</span>',
-            '<span class="ts">deployment "human" successfully rolled out</span>',
-            '<span class="tp">$</span> <span class="tc">kubectl get pods -n pims-prod</span>',
-            '<span class="ti">NAME                    READY   STATUS    RESTARTS   AGE</span>',
-            '<span class="ts">demo-app-7d9f6b-abc12      1/1     Running   0          45s</span>',
-            '<span class="ts">demo-app-7d9f6b-def34      1/1     Running   0          42s</span>',
-            '<span class="ts">demo-app-7d9f6b-ghi56      1/1     Running   0          39s</span>',
-            '<span class="ts">✅ 3/3 pods running with readiness probes healthy!</span>',
-        ]);
+    function runDeploy() {
+      showTerm('t4');
+      type('o4', [
+        '<span class="tp">$</span> <span class="tc">kubectl apply -f deployment.yaml -n pims-prod</span>',
+        '<span class="ts">deployment.apps/demo-app created</span>',
+        '<span class="tp">$</span> <span class="tc">kubectl rollout status deployment/demo-app -n pims-prod</span>',
+        '<span class="to">Waiting for deployment "human" rollout to finish: 0 of 3 updated replicas are available...</span>',
+        '<span class="to">Waiting for deployment "human" rollout to finish: 1 of 3 updated replicas are available...</span>',
+        '<span class="to">Waiting for deployment "human" rollout to finish: 2 of 3 updated replicas are available...</span>',
+        '<span class="ts">deployment "human" successfully rolled out</span>',
+        '<span class="tp">$</span> <span class="tc">kubectl get pods -n pims-prod</span>',
+        '<span class="ti">NAME                    READY   STATUS    RESTARTS   AGE</span>',
+        '<span class="ts">demo-app-7d9f6b-abc12      1/1     Running   0          45s</span>',
+        '<span class="ts">demo-app-7d9f6b-def34      1/1     Running   0          42s</span>',
+        '<span class="ts">demo-app-7d9f6b-ghi56      1/1     Running   0          39s</span>',
+        '<span class="ts">✅ 3/3 pods running with readiness probes healthy!</span>',
+      ]);
     }
 
-    function runNS(){
-        showTerm('t6');
-        type('o6',[
-            '<span class="tp">$</span> <span class="tc">kubectl create namespace pims-prod</span>',
-            '<span class="ts">namespace/pims-prod created</span>',
-            '<span class="tp">$</span> <span class="tc">kubectl get namespaces</span>',
-            '<span class="ti">NAME              STATUS   AGE</span>',
-            '<span class="ts">default           Active   2d</span>',
-            '<span class="ts">pims-prod         Active   2s</span>',
-            '<span class="to">kube-system       Active   2d</span>',
-            '<span class="to">kube-public       Active   2d</span>',
-            '<span class="tp">$</span> <span class="tc">kubectl config set-context --current --namespace=pims-prod</span>',
-            '<span class="ts">Context "minikube" modified. Default namespace set to pims-prod.</span>',
-            '<span class="ts">✅ Now kubectl commands default to pims-prod namespace!</span>',
-        ]);
+    function runNS() {
+      showTerm('t6');
+      type('o6', [
+        '<span class="tp">$</span> <span class="tc">kubectl create namespace pims-prod</span>',
+        '<span class="ts">namespace/pims-prod created</span>',
+        '<span class="tp">$</span> <span class="tc">kubectl get namespaces</span>',
+        '<span class="ti">NAME              STATUS   AGE</span>',
+        '<span class="ts">default           Active   2d</span>',
+        '<span class="ts">pims-prod         Active   2s</span>',
+        '<span class="to">kube-system       Active   2d</span>',
+        '<span class="to">kube-public       Active   2d</span>',
+        '<span class="tp">$</span> <span class="tc">kubectl config set-context --current --namespace=pims-prod</span>',
+        '<span class="ts">Context "minikube" modified. Default namespace set to pims-prod.</span>',
+        '<span class="ts">✅ Now kubectl commands default to pims-prod namespace!</span>',
+      ]);
     }
 
-    function runCmds(){
-        showTerm('t7');
-        type('o7',[
-            '<span class="tp">$</span> <span class="tc">kubectl get pods -n pims-prod -o wide</span>',
-            '<span class="ti">NAME                    READY   STATUS    RESTARTS   AGE   IP           NODE</span>',
-            '<span class="ts">demo-app-7d9f6b-abc12      1/1     Running   0          5m    10.244.1.4   worker-1</span>',
-            '<span class="ts">demo-app-7d9f6b-def34      1/1     Running   0          5m    10.244.2.7   worker-2</span>',
-            '<span class="te">demo-app-7d9f6b-zzz99      0/1     CrashLoopBackOff  3   5m    10.244.3.2   worker-3</span>',
-            '',
-            '<span class="tp">$</span> <span class="tc">kubectl logs demo-app-7d9f6b-zzz99 --previous</span>',
-            '<span class="to">... Spring Boot starting ...</span>',
-            '<span class="te">ERROR: Cannot connect to Oracle DB at //localhost:1521</span>',
-            '<span class="te">Caused by: java.net.ConnectException: Connection refused</span>',
-            '',
-            '<span class="tsk">💡 Bug found! App is using localhost but should use service name oracle-external</span>',
-            '',
-            '<span class="tp">$</span> <span class="tc">kubectl rollout undo deployment/demo-app -n pims-prod</span>',
-            '<span class="ts">deployment.apps/demo-app rolled back ✅</span>',
-        ]);
+    function runCmds() {
+      showTerm('t7');
+      type('o7', [
+        '<span class="tp">$</span> <span class="tc">kubectl get pods -n pims-prod -o wide</span>',
+        '<span class="ti">NAME                    READY   STATUS    RESTARTS   AGE   IP           NODE</span>',
+        '<span class="ts">demo-app-7d9f6b-abc12      1/1     Running   0          5m    10.244.1.4   worker-1</span>',
+        '<span class="ts">demo-app-7d9f6b-def34      1/1     Running   0          5m    10.244.2.7   worker-2</span>',
+        '<span class="te">demo-app-7d9f6b-zzz99      0/1     CrashLoopBackOff  3   5m    10.244.3.2   worker-3</span>',
+        '',
+        '<span class="tp">$</span> <span class="tc">kubectl logs demo-app-7d9f6b-zzz99 --previous</span>',
+        '<span class="to">... Spring Boot starting ...</span>',
+        '<span class="te">ERROR: Cannot connect to Oracle DB at //localhost:1521</span>',
+        '<span class="te">Caused by: java.net.ConnectException: Connection refused</span>',
+        '',
+        '<span class="tsk">💡 Bug found! App is using localhost but should use service name oracle-external</span>',
+        '',
+        '<span class="tp">$</span> <span class="tc">kubectl rollout undo deployment/demo-app -n pims-prod</span>',
+        '<span class="ts">deployment.apps/demo-app rolled back ✅</span>',
+      ]);
     }
 
-    function runHPA(){
-        showTerm('t11');
-        type('o11',[
-            '<span class="tsk">Simulating traffic spike → autoscaling response...</span>','',
-            '<span class="tp">$</span> <span class="tc">kubectl get hpa -n pims-prod -w</span>',
-            '<span class="ti">NAME        TARGETS   MINPODS   MAXPODS   REPLICAS</span>',
-            '<span class="ts">demo-app-hpa   45%/70%   2         10        2       (normal load)</span>',
-            '<span class="tw">demo-app-hpa   82%/70%   2         10        2       ← CPU spike detected!</span>',
-            '<span class="tw">demo-app-hpa   91%/70%   2         10        4       ← scaling up to 4</span>',
-            '<span class="to">demo-app-hpa   78%/70%   2         10        4</span>',
-            '<span class="to">demo-app-hpa   68%/70%   2         10        4       ← stabilizing...</span>',
-            '<span class="ts">demo-app-hpa   52%/70%   2         10        4       ← stable at 4 pods</span>',
-            '',
-            '<span class="tsk">Traffic drops 5 minutes later:</span>',
-            '<span class="to">demo-app-hpa   31%/70%   2         10        4       (stabilization window)</span>',
-            '<span class="ts">demo-app-hpa   28%/70%   2         10        3       ← scaling down slowly</span>',
-            '<span class="ts">demo-app-hpa   25%/70%   2         10        2       ← back to minimum</span>',
-            '<span class="ts">✅ HPA handled 2x traffic spike automatically with zero manual intervention!</span>',
-        ],90);
+    function runHPA() {
+      showTerm('t11');
+      type('o11', [
+        '<span class="tsk">Simulating traffic spike → autoscaling response...</span>', '',
+        '<span class="tp">$</span> <span class="tc">kubectl get hpa -n pims-prod -w</span>',
+        '<span class="ti">NAME        TARGETS   MINPODS   MAXPODS   REPLICAS</span>',
+        '<span class="ts">demo-app-hpa   45%/70%   2         10        2       (normal load)</span>',
+        '<span class="tw">demo-app-hpa   82%/70%   2         10        2       ← CPU spike detected!</span>',
+        '<span class="tw">demo-app-hpa   91%/70%   2         10        4       ← scaling up to 4</span>',
+        '<span class="to">demo-app-hpa   78%/70%   2         10        4</span>',
+        '<span class="to">demo-app-hpa   68%/70%   2         10        4       ← stabilizing...</span>',
+        '<span class="ts">demo-app-hpa   52%/70%   2         10        4       ← stable at 4 pods</span>',
+        '',
+        '<span class="tsk">Traffic drops 5 minutes later:</span>',
+        '<span class="to">demo-app-hpa   31%/70%   2         10        4       (stabilization window)</span>',
+        '<span class="ts">demo-app-hpa   28%/70%   2         10        3       ← scaling down slowly</span>',
+        '<span class="ts">demo-app-hpa   25%/70%   2         10        2       ← back to minimum</span>',
+        '<span class="ts">✅ HPA handled 2x traffic spike automatically with zero manual intervention!</span>',
+      ], 90);
     }
 
-    function runMonitor(){
-        showTerm('t14');
-        type('o14',[
-            '<span class="tp">$</span> <span class="tc">kubectl top pods -n pims-prod</span>',
-            '<span class="ti">NAME                    CPU(cores)   MEMORY(bytes)</span>',
-            '<span class="ts">demo-app-7d9f6b-abc12      234m         412Mi</span>',
-            '<span class="ts">demo-app-7d9f6b-def34      189m         398Mi</span>',
-            '<span class="ts">demo-app-7d9f6b-ghi56      201m         421Mi</span>',
-            '',
-            '<span class="tp">$</span> <span class="tc">kubectl get events -n pims-prod --sort-by=.lastTimestamp | tail -10</span>',
-            '<span class="to">5m    Normal   Scheduled   Pod/demo-app-abc   Successfully assigned to worker-2</span>',
-            '<span class="to">5m    Normal   Pulled      Pod/demo-app-abc   Image pulled successfully</span>',
-            '<span class="ts">5m    Normal   Started     Pod/demo-app-abc   Started container human</span>',
-            '<span class="tw">2m    Warning  Unhealthy   Pod/demo-app-abc   Readiness probe failed: Get http://...  </span>',
-            '<span class="ts">1m    Normal   Unhealthy   Pod/demo-app-abc   Readiness probe succeeded</span>',
-            '<span class="ts">✅ Monitoring data available. Open Grafana for dashboards.</span>',
-        ]);
+    function runMonitor() {
+      showTerm('t14');
+      type('o14', [
+        '<span class="tp">$</span> <span class="tc">kubectl top pods -n pims-prod</span>',
+        '<span class="ti">NAME                    CPU(cores)   MEMORY(bytes)</span>',
+        '<span class="ts">demo-app-7d9f6b-abc12      234m         412Mi</span>',
+        '<span class="ts">demo-app-7d9f6b-def34      189m         398Mi</span>',
+        '<span class="ts">demo-app-7d9f6b-ghi56      201m         421Mi</span>',
+        '',
+        '<span class="tp">$</span> <span class="tc">kubectl get events -n pims-prod --sort-by=.lastTimestamp | tail -10</span>',
+        '<span class="to">5m    Normal   Scheduled   Pod/demo-app-abc   Successfully assigned to worker-2</span>',
+        '<span class="to">5m    Normal   Pulled      Pod/demo-app-abc   Image pulled successfully</span>',
+        '<span class="ts">5m    Normal   Started     Pod/demo-app-abc   Started container human</span>',
+        '<span class="tw">2m    Warning  Unhealthy   Pod/demo-app-abc   Readiness probe failed: Get http://...  </span>',
+        '<span class="ts">1m    Normal   Unhealthy   Pod/demo-app-abc   Readiness probe succeeded</span>',
+        '<span class="ts">✅ Monitoring data available. Open Grafana for dashboards.</span>',
+      ]);
     }
 
-    function runHelm(){
-        showTerm('t15');
-        type('o15',[
-            '<span class="tp">$</span> <span class="tc">helm repo add bitnami https://charts.bitnami.com/bitnami && helm repo update</span>',
-            '<span class="ts">"bitnami" has been added to your repositories</span>',
-            '<span class="ts">Update Complete. ⎈Happy Helming!⎈</span>',
-            '<span class="tp">$</span> <span class="tc">helm install redis bitnami/redis --namespace pims-prod --set auth.password=secret123</span>',
-            '<span class="to">NAME: redis</span>',
-            '<span class="to">NAMESPACE: pims-prod</span>',
-            '<span class="ts">STATUS: deployed</span>',
-            '<span class="ts">NOTES: Redis can be accessed via redis-master:6379</span>',
-            '',
-            '<span class="tp">$</span> <span class="tc">helm create demo-app-chart</span>',
-            '<span class="ts">Creating demo-app-chart</span>',
-            '<span class="tp">$</span> <span class="tc">helm install demo-app ./demo-app-chart -f values-prod.yaml -n pims-prod</span>',
-            '<span class="ts">Release "demo-app" has been deployed successfully!</span>',
-            '<span class="tp">$</span> <span class="tc">helm list -n pims-prod</span>',
-            '<span class="ti">NAME    NAMESPACE   REVISION  STATUS    CHART</span>',
-            '<span class="ts">redis   pims-prod   1         deployed  redis-18.6.4</span>',
-            '<span class="ts">demo-app   pims-prod   1         deployed  demo-app-chart-0.1.0</span>',
-        ]);
+    function runHelm() {
+      showTerm('t15');
+      type('o15', [
+        '<span class="tp">$</span> <span class="tc">helm repo add bitnami https://charts.bitnami.com/bitnami && helm repo update</span>',
+        '<span class="ts">"bitnami" has been added to your repositories</span>',
+        '<span class="ts">Update Complete. ⎈Happy Helming!⎈</span>',
+        '<span class="tp">$</span> <span class="tc">helm install redis bitnami/redis --namespace pims-prod --set auth.password=secret123</span>',
+        '<span class="to">NAME: redis</span>',
+        '<span class="to">NAMESPACE: pims-prod</span>',
+        '<span class="ts">STATUS: deployed</span>',
+        '<span class="ts">NOTES: Redis can be accessed via redis-master:6379</span>',
+        '',
+        '<span class="tp">$</span> <span class="tc">helm create demo-app-chart</span>',
+        '<span class="ts">Creating demo-app-chart</span>',
+        '<span class="tp">$</span> <span class="tc">helm install demo-app ./demo-app-chart -f values-prod.yaml -n pims-prod</span>',
+        '<span class="ts">Release "demo-app" has been deployed successfully!</span>',
+        '<span class="tp">$</span> <span class="tc">helm list -n pims-prod</span>',
+        '<span class="ti">NAME    NAMESPACE   REVISION  STATUS    CHART</span>',
+        '<span class="ts">redis   pims-prod   1         deployed  redis-18.6.4</span>',
+        '<span class="ts">demo-app   pims-prod   1         deployed  demo-app-chart-0.1.0</span>',
+      ]);
     }
 
-    function runHuman(){
-        showTerm('t16');
-        type('o16',[
-            '<span class="tp">$</span> <span class="tc">kubectl apply -f k8s/ -n pims-prod</span>',
-            '<span class="ts">namespace/pims-prod configured</span>',
-            '<span class="ts">configmap/demo-app-config created</span>',
-            '<span class="ts">secret/demo-app-secrets created</span>',
-            '<span class="ts">service/oracle-external created</span>',
-            '<span class="ts">deployment.apps/demo-app created</span>',
-            '<span class="ts">service/demo-app-service created</span>',
-            '<span class="ts">ingress.networking.k8s.io/demo-app-ingress created</span>',
-            '<span class="ts">horizontalpodautoscaler.autoscaling/demo-app-hpa created</span>',
-            '',
-            '<span class="tp">$</span> <span class="tc">kubectl rollout status deployment/demo-app -n pims-prod</span>',
-            '<span class="to">Waiting for deployment... 1 of 3 replicas available...</span>',
-            '<span class="to">Waiting for deployment... 2 of 3 replicas available...</span>',
-            '<span class="ts">deployment "human" successfully rolled out ✅</span>',
-            '',
-            '<span class="tp">$</span> <span class="tc">kubectl get all -n pims-prod</span>',
-            '<span class="ti">NAME                       READY   STATUS    RESTARTS</span>',
-            '<span class="ts">pod/demo-app-7d9f6b-abc12     1/1     Running   0</span>',
-            '<span class="ts">pod/demo-app-7d9f6b-def34     1/1     Running   0</span>',
-            '<span class="ts">pod/demo-app-7d9f6b-ghi56     1/1     Running   0</span>',
-            '<span class="ti">NAME                   TYPE        CLUSTER-IP    PORT(S)</span>',
-            '<span class="ts">service/demo-app-service  ClusterIP   10.96.0.100   80/TCP</span>',
-            '<span class="ti">NAME                  READY   UP-TO-DATE   AVAILABLE</span>',
-            '<span class="ts">deployment.apps/demo-app 3/3     3            3</span>',
-            '<span class="ti">NAME                        REFERENCE           TARGETS   REPLICAS</span>',
-            '<span class="ts">hpa/demo-app-hpa               Deployment/demo-app    32%/70%   3</span>',
-            '',
-            '<span class="ts">🚀 demo-app is live on Kubernetes! https://yourdomain.com</span>',
-        ],80);
+    function runHuman() {
+      showTerm('t16');
+      type('o16', [
+        '<span class="tp">$</span> <span class="tc">kubectl apply -f k8s/ -n pims-prod</span>',
+        '<span class="ts">namespace/pims-prod configured</span>',
+        '<span class="ts">configmap/demo-app-config created</span>',
+        '<span class="ts">secret/demo-app-secrets created</span>',
+        '<span class="ts">service/oracle-external created</span>',
+        '<span class="ts">deployment.apps/demo-app created</span>',
+        '<span class="ts">service/demo-app-service created</span>',
+        '<span class="ts">ingress.networking.k8s.io/demo-app-ingress created</span>',
+        '<span class="ts">horizontalpodautoscaler.autoscaling/demo-app-hpa created</span>',
+        '',
+        '<span class="tp">$</span> <span class="tc">kubectl rollout status deployment/demo-app -n pims-prod</span>',
+        '<span class="to">Waiting for deployment... 1 of 3 replicas available...</span>',
+        '<span class="to">Waiting for deployment... 2 of 3 replicas available...</span>',
+        '<span class="ts">deployment "human" successfully rolled out ✅</span>',
+        '',
+        '<span class="tp">$</span> <span class="tc">kubectl get all -n pims-prod</span>',
+        '<span class="ti">NAME                       READY   STATUS    RESTARTS</span>',
+        '<span class="ts">pod/demo-app-7d9f6b-abc12     1/1     Running   0</span>',
+        '<span class="ts">pod/demo-app-7d9f6b-def34     1/1     Running   0</span>',
+        '<span class="ts">pod/demo-app-7d9f6b-ghi56     1/1     Running   0</span>',
+        '<span class="ti">NAME                   TYPE        CLUSTER-IP    PORT(S)</span>',
+        '<span class="ts">service/demo-app-service  ClusterIP   10.96.0.100   80/TCP</span>',
+        '<span class="ti">NAME                  READY   UP-TO-DATE   AVAILABLE</span>',
+        '<span class="ts">deployment.apps/demo-app 3/3     3            3</span>',
+        '<span class="ti">NAME                        REFERENCE           TARGETS   REPLICAS</span>',
+        '<span class="ts">hpa/demo-app-hpa               Deployment/demo-app    32%/70%   3</span>',
+        '',
+        '<span class="ts">🚀 demo-app is live on Kubernetes! https://yourdomain.com</span>',
+      ], 80);
     }
 
-    function validateChallenge(){
-        showTerm('t17');
-        const code=document.getElementById('c17').value;
-        const reqs=[
-            {ok:code.includes('kind: Namespace'),label:'Namespace defined (kind: Namespace)'},
-            {ok:code.includes('kind: Deployment')&&(code.match(/replicas:\s*[2-9]/)||code.match(/replicas:\s*[1-9][0-9]/)),label:'Deployment with replicas >= 2'},
-            {ok:code.includes('image:'),label:'Container image specified'},
-            {ok:code.includes('requests:')&&code.includes('limits:'),label:'Resource requests AND limits defined'},
-            {ok:code.includes('readinessProbe:'),label:'readinessProbe configured'},
-            {ok:code.includes('livenessProbe:'),label:'livenessProbe configured'},
-            {ok:code.includes('kind: Service')&&(code.includes('ClusterIP')||code.includes('LoadBalancer')),label:'Service (ClusterIP or LoadBalancer) defined'},
-            {ok:code.includes('configMapRef:')||code.includes('configMapKeyRef:'),label:'ConfigMap used (envFrom or env.valueFrom)'},
-            {ok:code.includes('secretKeyRef:'),label:'Secret used (secretKeyRef)'},
-            {ok:code.includes('kind: HorizontalPodAutoscaler'),label:'HorizontalPodAutoscaler defined'},
-        ];
-        const lines=['<span class="tsk">☸️ Validating Kubernetes manifests — 10 requirements check...</span>',''];
-        let passed=0;
-        reqs.forEach(r=>{
-            if(r.ok){lines.push('<span class="ts">✅ '+r.label+'</span>');passed++;}
-            else lines.push('<span class="te">❌ Missing: '+r.label+'</span>');
-        });
-        lines.push('');;
-        if(passed===10){
-            lines.push('<span class="ts">🎉 ALL 10 REQUIREMENTS PASSED!</span>');
-            lines.push('<span class="tpu">🏆 K8S EXPERT BADGE UNLOCKED — kubectl apply -f . --dry-run=server ✅</span>');
-            setTimeout(()=>{document.getElementById('victory').style.display='block';},1800);
-        } else {
-            lines.push('<span class="tw">Score: '+passed+'/10 — Fix the missing items above and try again.</span>');
-        }
-        type('o17',lines);
+    function validateChallenge() {
+      showTerm('t17');
+      const code = document.getElementById('c17').value;
+      const reqs = [
+        { ok: code.includes('kind: Namespace'), label: 'Namespace defined (kind: Namespace)' },
+        { ok: code.includes('kind: Deployment') && (code.match(/replicas:\s*[2-9]/) || code.match(/replicas:\s*[1-9][0-9]/)), label: 'Deployment with replicas >= 2' },
+        { ok: code.includes('image:'), label: 'Container image specified' },
+        { ok: code.includes('requests:') && code.includes('limits:'), label: 'Resource requests AND limits defined' },
+        { ok: code.includes('readinessProbe:'), label: 'readinessProbe configured' },
+        { ok: code.includes('livenessProbe:'), label: 'livenessProbe configured' },
+        { ok: code.includes('kind: Service') && (code.includes('ClusterIP') || code.includes('LoadBalancer')), label: 'Service (ClusterIP or LoadBalancer) defined' },
+        { ok: code.includes('configMapRef:') || code.includes('configMapKeyRef:'), label: 'ConfigMap used (envFrom or env.valueFrom)' },
+        { ok: code.includes('secretKeyRef:'), label: 'Secret used (secretKeyRef)' },
+        { ok: code.includes('kind: HorizontalPodAutoscaler'), label: 'HorizontalPodAutoscaler defined' },
+      ];
+      const lines = ['<span class="tsk">☸️ Validating Kubernetes manifests — 10 requirements check...</span>', ''];
+      let passed = 0;
+      reqs.forEach(r => {
+        if (r.ok) { lines.push('<span class="ts">✅ ' + r.label + '</span>'); passed++; }
+        else lines.push('<span class="te">❌ Missing: ' + r.label + '</span>');
+      });
+      lines.push('');;
+      if (passed === 10) {
+        lines.push('<span class="ts">🎉 ALL 10 REQUIREMENTS PASSED!</span>');
+        lines.push('<span class="tpu">🏆 K8S EXPERT BADGE UNLOCKED — kubectl apply -f . --dry-run=server ✅</span>');
+        setTimeout(() => { document.getElementById('victory').style.display = 'block'; }, 1800);
+      } else {
+        lines.push('<span class="tw">Score: ' + passed + '/10 — Fix the missing items above and try again.</span>');
+      }
+      type('o17', lines);
     }
 
     updateProg();
-</script>
+  </script>
 </body>
+
 </html>

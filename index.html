@@ -1,612 +1,263 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Weather App — Home Screen Mock-up (activity_home.xml)</title>
-<style>
-  :root{
-    --sky-top:#8ec9f2;
-    --sky-bottom:#e9f4fd;
-    --ink:#16324a;
-    --ink-soft:#5c7690;
-    --card:#ffffff;
-    --hero:#dcecfb;
-    --hero-ink:#123a5e;
-    --line:#d7e4ef;
-    --accent:#1f7ae0;
-    --tag-bg:#16324a;
-    --tag-ink:#ffffff;
-  }
-  *{box-sizing:border-box;}
-  body{
-    margin:0;
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    background:#eef3f7;
-    color:var(--ink);
-    padding:28px 16px 60px;
-  }
-  .wrap{
-    max-width:1000px;
-    margin:0 auto;
-    display:flex;
-    gap:36px;
-    align-items:flex-start;
-    flex-wrap:wrap;
-  }
-  .intro{
-    max-width:640px;
-    margin:0 auto 28px;
-  }
-  .intro h1{
-    font-size:20px;
-    margin:0 0 6px;
-  }
-  .intro p{
-    font-size:14px;
-    line-height:1.55;
-    color:var(--ink-soft);
-    margin:0 0 10px;
-  }
-  .controls{
-    display:flex;
-    align-items:center;
-    gap:8px;
-    font-size:13px;
-    background:var(--card);
-    border:1px solid var(--line);
-    padding:10px 14px;
-    border-radius:10px;
-    width:fit-content;
-  }
-  .controls input{width:16px;height:16px;}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Hub</title>
+    <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+            rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0e1a;
+            --surface: #111827;
+            --surface2: #1a2235;
+            --border: #1f2d45;
+            --accent: #00d4aa;
+            --accent2: #0099ff;
+            --text: #e2e8f0;
+            --muted: #64748b;
+            --gradient: linear-gradient(135deg, var(--accent), var(--accent2));
+        }
 
-  /* ---- phone frame ---- */
-  .phone{
-    width:360px;
-    flex-shrink:0;
-    background:#0d1b26;
-    border-radius:42px;
-    padding:12px;
-    box-shadow:0 24px 50px rgba(13,27,38,.28);
-    margin:0 auto;
-  }
-  .screen{
-    position:relative;
-    background:linear-gradient(180deg,var(--sky-top),var(--sky-bottom) 220px, #f5f9fc 220px);
-    border-radius:30px;
-    overflow:hidden;
-    height:760px;
-    overflow-y:auto;
-    -ms-overflow-style:none;
-    scrollbar-width:none;
-  }
-  .screen::-webkit-scrollbar{display:none;}
-  .statusbar{
-    height:26px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:0 22px;
-    font-size:11px;
-    font-weight:600;
-    color:var(--ink);
-  }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-  /* generic tag badge */
-  .tagged{position:relative;}
-  .tag{
-    position:absolute;
-    top:-9px;
-    right:-6px;
-    background:var(--tag-bg);
-    color:var(--tag-ink);
-    font:600 8.5px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-    padding:3px 5px;
-    border-radius:5px;
-    white-space:nowrap;
-    z-index:5;
-    letter-spacing:.2px;
-    box-shadow:0 1px 3px rgba(0,0,0,.25);
-  }
-  .tag.left{ right:auto; left:-6px; }
-  .tag.below{ top:auto; bottom:-9px; }
-  body.hide-tags .tag{ display:none; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+        }
 
-  /* ---- header row ---- */
-  .top-row{
-    display:flex;
-    align-items:center;
-    padding:14px 12px 0;
-    gap:8px;
-  }
-  .icon-btn{
-    width:38px;height:38px;
-    border-radius:50%;
-    display:flex;align-items:center;justify-content:center;
-    font-size:17px;
-    background:rgba(255,255,255,.55);
-    flex-shrink:0;
-  }
-  .greeting{
-    flex:1;
-    font-size:19px;
-    font-weight:700;
-    color:var(--ink);
-  }
-  .datetime-row{
-    display:flex;
-    gap:6px;
-    padding:10px 20px 0;
-    font-size:12.5px;
-    color:var(--ink-soft);
-  }
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(ellipse 80% 50% at 20% 10%, rgba(0, 212, 170, 0.08) 0%, transparent 60%),
+            radial-gradient(ellipse 60% 40% at 80% 90%, rgba(0, 153, 255, 0.06) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
 
-  /* search row */
-  .search-row{
-    display:flex;
-    gap:10px;
-    padding:14px 16px 0;
-  }
-  .search-field{
-    flex:1;
-    height:44px;
-    background:rgba(255,255,255,.85);
-    border-radius:12px;
-    display:flex;
-    align-items:center;
-    gap:8px;
-    padding:0 14px;
-    font-size:13px;
-    color:#7d93a6;
-  }
-  .search-btn{
-    width:44px;height:44px;
-    border-radius:12px;
-    background:var(--accent);
-    color:#fff;
-    display:flex;align-items:center;justify-content:center;
-    font-size:16px;
-    flex-shrink:0;
-  }
-  .location-btn{
-    margin:10px 16px 0;
-    height:34px;
-    display:flex;align-items:center;justify-content:center;gap:6px;
-    font-size:12.5px;
-    color:var(--accent);
-    font-weight:600;
-  }
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            width: 100%;
+            padding: 2rem;
+            text-align: center;
+        }
 
-  /* hero card */
-  .hero{
-    margin:16px 14px 0;
-    background:var(--hero);
-    border-radius:26px;
-    padding:20px;
-    color:var(--hero-ink);
-  }
-  .hero-top{
-    display:flex;
-    align-items:center;
-  }
-  .unit-pill{
-    display:flex;
-    background:rgba(255,255,255,.55);
-    border-radius:20px;
-    padding:2px;
-  }
-  .unit-pill span{
-    padding:5px 10px;
-    font-size:11px;
-    font-weight:700;
-    border-radius:16px;
-  }
-  .unit-pill span.active{background:#fff;}
-  .chat-btn{
-    margin-left:auto;
-    width:32px;height:32px;
-    border-radius:50%;
-    background:rgba(255,255,255,.55);
-    display:flex;align-items:center;justify-content:center;
-    font-size:14px;
-  }
-  .city{
-    text-align:center;
-    font-size:16px;
-    font-weight:700;
-    margin-top:10px;
-  }
-  .wicon{
-    text-align:center;
-    font-size:64px;
-    line-height:1;
-    margin-top:6px;
-  }
-  .temp{
-    text-align:center;
-    font-size:44px;
-    font-weight:700;
-    margin-top:2px;
-  }
-  .cond{
-    text-align:center;
-    font-size:13.5px;
-    opacity:.85;
-  }
-  .fav-btn{
-    display:block;
-    margin:14px auto 0;
-    border:1.4px solid var(--hero-ink);
-    color:var(--hero-ink);
-    background:transparent;
-    padding:9px 16px;
-    border-radius:20px;
-    font-size:12.5px;
-    font-weight:700;
-  }
+        .header {
+            margin-bottom: 3rem;
+        }
 
-  /* details */
-  .details{
-    margin:20px 14px 0;
-  }
-  .section-title{
-    font-size:15px;
-    font-weight:700;
-    margin:0 0 10px;
-  }
-  .stat-grid{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:8px;
-  }
-  .stat-card{
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:14px;
-    padding:10px 12px;
-    display:flex;
-    align-items:center;
-    gap:8px;
-  }
-  .stat-card .emoji{font-size:18px;}
-  .stat-label{font-size:10.5px;color:var(--ink-soft);}
-  .stat-value{font-size:14px;font-weight:700;}
-  .minmax-card{display:block;}
-  .minmax-card .stat-value{margin-top:2px;}
+        .title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            line-height: 1.1;
+        }
 
-  /* hourly */
-  .hourly-scroll{
-    display:flex;
-    gap:10px;
-    overflow-x:auto;
-    padding:2px 2px 6px;
-  }
-  .hour-card{
-    min-width:58px;
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:14px;
-    padding:10px 6px;
-    text-align:center;
-    flex-shrink:0;
-  }
-  .hour-card .hlabel{font-size:10.5px;color:var(--ink-soft);}
-  .hour-card .hemoji{font-size:18px;margin:4px 0;}
-  .hour-card .htemp{font-size:12.5px;font-weight:700;}
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--muted);
+            font-weight: 400;
+            max-width: 500px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
 
-  /* forecast list */
-  .forecast-row{
-    display:flex;
-    align-items:center;
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:14px;
-    padding:10px 14px;
-    margin-bottom:8px;
-    font-size:13px;
-  }
-  .forecast-row .day{width:70px;font-weight:700;}
-  .forecast-row .femoji{font-size:18px;width:34px;}
-  .forecast-row .fcond{flex:1;color:var(--ink-soft);font-size:12px;}
-  .forecast-row .frange{font-weight:700;font-size:12.5px;}
+        .learning-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
 
-  /* legend */
-  .legend{
-    flex:1;
-    min-width:320px;
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:14px;
-    padding:18px 20px;
-  }
-  .legend h2{font-size:15px;margin:0 0 4px;}
-  .legend p.note{font-size:12.5px;color:var(--ink-soft);margin:0 0 14px;}
-  .legend table{width:100%;border-collapse:collapse;font-size:12.5px;}
-  .legend th{
-    text-align:left;
-    font-size:10.5px;
-    text-transform:uppercase;
-    letter-spacing:.03em;
-    color:var(--ink-soft);
-    border-bottom:1px solid var(--line);
-    padding:6px 6px;
-  }
-  .legend td{
-    padding:7px 6px;
-    border-bottom:1px solid var(--line);
-    vertical-align:top;
-  }
-  .legend td.id{font:600 11.5px ui-monospace,Menlo,Consolas,monospace;color:var(--accent);}
-  .legend td.line{font:600 11.5px ui-monospace,Menlo,Consolas,monospace;color:var(--ink-soft);white-space:nowrap;}
-  .legend tr.group td{
-    background:#f4f8fb;
-    font-weight:700;
-    color:var(--ink);
-    font-size:12px;
-  }
+        .learning-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            position: relative;
+            overflow: hidden;
+        }
 
-  /* drawer */
-  .drawer-overlay{
-    position:absolute;inset:0;
-    background:rgba(10,20,30,.0);
-    pointer-events:none;
-    transition:background .25s ease;
-    z-index:20;
-  }
-  #drawerToggle{display:none;}
-  #drawerToggle:checked ~ .drawer-overlay{
-    background:rgba(10,20,30,.35);
-    pointer-events:auto;
-  }
-  .drawer-panel{
-    position:absolute;
-    top:0;bottom:0;left:0;
-    width:76%;
-    background:#fff;
-    transform:translateX(-100%);
-    transition:transform .28s ease;
-    padding:18px;
-    box-shadow:2px 0 12px rgba(0,0,0,.15);
-  }
-  #drawerToggle:checked ~ .drawer-overlay .drawer-panel{
-    transform:translateX(0);
-  }
-  .drawer-header{
-    background:var(--hero);
-    border-radius:14px;
-    padding:16px;
-    margin-bottom:14px;
-  }
-  .drawer-header .name{font-weight:700;font-size:14px;color:var(--hero-ink);}
-  .drawer-header .email{font-size:11.5px;color:var(--hero-ink);opacity:.8;}
-  .drawer-item{
-    display:flex;align-items:center;gap:10px;
-    padding:10px 8px;
-    font-size:13px;
-    color:var(--ink);
-    border-radius:10px;
-  }
-  .drawer-item .emoji{width:20px;text-align:center;}
-  .drawer-close-label{
-    position:absolute;top:10px;right:10px;
-    width:28px;height:28px;
-    border-radius:50%;
-    background:#f0f3f6;
-    display:flex;align-items:center;justify-content:center;
-    font-size:13px;
-    cursor:pointer;
-  }
-  label[for="drawerToggle"]{cursor:pointer;}
-</style>
+        .learning-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .learning-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent);
+            box-shadow: 0 20px 40px rgba(0, 212, 170, 0.1);
+        }
+
+        .learning-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        .card-description {
+            color: var(--muted);
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-tech {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(0, 212, 170, 0.1);
+            border: 1px solid rgba(0, 212, 170, 0.2);
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--accent);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .footer {
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .footer-text {
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2.5rem;
+            }
+
+            .learning-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+        }
+    </style>
 </head>
 <body>
-
-<div class="intro">
-  <h1>Weather App — Home Screen (mock-up with sample data)</h1>
-  <p>This is a static preview of <code>activity_home.xml</code> with placeholder numbers filled in, so it looks the way it will once real weather data loads. Every button/text on the phone has a small black tag on it — that tag is the exact <code>android:id</code> and the line number where that element is defined in the XML file. The table on the right lists the same mapping if the tags are hard to read on the small screen.</p>
-  <label class="controls">
-    <input type="checkbox" id="labelsToggle" checked onchange="document.body.classList.toggle('hide-tags', !this.checked)">
-    Show code-reference tags on the screen
-  </label>
-</div>
-
-<div class="wrap">
-
-  <!-- PHONE MOCKUP -->
-  <div class="phone">
-    <input type="checkbox" id="drawerToggle">
-    <div class="screen">
-
-      <div class="statusbar"><span>10:15</span><span>🔋 82%</span></div>
-
-      <!-- top row -->
-      <div class="top-row">
-        <label for="drawerToggle" class="icon-btn tagged">☰
-          <span class="tag left">btnMenu · L35</span>
-        </label>
-        <div class="greeting tagged">Hi!
-          <span class="tag">txtGreeting · L61</span>
-        </div>
-        <div class="icon-btn tagged">🌦️
-          <span class="tag">btnPredictIcon · L48</span>
-        </div>
-      </div>
-
-      <div class="datetime-row">
-        <span class="tagged">02 August 2026<span class="tag below">txtDate · L76</span></span>
-        <span class="tagged">10:15 PM<span class="tag below">txtTime · L88</span></span>
-      </div>
-
-      <!-- search -->
-      <div class="search-row">
-        <div class="search-field tagged">🔍&nbsp; Search city
-          <span class="tag">etCitySearch · L115</span>
-        </div>
-        <div class="search-btn tagged">🔍
-          <span class="tag">btnSearch · L125</span>
-        </div>
-      </div>
-      <div class="location-btn tagged">📍 Use Current Location
-        <span class="tag below">btnCurrentLocation · L140</span>
-      </div>
-
-      <!-- hero -->
-      <div class="hero tagged">
-        <span class="tag">heroCard · L157</span>
-        <div class="hero-top">
-          <div class="unit-pill">
-            <span class="active tagged">°C<span class="tag" style="top:-16px;">txtUnitCelsius · L192</span></span>
-            <span class="tagged">°F<span class="tag" style="top:-16px;">txtUnitFahrenheit · L207</span></span>
-          </div>
-          <div class="chat-btn tagged">💬
-            <span class="tag">btnChatIcon · L229</span>
-          </div>
-        </div>
-        <div class="city tagged">Dhaka, Bangladesh
-          <span class="tag below">txtCity · L250</span>
-        </div>
-        <div class="wicon tagged">☀️
-          <span class="tag below">imgWeather · L260</span>
-        </div>
-        <div class="temp tagged">29°C
-          <span class="tag below">txtTemp · L268</span>
-        </div>
-        <div class="cond tagged">Sunny
-          <span class="tag below">txtCondition · L277</span>
-        </div>
-        <button class="fav-btn tagged">⭐ Add to Favorites
-          <span class="tag below">btnFavorite · L286</span>
-        </button>
-      </div>
-
-      <!-- details -->
-      <div class="details tagged">
-        <span class="tag">weatherCard · L303</span>
-        <div class="section-title">Weather Details</div>
-        <div class="stat-grid">
-          <div class="stat-card tagged"><span class="emoji">💧</span><div><div class="stat-label">Humidity</div><div class="stat-value">64%</div></div><span class="tag">txtHumidity · L361</span></div>
-          <div class="stat-card tagged"><span class="emoji">💨</span><div><div class="stat-label">Wind</div><div class="stat-value">12 km/h</div></div><span class="tag">txtWind · L406</span></div>
-          <div class="stat-card tagged"><span class="emoji">🎚️</span><div><div class="stat-label">Pressure</div><div class="stat-value">1013 hPa</div></div><span class="tag">txtPressure · L451</span></div>
-          <div class="stat-card tagged"><span class="emoji">👁️</span><div><div class="stat-label">Visibility</div><div class="stat-value">8 km</div></div><span class="tag">txtVisibility · L496</span></div>
-          <div class="stat-card tagged"><span class="emoji">🌡️</span><div><div class="stat-label">Feels Like</div><div class="stat-value">31°C</div></div><span class="tag">txtFeelsLike · L541</span></div>
-          <div class="stat-card minmax-card tagged">
-            <div><div class="stat-label">Min / Max</div>
-            <div class="stat-value">26° / 33°</div></div>
-            <span class="tag">txtMinTemp · L578</span>
-            <span class="tag below">txtMaxTemp · L591</span>
-          </div>
-          <div class="stat-card tagged"><span class="emoji">🌅</span><div><div class="stat-label">Sunrise</div><div class="stat-value">5:52 AM</div></div><span class="tag">txtSunrise · L636</span></div>
-          <div class="stat-card tagged"><span class="emoji">🌇</span><div><div class="stat-label">Sunset</div><div class="stat-value">6:36 PM</div></div><span class="tag">txtSunset · L682</span></div>
-        </div>
-
-        <div class="section-title tagged" style="margin-top:18px;">Hourly Forecast
-          <span class="tag below">txtHourlyTitle · L696</span>
-        </div>
-        <div class="hourly-scroll tagged">
-          <span class="tag" style="top:-14px;">recyclerHourly · L705 (list — items are not fixed in XML)</span>
-          <div class="hour-card"><div class="hlabel">Now</div><div class="hemoji">☀️</div><div class="htemp">29°</div></div>
-          <div class="hour-card"><div class="hlabel">1 PM</div><div class="hemoji">🌤️</div><div class="htemp">31°</div></div>
-          <div class="hour-card"><div class="hlabel">2 PM</div><div class="hemoji">🌤️</div><div class="htemp">32°</div></div>
-          <div class="hour-card"><div class="hlabel">3 PM</div><div class="hemoji">⛅</div><div class="htemp">31°</div></div>
-          <div class="hour-card"><div class="hlabel">4 PM</div><div class="hemoji">⛅</div><div class="htemp">29°</div></div>
-          <div class="hour-card"><div class="hlabel">5 PM</div><div class="hemoji">🌥️</div><div class="htemp">27°</div></div>
-        </div>
-
-        <div class="section-title tagged" style="margin-top:18px;">5-Day Forecast
-          <span class="tag below">txtForecastTitle · L715</span>
-        </div>
-        <div class="tagged" style="position:relative;">
-          <span class="tag" style="top:-14px;">recyclerForecast · L724 (list — items are not fixed in XML)</span>
-          <div class="forecast-row"><div class="day">Today</div><div class="femoji">☀️</div><div class="fcond">Sunny</div><div class="frange">33° / 26°</div></div>
-          <div class="forecast-row"><div class="day">Tue</div><div class="femoji">⛅</div><div class="fcond">Partly cloudy</div><div class="frange">32° / 26°</div></div>
-          <div class="forecast-row"><div class="day">Wed</div><div class="femoji">🌦️</div><div class="fcond">Light rain</div><div class="frange">30° / 25°</div></div>
-          <div class="forecast-row"><div class="day">Thu</div><div class="femoji">🌧️</div><div class="fcond">Rain</div><div class="frange">29° / 25°</div></div>
-          <div class="forecast-row"><div class="day">Fri</div><div class="femoji">☀️</div><div class="fcond">Sunny</div><div class="frange">33° / 27°</div></div>
-        </div>
-      </div>
-
-      <div style="height:20px;"></div>
-
-      <!-- drawer -->
-      <label for="drawerToggle" class="drawer-overlay">
-        <div class="drawer-panel tagged" onclick="event.stopPropagation()">
-          <span class="tag" style="top:2px;left:2px;">navigationView · L765</span>
-          <label for="drawerToggle" class="drawer-close-label">✕</label>
-          <div class="drawer-header">
-            <div class="name">Moeen</div>
-            <div class="email">Signed in</div>
-          </div>
-          <div class="drawer-item"><span class="emoji">🏠</span> Home</div>
-          <div class="drawer-item"><span class="emoji">⭐</span> Favorite Cities</div>
-          <div class="drawer-item"><span class="emoji">🌦️</span> Rain &amp; Heat Prediction</div>
-          <div class="drawer-item"><span class="emoji">⚙️</span> Settings</div>
-          <div class="drawer-item"><span class="emoji">ℹ️</span> About</div>
-        </div>
-      </label>
-
+<div class="container">
+    <div class="header">
+        <h1 class="title">Learning Hub</h1>
+        <p class="subtitle">Master modern technologies with hands-on tutorials and interactive lessons</p>
     </div>
+
+    <div class="learning-grid">
+        <a href="docker-mastery.html" class="learning-card">
+            <span class="card-icon">🐳</span>
+            <h2 class="card-title">Docker Mastery</h2>
+            <p class="card-description">
+                Complete Docker course from zero to expert. Learn containerization, Dockerfile creation, Docker Compose,
+                and
+                production best practices.
+            </p>
+            <div class="card-tech">
+                <span>🚀</span>
+                Zero → Expert
+            </div>
+        </a>
+
+        <a href="nginx-mastery.html" class="learning-card">
+            <span class="card-icon">⚡</span>
+            <h2 class="card-title">NGINX Master</h2>
+            <p class="card-description">
+                Learn NGINX from zero to expert, reverse proxy setup, load balancing, and performance optimization
+                techniques.
+            </p>
+            <div class="card-tech">
+                <span>🚀</span>
+                Zero → Expert
+            </div>
+        </a>
+
+        <a href="cicd-mastery.html" class="learning-card">
+            <span class="card-icon">🔄</span>
+            <h2 class="card-title">CI/CD Mastery</h2>
+            <p class="card-description">
+                Master Continuous Integration and Continuous Deployment with GitHub Actions, Jenkins, and modern DevOps
+                practices.
+            </p>
+            <div class="card-tech">
+                <span>⚙️</span>
+                Zero → Expert
+            </div>
+        </a>
+
+        <a href="k8.html" class="learning-card">
+            <span class="card-icon">☸️</span>
+            <h2 class="card-title">Kubernetes Mastery</h2>
+            <p class="card-description">
+                Master Kubernetes from zero to expert. Learn pods, deployments, services, RBAC, Helm, HPA, and deploy
+                production-ready apps on K8s clusters.
+            </p>
+            <div class="card-tech">
+                <span>🚀</span>
+                Zero → Expert
+            </div>
+        </a>
+    </div>
+    
+        <div class="footer">
+        <p class="footer-text">
+            Interactive learning experiences designed for developers
+        </p>
+        <p class="footer-text" style="margin-top: 1rem;">
+            Created by <a href="https://github.com/moeenScape" target="_blank" rel="noopener noreferrer"
+                          style="color: var(--accent); text-decoration: none; transition: opacity 0.2s;">moeenScape</a>
+            •
+            <a href="https://github.com/moeenScape/learnig" target="_blank" rel="noopener noreferrer"
+               style="color: var(--accent); text-decoration: none; transition: opacity 0.2s;">⭐ Star on GitHub</a>
+        </p>
+    </div>
+    
   </div>
-
-  <!-- LEGEND -->
-  <div class="legend">
-    <h2>Element → android:id → XML line</h2>
-    <p class="note">File: <strong>activity_home.xml</strong>. Tap the ☰ icon on the phone to preview the side drawer.</p>
-    <table>
-      <tr><th>What you see</th><th>android:id</th><th>Line</th></tr>
-
-      <tr class="group"><td colspan="3">Top bar</td></tr>
-      <tr><td>Hamburger menu icon</td><td class="id">btnMenu</td><td class="line">35</td></tr>
-      <tr><td>"Hi!" greeting text</td><td class="id">txtGreeting</td><td class="line">61</td></tr>
-      <tr><td>Rain/heat prediction icon</td><td class="id">btnPredictIcon</td><td class="line">48</td></tr>
-      <tr><td>Date text</td><td class="id">txtDate</td><td class="line">76</td></tr>
-      <tr><td>Time text</td><td class="id">txtTime</td><td class="line">88</td></tr>
-
-      <tr class="group"><td colspan="3">Search</td></tr>
-      <tr><td>Search box (input field)</td><td class="id">etCitySearch</td><td class="line">115</td></tr>
-      <tr><td>Search box wrapper</td><td class="id">tilCitySearch</td><td class="line">102</td></tr>
-      <tr><td>Search button (magnifier)</td><td class="id">btnSearch</td><td class="line">125</td></tr>
-      <tr><td>"Use Current Location" button</td><td class="id">btnCurrentLocation</td><td class="line">140</td></tr>
-
-      <tr class="group"><td colspan="3">Hero card (blue box)</td></tr>
-      <tr><td>Hero card container</td><td class="id">heroCard</td><td class="line">157</td></tr>
-      <tr><td>°C toggle</td><td class="id">txtUnitCelsius</td><td class="line">192</td></tr>
-      <tr><td>°F toggle</td><td class="id">txtUnitFahrenheit</td><td class="line">207</td></tr>
-      <tr><td>Chat bubble icon</td><td class="id">btnChatIcon</td><td class="line">229</td></tr>
-      <tr><td>City name</td><td class="id">txtCity</td><td class="line">250</td></tr>
-      <tr><td>Weather icon (sun/cloud image)</td><td class="id">imgWeather</td><td class="line">260</td></tr>
-      <tr><td>Big temperature number</td><td class="id">txtTemp</td><td class="line">268</td></tr>
-      <tr><td>Condition text ("Sunny")</td><td class="id">txtCondition</td><td class="line">277</td></tr>
-      <tr><td>"Add to Favorites" button</td><td class="id">btnFavorite</td><td class="line">286</td></tr>
-
-      <tr class="group"><td colspan="3">Weather Details grid</td></tr>
-      <tr><td>Section container</td><td class="id">weatherCard</td><td class="line">303</td></tr>
-      <tr><td>Humidity value</td><td class="id">txtHumidity</td><td class="line">361</td></tr>
-      <tr><td>Wind value</td><td class="id">txtWind</td><td class="line">406</td></tr>
-      <tr><td>Pressure value</td><td class="id">txtPressure</td><td class="line">451</td></tr>
-      <tr><td>Visibility value</td><td class="id">txtVisibility</td><td class="line">496</td></tr>
-      <tr><td>Feels Like value</td><td class="id">txtFeelsLike</td><td class="line">541</td></tr>
-      <tr><td>Min temp value</td><td class="id">txtMinTemp</td><td class="line">578</td></tr>
-      <tr><td>Max temp value</td><td class="id">txtMaxTemp</td><td class="line">591</td></tr>
-      <tr><td>Sunrise time</td><td class="id">txtSunrise</td><td class="line">636</td></tr>
-      <tr><td>Sunset time</td><td class="id">txtSunset</td><td class="line">682</td></tr>
-
-      <tr class="group"><td colspan="3">Forecast lists</td></tr>
-      <tr><td>"Hourly Forecast" heading</td><td class="id">txtHourlyTitle</td><td class="line">696</td></tr>
-      <tr><td>Hourly scroll list (fills at runtime)</td><td class="id">recyclerHourly</td><td class="line">705</td></tr>
-      <tr><td>"5-Day Forecast" heading</td><td class="id">txtForecastTitle</td><td class="line">715</td></tr>
-      <tr><td>Daily list (fills at runtime)</td><td class="id">recyclerForecast</td><td class="line">724</td></tr>
-
-      <tr class="group"><td colspan="3">Side drawer & structure (not visible as content)</td></tr>
-      <tr><td>Whole screen + drawer wrapper</td><td class="id">drawerLayout</td><td class="line">3</td></tr>
-      <tr><td>Pull-to-refresh wrapper</td><td class="id">swipeRefresh</td><td class="line">17</td></tr>
-      <tr><td>Main scrolling content area</td><td class="id">home</td><td class="line">28</td></tr>
-      <tr><td>Loading spinner (hidden until loading)</td><td class="id">progressBar</td><td class="line">738</td></tr>
-      <tr><td>Bar behind the phone's status bar</td><td class="id">statusBarScrim</td><td class="line">755</td></tr>
-      <tr><td>Side menu panel</td><td class="id">navigationView</td><td class="line">765</td></tr>
-    </table>
-  </div>
-
-</div>
-
 </body>
 </html>
